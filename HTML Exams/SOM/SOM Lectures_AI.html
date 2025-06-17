@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SOM Mock Exam</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #3c3b3f, #605c3c);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .sidebar, .grid {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .sidebar {
+      width: 250px;
+    }
+
+    .grid {
+  display: grid;
+  grid-template-columns: repeat(8, 15px);
+  grid-auto-rows: 5px;
+  grid-gap: 30px;
+}
+
+    .grid button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      height: 75%;
+    }
+
+    #main {
+      background: #2a2a2a;
+      margin-top: 30px;
+      padding: 30px;
+      border-radius: 10px;
+      width: 600px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    #question-title {
+      margin-bottom: 15px;
+    }
+
+    #answers label {
+      display: block;
+      margin: 8px 0;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #timer {
+      color: red;
+      font-weight: bold;
+      float: right;
+    }
+
+    .hidden {
+      display: none;
+    }
+	
+	.results li.correct label::before {
+  content: "✔";
+  display: inline-block;
+  color: green;
+  font-weight: bold;
+  width: 1em;
+  margin-right: 0.5em;
+  text-align: center;
+}
+
+.results li.incorrect label::before {
+  content: "✖";
+  display: inline-block;
+  color: red;
+  font-weight: bold;
+  width: 1em;
+  margin-right: 0.5em;
+  text-align: center;
+}
+
+/* optionally hide the native radio dot so only your icon shows */
+.results li.correct input,
+.results li.incorrect input {
+  visibility: hidden;
+}
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h3>Diploma In Cybersecurity<br>NFQ Level 7</h3>
+    <p><strong>Disclaimer:</strong><br>
+      This is an unofficial mock examination.<br><br>
+      It was created solely for personal learning purposes.<br><br>
+      It is based on the knowledge acquired during the second semester.<br><br>
+      It is not endorsed by any academic institution.<br><br>
+      It is not formal exam preparation material.<br><br>
+      It is neither an official exam.</p>
+  </div>
+
+  <div id="main">
+    <div id="timer">Time Remaining: <span id="countdown">00:00</span></div>
+    <h2 style="text-align:center;">SOM Mock Exam</h2>
+    
+    <div id="exam-section">
+      <h3 id="question-title">Loading question...</h3>
+      <div id="answers"></div>
+
+      <div class="controls">
+		<button onclick="nextQuestion()">➡️ Next</button>
+		<button onclick="prevQuestion()">⬅️ Previous</button>
+		<button onclick="submitExam()">✅ Submit Exam</button>
+        <button onclick="flagQuestion()">🔖 Flag This Question</button>
+      </div>
+    </div>
+
+    <div id="review-section" class="hidden">
+      <h2>Exam Results</h2>
+      <p>Correct Answers: <span id="correct-count"></span></p>
+      <p>Wrong Answers: <span id="wrong-count"></span></p>
+      <p>Score: <span id="percentage"></span>%</p>
+      <div>
+        <button onclick="retakeWrongOnly()">🔁 Retake Wrong Only</button>
+        <button onclick="resetExam()">🔄 Restart Full Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="grid" id="question-grid">
+      <!-- Dynamically filled -->
+    </div>
+    <button style="margin-top: 10px;" onclick="showFlagged()">📑 Show Flagged Questions</button>
+  </div>
+
+  <script>
+    const fullQuestionBank = [
+      {
+    "question": "Which ISO standard series provides best practices for Information Security Management?",
+    "answers": [
+      "A. ISO 22301.",
+      "B. ISO 9001.",
+      "C. ISO 14001.",
+      "D. ISO/IEC 31000 series.",
+      "E. ISO/IEC 27000 series."
+    ],
+    "correct": [4]
+  },
+  {
+    "question": "Which two of the following are fundamental functions performed in Security Operations Management?",
+    "answers": [
+      "A. Continuous Improvement.",
+      "B. People.",
+      "C. Technology.",
+      "D. Risk Management.",
+      "E. Processes."
+    ],
+    "correct": [1, 4]
+  },
+  {
+    "question": "Which activity ensures that processes in Security Operations Management are carried out effectively and efficiently?",
+    "answers": [
+      "A. Ensuring people are qualified.",
+      "B. Deploying technologies.",
+      "C. Defining processes.",
+      "D. Developing marketing strategies.",
+      "E. Conducting financial audits."
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Who are the security capabilities and control measures applied to?",
+    "answers": [
+      "A. Third-party vendors.",
+      "B. Cloud service providers.",
+      "C. External auditors.",
+      "D. The organisation’s people, processes and technologies.",
+      "E. Government regulatory bodies."
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "What function deals with ensuring configuration baselines are applied appropriately?",
+    "answers": [
+      "A. Identity and Access Management.",
+      "B. Security Monitoring.",
+      "C. Security Incident Response.",
+      "D. Infrastructure and Application Security.",
+      "E. Threat & Vulnerability Management."
+    ],
+    "correct": [4]
+  },
+  {
+    "question": "What are RACIs used for and why?",
+    "answers": [
+      "A. Defining Roles, Accountabilities, Consulted and Informed to clarify responsibilities.",
+      "B. Tracking vulnerability scan results for audit purposes.",
+      "C. Managing incident response playbooks.",
+      "D. Prioritising mitigation actions by risk level.",
+      "E. Categorising assets by criticality."
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which tool is typically used to collect and analyse logs for potential security events?",
+    "answers": [
+      "A. Vulnerability scanner.",
+      "B. Configuration management database (CMDB).",
+      "C. Data Loss Prevention (DLP).",
+      "D. Endpoint Detection and Response (EDR).",
+      "E. Security Information and Event Management (SIEM)."
+    ],
+    "correct": [4]
+  },
+  {
+    "question": "Which two processes are core to the Security Monitoring function?",
+    "answers": [
+      "A. Onboarding of log feeds.",
+      "B. Creating data classification schemas.",
+      "C. Developing and mobilising use cases.",
+      "D. Conducting risk assessments.",
+      "E. Deploying incident analysis tooling."
+    ],
+    "correct": [0, 2]
+  },
+  {
+    "question": "Which activity is part of the Security Incident Response function?",
+    "answers": [
+      "A. Scanning for container vulnerabilities.",
+      "B. Establishing and mobilising a communication plan.",
+      "C. Defining access permissions.",
+      "D. Developing SIEM use cases.",
+      "E. Onboarding of log feeds."
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which three sub-processes are part of the Security Incident Response lifecycle?",
+    "answers": [
+      "A. Qualify incidents.",
+      "B. Analyse alerts and triage.",
+      "C. Collect and preserve incident evidence.",
+      "D. Integrate threat and vulnerability information.",
+      "E. Identify recovery measures and support implementation."
+    ],
+    "correct": [0, 2, 4]
+  },
+  {
+    "question": "Who in an organisation has a keen interest in data security?",
+    "answers": [
+      "A. Human Resources only.",
+      "B. Finance department only.",
+      "C. Data owners and protection teams.",
+      "D. Marketing department only.",
+      "E. Internal audit only."
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "What typical activities does the Security Architecture function pursue?",
+    "answers": [
+      "A. Designing and configuring federation services.",
+      "B. Advising on firewall and proxy rule sets.",
+      "C. Deploying incident analysis tooling.",
+      "D. Creating and reviewing OS security baselines.",
+      "E. Managing privileged access."
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Why does the Security Strategy & Implementation function need to work with an organisation’s Project Office?",
+    "answers": [
+      "A. To test detection processes.",
+      "B. To align security initiatives with project timelines and deliverables.",
+      "C. To conduct vulnerability scans.",
+      "D. To define incident response playbooks.",
+      "E. To manage IAM provisioning."
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "What interactions does a Security Engineering team have with the Incident Response team?",
+    "answers": [
+      "A. Integrating threat intelligence feeds into SIEM.",
+      "B. Assisting with forensic evidence collection.",
+      "C. Providing hardened configurations post-incident.",
+      "D. Advising on playbook development.",
+      "E. All of the above."
+    ],
+    "correct": [4]
+  },
+  {
+    "question": "Which areas does Security Engineering activities cover in the NIST CSF?",
+    "answers": [
+      "A. Protect (hardening, PAM, PKI) and Detect (IDS/EDR).",
+      "B. Respond (incident containment) only.",
+      "C. Identify (asset inventory) only.",
+      "D. Recover (restoration & reconfiguration) only.",
+      "E. All functions equally."
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which of the following are core outputs of the Infrastructure Security activity “Applying or validating hardened configurations”?",
+    "answers": [
+      "A. Hardened infra components/services.",
+      "B. Documented secure rules.",
+      "C. Audit reports.",
+      "D. Deployed certificates.",
+      "E. Updated SIEM use cases."
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which two of the following activities belong to the Network Security function?",
+    "answers": [
+      "A. Researching suspected malicious sites and updating proxy configurations.",
+      "B. Creating or reviewing IDS/IPS configurations.",
+      "C. Designing secure groups for directory services.",
+      "D. Collecting and preserving incident evidence.",
+      "E. Advising on DLP rules."
+    ],
+    "correct": [0, 1]
+  },
+  {
+    "question": "Which three outputs are produced by the Data Security processes?",
+    "answers": [
+      "A. Documented and applied removable-media configurations.",
+      "B. Deployed PKI certificates.",
+      "C. CMDB entries for asset inventory.",
+      "D. Documented DLP rules.",
+      "E. Hardened infra components."
+    ],
+    "correct": [0, 1, 3]
+  },
+  {
+    "question": "Which activity is part of the Application Security processes?",
+    "answers": [
+      "A. Inventory of applications and vulnerabilities.",
+      "B. Defining backup and restore procedures.",
+      "C. Monitoring user behaviour analytics.",
+      "D. Conducting crisis management.",
+      "E. Approving firewall rule changes."
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "What are the three main core areas of Security Monitoring function concerns?",
+    "answers": [
+      "A. Use case management",
+      "B. Threat intelligence integration",
+      "C. SIEM management",
+      "D. Capturing KPIs and reporting",
+      "E. Log ingestion"
+    ],
+    "correct": [0, 2, 4]
+  },
+  {
+    "question": "What components do SIEM systems monitor?",
+    "answers": [
+      "A. User access and privileges",
+      "B. Network traffic, system events, and application logs",
+      "C. Physical security controls",
+      "D. Vulnerability scan outputs",
+      "E. Incident response playbooks"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "How many levels of investigation usually exist in Security Monitoring?",
+    "answers": [
+      "A. Two",
+      "B. Four",
+      "C. One",
+      "D. Three",
+      "E. Five"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "What are the use case development & lifecycle phases?",
+    "answers": [
+      "A. Identification & Selection; Creation, Testing & Deployment; Mobilisation, Operation & Improvement; Integration & Reporting",
+      "B. Planning; Design; Implementation; Testing",
+      "C. Discovery; Scanning; Analysis; Remediation",
+      "D. Define; Develop; Deploy; Decommission",
+      "E. Framework Mapping; Metrics; Tuning; Governance"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "What is the output of tuning SIEM use cases?",
+    "answers": [
+      "A. Updated use cases",
+      "B. Dashboards and reports",
+      "C. Qualified incidents",
+      "D. Incident tickets",
+      "E. Deployed system configurations"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "What is produced when capturing KPIs and reporting?",
+    "answers": [
+      "A. SIEM improvement recommendations",
+      "B. Dashboards and reports",
+      "C. Threat intelligence feeds",
+      "D. Updated incident playbooks",
+      "E. Hardened configurations"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "What is produced when liaising with vendors and evaluating SIEM platform updates?",
+    "answers": [
+      "A. SIEM improvement recommendations",
+      "B. Qualified alerts",
+      "C. New use case requirements",
+      "D. Incident response plans",
+      "E. Compliance metrics"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which two activities are core to Use Case Management in Security Monitoring?",
+    "answers": [
+      "A. Defining event/alert triggers and required correlations",
+      "B. Performing lessons learned exercises",
+      "C. Identifying noise (FPs/FNs)",
+      "D. Qualifying incidents",
+      "E. Onboarding new log feeds"
+    ],
+    "correct": [0, 2]
+  },
+  {
+    "question": "What are the three basic vulnerability process steps?",
+    "answers": [
+      "A. Assessment",
+      "B. Identification",
+      "C. Reporting",
+      "D. Remediation",
+      "E. Monitoring"
+    ],
+    "correct": [0, 1, 3]
+  },
+  {
+    "question": "Which information is used for qualifying identified vulnerabilities?",
+    "answers": [
+      "A. Remediation timeframe",
+      "B. Asset criticality",
+      "C. CVSS score",
+      "D. Regulatory requirements",
+      "E. Exploit deliverability"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "How does the TVM team collaborate with Threat Intelligence?",
+    "answers": [
+      "A. Conducting joint penetration tests",
+      "B. Ingesting threat advisories into prioritisation",
+      "C. Sharing vulnerability scanning tools",
+      "D. Developing threat actor profiles",
+      "E. Writing incident reports"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "What is produced when liaising with vendors and evaluating SIEM platform updates?",
+    "answers": [
+      "A. SIEM improvement recommendations",
+      "B. Qualified alerts",
+      "C. New use case requirements",
+      "D. Incident response plans",
+      "E. Compliance metrics"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which two activities are core to Use Case Management in Security Monitoring?",
+    "answers": [
+      "A. Defining event/alert triggers and required correlations",
+      "B. Performing lessons learned exercises",
+      "C. Identifying noise (FPs/FNs)",
+      "D. Qualifying incidents",
+      "E. Onboarding new log feeds"
+    ],
+    "correct": [0, 2]
+  },
+  {
+    "question": "What are the three basic vulnerability process steps?",
+    "answers": [
+      "A. Assessment",
+      "B. Identification",
+      "C. Reporting",
+      "D. Remediation",
+      "E. Monitoring"
+    ],
+    "correct": [0, 1, 3]
+  },
+  {
+    "question": "Which information is used for qualifying identified vulnerabilities?",
+    "answers": [
+      "A. Remediation timeframe",
+      "B. Asset criticality",
+      "C. CVSS score",
+      "D. Regulatory requirements",
+      "E. Exploit deliverability"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "How does the TVM team collaborate with Threat Intelligence?",
+    "answers": [
+      "A. Conducting joint penetration tests",
+      "B. Ingesting threat advisories into prioritisation",
+      "C. Sharing vulnerability scanning tools",
+      "D. Developing threat actor profiles",
+      "E. Writing incident reports"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which two elements are essential in a TVM standard?",
+    "answers": [
+      "A. Scan frequency and scope",
+      "B. Roles and responsibilities",
+      "C. Incident containment measures",
+      "D. Threat hunting procedures",
+      "E. SIEM use cases"
+    ],
+    "correct": [0, 1]
+  },
+  {
+    "question": "Which system is commonly used for aggregating vulnerability scanning outputs?",
+    "answers": [
+      "A. Ticketing system",
+      "B. SIEM",
+      "C. GRC platform",
+      "D. CMDB",
+      "E. Antivirus console"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "What output is produced when analysing and qualifying vulnerabilities?",
+    "answers": [
+      "A. Patch deployment plans",
+      "B. Qualified vulnerability reports",
+      "C. Threat intelligence feeds",
+      "D. Incident tickets",
+      "E. Remediation guidelines"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which ISO 27001 control objective aligns with the TVM process?",
+    "answers": [
+      "A. A12 – Operations Security",
+      "B. A9 – Access Control",
+      "C. A5 – Information Security Policies",
+      "D. A14 – System Acquisition",
+      "E. A7 – Human Resource Security"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "In the TVM process, what is the first step?",
+    "answers": [
+      "A. Scanning the environment",
+      "B. Triage of scan results",
+      "C. Remediation of vulnerabilities",
+      "D. Reporting to stakeholders",
+      "E. Feeding back into governance"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "What accounts should be managed by IAM?",
+    "answers": [
+      "A. Service accounts, privileged accounts, and general user accounts.",
+      "B. Vendor and partner service accounts only.",
+      "C. Only privileged administrative accounts.",
+      "D. Guest and contractor accounts only.",
+      "E. External customer portal accounts only."
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Name the Provisioning steps and the key pre-requisite?",
+    "answers": [
+      "A. Provisioning request → Identity creation → Credentials issuance → Pre-req: approved business authorisation.",
+      "B. Identity creation → Access configuration → Authorisation configuration → Pre-req: valid credentials.",
+      "C. Access configuration → Provisioning request → Credentials issuance → Pre-req: directory sync enabled.",
+      "D. Credentials issuance → Provisioning request → Identity activation → Pre-req: MFA enforced.",
+      "E. Provisioning request → Authorisation configuration → Access configuration → Pre-req: service onboarding complete."
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "What measure would you take to enhance security of privileged accounts?",
+    "answers": [
+      "A. Require periodic recertification and implement just-in-time credential issuance.",
+      "B. Disable MFA for privileged sessions.",
+      "C. Assign permanent excessive privileges to avoid delays.",
+      "D. Store credentials in plaintext for quick access.",
+      "E. Skip audit logging to improve performance."
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "What characteristics would an organisation exhibit at an advanced IAM maturity level?",
+    "answers": [
+      "A. Centralised IAM/PAM with SSO, well-established governance, and on-prem/cloud integration.",
+      "B. Manual onboarding, disparate directories, and high operational effort.",
+      "C. No federation, no MFA, and no governance processes.",
+      "D. Only on-prem systems managed with ad-hoc processes.",
+      "E. Outsourced IAM services with no internal oversight."
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which single capability does Privileged Access Management (PAM) primarily provide?",
+    "answers": [
+      "A. Temporary credential issuance and session recording.",
+      "B. Centralised single sign-on for all employees.",
+      "C. Automated software patch deployment.",
+      "D. Network traffic inspection.",
+      "E. Vulnerability scanning."
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which two IAM system types handle different user populations?",
+    "answers": [
+      "A. Enterprise IAM (EIAM)",
+      "B. Customer IAM (CIAM)",
+      "C. Privileged Access Management (PAM)",
+      "D. Security Information and Event Management (SIEM)",
+      "E. Threat & Vulnerability Management (TVM)"
+    ],
+    "correct": [0, 1]
+  },
+  {
+    "question": "Which three framework mappings involve IAM/PAM?",
+    "answers": [
+      "A. NIST Protect – IAM, PAM, access rights, resource connection",
+      "B. NIST Detect – vulnerability scanning only",
+      "C. NIST Respond – IR support",
+      "D. NIST Recover – service scope expansion",
+      "E. NIST Identify – asset discovery"
+    ],
+    "correct": [0, 2, 3]
+  },
+  {
+    "question": "Which activity is part of the IAM “Joiners–Movers–Leavers” lifecycle?",
+    "answers": [
+      "A. Deprovision digital identities and remove access upon termination.",
+      "B. Conduct vulnerability scans on joiners’ devices.",
+      "C. Develop SIEM use cases for movers.",
+      "D. Perform pen tests on leavers’ accounts.",
+      "E. Integrate threat intelligence feeds for joiners."
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "What are the three components that make up Threat Management?",
+    "answers": [
+      "A. Threat Intelligence, Threat Hunting, Advanced Threat Management",
+      "B. Threat Modelling, Incident Response, Continuous Improvement",
+      "C. Vulnerability Scanning, Asset Management, Risk Assessment",
+      "D. Security Architecture, Security Monitoring, Security Strategy",
+      "E. Governance, Risk, Compliance"
+    ],
+    "correct": [0, 4, 1]
+  },
+  {
+    "question": "What do you need or needs to be in place for starting threat hunting?",
+    "answers": [
+      "A. A mature security awareness program",
+      "B. Defined threat intelligence sources and tooling",
+      "C. A fully staffed red team",
+      "D. A crisis management playbook",
+      "E. An incident recovery plan"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "What is the difference between a red and blue team?",
+    "answers": [
+      "A. Red teams focus on defence; blue teams focus on attack",
+      "B. Red teams simulate attackers; blue teams defend and detect",
+      "C. Red teams manage vulnerabilities; blue teams perform forensics",
+      "D. Red teams handle alerts; blue teams develop mitigation strategies",
+      "E. Red teams streamline incident response; blue teams run compliance audits"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which two threat intelligence types would you seek initially to understand your organisation’s risk landscape?",
+    "answers": [
+      "A. Operational and Tactical",
+      "B. Strategic and Tactical",
+      "C. Technical and Physical",
+      "D. Compliance and Strategic",
+      "E. Operational and Compliance"
+    ],
+    "correct": [1, 0]
+  },
+  {
+    "question": "Which threat-modelling technique uses a structured list of attack categories like Spoofing, Tampering, and Denial of Service?",
+    "answers": [
+      "A. Kill Chain",
+      "B. STRIDE",
+      "C. PASTA",
+      "D. OCTAVE",
+      "E. LINDDUN"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "What is the primary output when you deploy and monitor honeypots or honeynets?",
+    "answers": [
+      "A. Adversary TTPs (Tactics, Techniques & Procedures)",
+      "B. SIEM dashboards",
+      "C. Compliance reports",
+      "D. Vulnerability scan results",
+      "E. Incident recovery plans"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which alignment describes Threat Hunting’s place in the NIST Cybersecurity Framework?",
+    "answers": [
+      "A. Identify",
+      "B. Respond",
+      "C. Detect",
+      "D. Recover",
+      "E. Protect"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Which three activities are core to Advanced Threat Management?",
+    "answers": [
+      "A. Deep-dive system/application analysis",
+      "B. Performing exploit proof-of-concepts",
+      "C. Developing threat-modelling diagrams",
+      "D. Capturing adversary behaviours and designing countermeasures",
+      "E. Onboarding new threat-intelligence feeds"
+    ],
+    "correct": [0, 1, 3]
+  },
+  {
+    "question": "What application categories could be defined?",
+    "answers": [
+      "A. Server-less apps, monolithic mainframe, desktop utilities.",
+      "B. Container-based apps, mobile apps, server-less apps.",
+      "C. Legacy COBOL, COTS, open-source libraries.",
+      "D. Desktop apps, server-side scripts, human-machine interfaces.",
+      "E. Mobile apps, network services, database engines."
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "What security challenges would you highlight when embedding security in an Agile delivery methodology?",
+    "answers": [
+      "A. Lack of defined stage gates and documentation.",
+      "B. Delayed threat modelling and ad-hoc code reviews.",
+      "C. Over-reliance on pen testing and manual audits.",
+      "D. Strict sequential phase progression.",
+      "E. Inflexible CI/CD pipelines."
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which application software testing tool would you use to identify runtime weaknesses?",
+    "answers": [
+      "A. Static Application Security Testing (SAST).",
+      "B. Software Composition Analysis (SCA).",
+      "C. Container Vulnerability Scanner.",
+      "D. Dynamic Application Security Testing (DAST).",
+      "E. Web Application Firewall (WAF)."
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "How can you perform Software Composition Analysis (SCA) on SaaS offerings?",
+    "answers": [
+      "A. Scan underlying host OS for vulnerabilities.",
+      "B. Integrate SCA APIs into the service provider’s pipeline.",
+      "C. Request dependency reports from the vendor.",
+      "D. Deploy an external DAST tool.",
+      "E. Use a Web Application Firewall."
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Which three elements are part of an Optimised AppSec service maturation?",
+    "answers": [
+      "A. Consistent threat modelling.",
+      "B. Advanced SOC integration.",
+      "C. Manual code reviews.",
+      "D. Extensive automation toolchain.",
+      "E. Centralised code repository."
+    ],
+    "correct": [0, 1, 3]
+  },
+  {
+    "question": "Which two security elements belong to the Advanced AppSec phase?",
+    "answers": [
+      "A. Ad-hoc code reviews.",
+      "B. SAST & SCA in CI/CD.",
+      "C. Periodic penetration testing.",
+      "D. Education & training programs.",
+      "E. Manual configuration baselines."
+    ],
+    "correct": [1, 3]
+  },
+  {
+    "question": "Which single AppSec tool is ‘outside-in’, scanning running applications?",
+    "answers": [
+      "A. Dynamic Application Security Testing (DAST).",
+      "B. Static Application Security Testing (SAST).",
+      "C. Software Composition Analysis (SCA).",
+      "D. Container Vulnerability Scanner.",
+      "E. Web Application Firewall (WAF)."
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which activity is part of integrating security into CI/CD?",
+    "answers": [
+      "A. Triggering SAST on code check-in.",
+      "B. Automating build-time vulnerability scans.",
+      "C. Embedding threat models in user stories.",
+      "D. Reviewing pull requests manually.",
+      "E. Configuring WAF rules post-deployment."
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which Incident Response phase should playbooks be created?",
+    "answers": [
+      "A. Containment",
+      "B. Preparation",
+      "C. Identification",
+      "D. Eradication",
+      "E. Restoration"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which phase should deal comprehensively with the root causes of an incident?",
+    "answers": [
+      "A. Lessons Learned",
+      "B. Preparation",
+      "C. Identification",
+      "D. Eradication",
+      "E. Restoration"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Which two incident criticality categories would typically involve a crisis management team?",
+    "answers": [
+      "A. C4 – Minor incidents",
+      "B. C2 – Significant incidents",
+      "C. C3 – Moderate incidents",
+      "D. C1 – Major incidents",
+      "E. C5 – Catastrophic incidents"
+    ],
+    "correct": [1, 3]
+  },
+  {
+    "question": "Which of the following is a common mistake made during incident response?",
+    "answers": [
+      "A. Failure to take clean or working backups",
+      "B. Over-documenting every step in playbooks",
+      "C. Performing too many tabletop exercises",
+      "D. Excessive reliance on automated detection",
+      "E. Immediate public disclosure of incidents"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which three activities are core to the Restoration and Lessons Learned stages?",
+    "answers": [
+      "A. Validating integrity of restored systems",
+      "B. Performing post-mortem review and compiling recommendations",
+      "C. Identifying recovery measures in planning",
+      "D. Collaborating with IT and security to rebuild from clean backups",
+      "E. Developing new threat-hunting use cases"
+    ],
+    "correct": [0, 1, 3]
+  },
+  {
+    "question": "Which activity is part of the Lessons Learned process?",
+    "answers": [
+      "A. Issuing of interjections during tabletop exercises",
+      "B. Conducting post-incident scenario simulations",
+      "C. Compiling a report with recommendations for improvement",
+      "D. Deploying new SIEM use cases",
+      "E. Triggering automated vulnerability scans"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Which ISO/IEC 27001 control objective aligns directly with Incident Management?",
+    "answers": [
+      "A. A12 – Operations Security",
+      "B. A16 – Information Security Incident Management",
+      "C. A9 – Access Control",
+      "D. A5 – Information Security Policies",
+      "E. A18 – Compliance"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Within the NIST Cybersecurity Framework, which function best maps to Incident Management’s containment and mitigation activities?",
+    "answers": [
+      "A. Recover",
+      "B. Detect",
+      "C. Identify",
+      "D. Respond",
+      "E. Protect"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "What is the primary goal of a Security Architecture practice?",
+    "answers": [
+      "A. To define incident response playbooks",
+      "B. To design and document the organisation’s security controls and their interactions",
+      "C. To conduct penetration testing on applications",
+      "D. To manage user access and provisioning",
+      "E. To develop employee security training materials"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which of the following components would you expect to find in an enterprise reference security architecture?",
+    "answers": [
+      "A. Business continuity runbooks",
+      "B. Network segmentation and firewall zones",
+      "C. Vulnerability scanning schedules",
+      "D. Incident ticketing workflows",
+      "E. Training curriculums"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which three principles underpin a robust Security Architecture?",
+    "answers": [
+      "A. Defence-in-depth",
+      "B. Least privilege",
+      "C. Single sign-on",
+      "D. Segregation of duties",
+      "E. Unified logging"
+    ],
+    "correct": [0, 1, 3]
+  },
+  {
+    "question": "What activity falls under Security Strategy & Implementation?",
+    "answers": [
+      "A. Developing a technology roadmap to meet future security requirements",
+      "B. Monitoring network traffic for anomalies",
+      "C. Conducting daily vulnerability scans",
+      "D. Running user awareness phishing campaigns",
+      "E. Configuring endpoint antivirus policies"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which two stakeholders should be engaged when defining security strategy for a new enterprise project?",
+    "answers": [
+      "A. Project management office (PMO)",
+      "B. External legal counsel",
+      "C. Human resources",
+      "D. Executive leadership",
+      "E. Data centre operations"
+    ],
+    "correct": [0, 3]
+  },
+  {
+    "question": "Which ISO/IEC standard series most directly informs an organisation’s Security Architecture?",
+    "answers": [
+      "A. ISO/IEC 27000 series",
+      "B. ISO 9001 series",
+      "C. ISO/IEC 20000 series",
+      "D. ISO 31000 series",
+      "E. ISO 14000 series"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "What outcome does effective Security Implementation ensure?",
+    "answers": [
+      "A. All systems are automatically scanned hourly",
+      "B. Security designs are deployed consistently across environments",
+      "C. Incident response teams are always on standby",
+      "D. Employees complete annual security awareness training",
+      "E. Vendors comply with SLA requirements"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which activity is part of translating Security Strategy into operational plans?",
+    "answers": [
+      "A. Defining and scheduling security project milestones",
+      "B. Writing vulnerability remediation reports",
+      "C. Performing root-cause forensic analysis",
+      "D. Onboarding new threat intelligence feeds",
+      "E. Updating antivirus signature databases"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which mechanisms and means are available to get visibility and manage information security risks across an organisation?",
+    "answers": [
+      "A. Incident Response playbooks and crisis drills",
+      "B. Executive Board communication channels",
+      "C. Governance structures and KPIs",
+      "D. Vendor contract SLAs",
+      "E. Asset discovery and risk treatment processes"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "What is the key purpose of risk management?",
+    "answers": [
+      "A. To enforce password policies",
+      "B. To document network topologies",
+      "C. To identify, articulate, and mitigate risks",
+      "D. To audit compliance controls",
+      "E. To establish remediation runbooks"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "What is a key advantage of defining governance structures?",
+    "answers": [
+      "A. Reduced costs for security tooling",
+      "B. Clear decision authority and transparency",
+      "C. Automated policy enforcement",
+      "D. Enhanced encryption standards",
+      "E. Faster incident containment"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Mean time to detection is a KPI for which metrics area?",
+    "answers": [
+      "A. Technical metrics",
+      "B. Managerial metrics",
+      "C. Compliance metrics",
+      "D. Operational metrics",
+      "E. Strategic metrics"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Which three activities are part of a robust ISMS assurance cycle?",
+    "answers": [
+      "A. Self assessments",
+      "B. Crisis management exercises",
+      "C. Remediation plan tracking",
+      "D. Evidenced-based evaluations",
+      "E. Annual user training"
+    ],
+    "correct": [0, 2, 3]
+  },
+  {
+    "question": "Which two outputs result from the CISO’s management of major incident response?",
+    "answers": [
+      "A. Post-mortem report",
+      "B. Funded security roadmap",
+      "C. IR management and coordination",
+      "D. Revised governance charter",
+      "E. Crisis communication plan"
+    ],
+    "correct": [2, 0]
+  },
+  {
+    "question": "Which ISO 27001 control objective area covers Information Security Incident Management?",
+    "answers": [
+      "A. A5 – Information Security Policies",
+      "B. A12 – Operations Security",
+      "C. A16 – Information Security Incident Management",
+      "D. A9 – Access Control",
+      "E. A18 – Compliance"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Which single NIST CSF Protect subcategory relates to ensuring staff understand cybersecurity roles and responsibilities?",
+    "answers": [
+      "A. PR.AT – Awareness and Training",
+      "B. PR.PT – Protective Technology",
+      "C. PR.AC – Access Control",
+      "D. PR.DS – Data Security",
+      "E. PR.IP – Information Protection Processes"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which responsibility falls under the Data Protection Office?",
+    "answers": [
+      "A. Conducting vulnerability scans",
+      "B. Configuring network segmentation rules",
+      "C. Managing endpoint antivirus deployments",
+      "D. Defining and applying data classification schemes",
+      "E. Performing digital forensics on compromised systems"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Which two activities are core to Physical Security within an organisation?",
+    "answers": [
+      "A. Designing and maintaining secure entry controls",
+      "B. Developing software change-management processes",
+      "C. Conducting facility risk assessments",
+      "D. Configuring SIEM use cases",
+      "E. Background checks on personnel"
+    ],
+    "correct": [0, 4]
+  },
+  {
+    "question": "What is a key component of Business Continuity planning?",
+    "answers": [
+      "A. Tuning SIEM detection rules",
+      "B. Simulating cybersecurity compromise scenarios",
+      "C. Establishing federated identity services",
+      "D. Encrypting data at rest",
+      "E. Implementing just-in-time privileged access"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which measure supports Failure Tolerance in business resilience?",
+    "answers": [
+      "A. Continuous threat hunting",
+      "B. Automated code scanning",
+      "C. Mandatory quarterly security audits",
+      "D. Redundancies in power and network",
+      "E. Centralised IAM/PAM solutions"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Which three principles underlie a Zero Trust approach?",
+    "answers": [
+      "A. Never trust, always verify",
+      "B. Least-privilege access",
+      "C. Perimeter-based security",
+      "D. Continuous monitoring of transactions",
+      "E. Implicit trust of internal network traffic"
+    ],
+    "correct": [0, 1, 3]
+  },
+  {
+    "question": "Which of the following is an example of a GenAI “Data Poisoning” risk?",
+    "answers": [
+      "A. Exfiltrating user chat history",
+      "B. Corrupting the training dataset to bias model outputs",
+      "C. Overloading compute resources with large file uploads",
+      "D. Injecting malicious prompts at runtime",
+      "E. Causing the model to hallucinate through adversarial inputs"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which control helps mitigate GenAI “Prompt Injection” attacks?",
+    "answers": [
+      "A. Disabling all user file uploads",
+      "B. Implementing prompt sanitization and validation",
+      "C. Purging or encrypting chat history",
+      "D. Deploying secure isolation environments",
+      "E. Enforcing access policies and guardrails"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which activity belongs to the overall governance approach for GenAI?",
+    "answers": [
+      "A. Scheduling daily SIEM report reviews",
+      "B. Registering AI use cases before deployment",
+      "C. Performing container vulnerability scans",
+      "D. Managing PKI certificate lifecycles",
+      "E. Designing application-level DAST tests"
+    ],
+    "correct": [1]
+  }
+    ];
+
+    let questions = [...fullQuestionBank];
+    let currentIndex = 0;
+    let userAnswers = Array(questions.length).fill().map(() => []);
+    let flagged = new Set();
+    let timerId;
+    const totalTime = questions.length * 60;
+
+    function loadQuestion() {
+  const q = questions[currentIndex];
+  document.getElementById('question-title').textContent = `Question ${currentIndex + 1}: ${q.question}`;
+  const answersDiv = document.getElementById('answers');
+  answersDiv.innerHTML = '';
+
+  const isMultiAnswer = q.correct.length > 1;
+  let submitted = false;
+
+  const feedback = document.createElement('div');
+  feedback.id = 'feedback';
+  feedback.style.marginTop = '15px';
+  feedback.style.fontWeight = 'bold';
+
+  const updateStyles = () => {
+    document.querySelectorAll('#answers label').forEach(label => {
+      label.style.backgroundColor = '';
+      label.style.padding = '';
+      label.style.borderRadius = '';
+    });
+  };
+
+  
+
+  q.answers.forEach((ans, i) => {
+    const input = document.createElement('input');
+    input.type = isMultiAnswer ? 'checkbox' : 'radio';
+    input.name = 'answer';
+    input.value = i;
+    input.checked = userAnswers[currentIndex].includes(i);
+
+    const label = document.createElement('label');
+    label.style.display = "block";
+    label.style.margin = "8px 0";
+    label.appendChild(input);
+    label.append(" " + ans);
+
+    input.addEventListener('change', () => {
+      const checked = Array.from(document.querySelectorAll('#answers input:checked')).map(cb => +cb.value);
+      userAnswers[currentIndex] = checked;
+
+      // Compare sorted user input with correct answers
+      const sortedUser = [...checked].sort().join(',');
+      const sortedCorrect = q.correct.slice().sort().join(',');
+
+      // Reset all styles first
+      updateStyles();
+
+      if (sortedUser === sortedCorrect) {
+        feedback.textContent = "✅ Correct!";
+        feedback.style.color = "limegreen";
+
+        // Mark correct answers in green
+        checked.forEach(idx => {
+          const label = document.querySelectorAll('#answers label')[idx];
+          label.style.backgroundColor = '#28a745';
+          label.style.padding = '5px';
+          label.style.borderRadius = '5px';
+        });
+      } else {
+        const correctText = q.correct.map(idx => q.answers[idx]).join(', ');
+        feedback.textContent = `❌ Incorrect. Correct answer: ${correctText}`;
+        feedback.style.color = "red";
+
+        // Highlight selected answers in red
+        checked.forEach(idx => {
+          const label = document.querySelectorAll('#answers label')[idx];
+          label.style.backgroundColor = '#dc3545';
+          label.style.padding = '5px';
+          label.style.borderRadius = '5px';
+        });
+
+        // Highlight correct answers in green
+        q.correct.forEach(idx => {
+          const label = document.querySelectorAll('#answers label')[idx];
+          label.style.backgroundColor = '#28a745';
+          label.style.padding = '5px';
+          label.style.borderRadius = '5px';
+        });
+      }
+    });
+
+    answersDiv.appendChild(label);
+  });
+}
+
+    function updateGrid() {
+      const grid = document.getElementById('question-grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < questions.length; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i + 1;
+        btn.onclick = () => {
+          currentIndex = i;
+          loadQuestion();
+        };
+        grid.appendChild(btn);
+      }
+    }
+
+    function flagQuestion() {
+      if (flagged.has(currentIndex)) {
+        flagged.delete(currentIndex);
+      } else {
+        flagged.add(currentIndex);
+      }
+      alert(`Question ${currentIndex + 1} ${flagged.has(currentIndex) ? 'flagged' : 'unflagged'}`);
+    }
+
+    function showFlagged() {
+      if (!flagged.size) return alert("No flagged questions.");
+      alert("Flagged questions: " + Array.from(flagged).map(i => i + 1).join(', '));
+    }
+
+    function nextQuestion() {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        loadQuestion();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        loadQuestion();
+      }
+    }
+
+    function submitExam() {
+      clearInterval(timerId);
+      let correct = [], wrong = [];
+      questions.forEach((q, i) => {
+        const sortedUser = [...(userAnswers[i] || [])].sort().join(',');
+        const sortedCorrect = q.correct.slice().sort().join(',');
+        if (sortedUser === sortedCorrect) correct.push(i);
+        else wrong.push(i);
+      });
+
+      document.getElementById('exam-section').classList.add('hidden');
+      document.getElementById('review-section').classList.remove('hidden');
+      document.getElementById('correct-count').textContent = correct.length;
+      document.getElementById('wrong-count').textContent = wrong.length;
+      document.getElementById('percentage').textContent = ((correct.length / questions.length) * 100).toFixed(2);
+
+      sessionStorage.setItem('wrongIndexes', JSON.stringify(wrong));
+    }
+
+    function retakeWrongOnly() {
+      const wrong = JSON.parse(sessionStorage.getItem('wrongIndexes') || '[]');
+      if (!wrong.length) return alert("No wrong answers to retake!");
+      questions = wrong.map(i => fullQuestionBank[i]);
+      resetExam();
+    }
+
+    function resetExam() {
+      userAnswers = Array(questions.length).fill().map(() => []);
+      currentIndex = 0;
+      flagged = new Set();
+      document.getElementById('review-section').classList.add('hidden');
+      document.getElementById('exam-section').classList.remove('hidden');
+      updateGrid();
+      loadQuestion();
+      startTimer(questions.length * 60);
+    }
+
+    function startTimer(duration) {
+      let timer = duration;
+      const countdown = document.getElementById('countdown');
+      const update = () => {
+        const m = String(Math.floor(timer / 60)).padStart(2, '0');
+        const s = String(timer % 60).padStart(2, '0');
+        countdown.textContent = `${m}:${s}`;
+        if (--timer < 0) {
+          clearInterval(timerId);
+          submitExam();
+        }
+      };
+      update();
+      timerId = setInterval(update, 1000);
+    }
+
+    window.onload = () => {
+      updateGrid();
+      loadQuestion();
+      startTimer(totalTime);
+    };
+  </script>
+</body>
+</html>

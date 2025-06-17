@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Forensics Mock Exam</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #3c3b3f, #605c3c);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .sidebar, .grid {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .sidebar {
+      width: 250px;
+    }
+
+    .grid {
+  display: grid;
+  grid-template-columns: repeat(8, 15px);
+  grid-auto-rows: 5px;
+  grid-gap: 30px;
+}
+
+    .grid button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      height: 75%;
+    }
+
+    #main {
+      background: #2a2a2a;
+      margin-top: 30px;
+      padding: 30px;
+      border-radius: 10px;
+      width: 600px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    #question-title {
+      margin-bottom: 15px;
+    }
+
+    #answers label {
+      display: block;
+      margin: 8px 0;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #timer {
+      color: red;
+      font-weight: bold;
+      float: right;
+    }
+
+    .hidden {
+      display: none;
+    }
+	
+	.results li.correct label::before {
+  content: "✔";
+  display: inline-block;
+  color: green;
+  font-weight: bold;
+  width: 1em;
+  margin-right: 0.5em;
+  text-align: center;
+}
+
+.results li.incorrect label::before {
+  content: "✖";
+  display: inline-block;
+  color: red;
+  font-weight: bold;
+  width: 1em;
+  margin-right: 0.5em;
+  text-align: center;
+}
+
+/* optionally hide the native radio dot so only your icon shows */
+.results li.correct input,
+.results li.incorrect input {
+  visibility: hidden;
+}
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h3>Diploma In Cybersecurity<br>NFQ Level 7</h3>
+    <p><strong>Disclaimer:</strong><br>
+      This is an unofficial mock examination.<br><br>
+      It was created solely for personal learning purposes.<br><br>
+      It is based on the knowledge acquired during the second semester.<br><br>
+      It is not endorsed by any academic institution.<br><br>
+      It is not formal exam preparation material.<br><br>
+      It is neither an official exam.</p>
+  </div>
+
+  <div id="main">
+    <div id="timer">Time Remaining: <span id="countdown">00:00</span></div>
+    <h2 style="text-align:center;">Forensics Mock Exam</h2>
+    
+    <div id="exam-section">
+      <h3 id="question-title">Loading question...</h3>
+      <div id="answers"></div>
+
+      <div class="controls">
+        <button onclick="flagQuestion()">🔖 Flag This Question</button>
+        <button onclick="prevQuestion()">⬅️ Previous</button>
+        <button onclick="submitExam()">✅ Submit Exam</button>
+        <button onclick="nextQuestion()">➡️ Next</button>
+      </div>
+    </div>
+
+    <div id="review-section" class="hidden">
+      <h2>Exam Results</h2>
+      <p>Correct Answers: <span id="correct-count"></span></p>
+      <p>Wrong Answers: <span id="wrong-count"></span></p>
+      <p>Score: <span id="percentage"></span>%</p>
+      <div>
+        <button onclick="retakeWrongOnly()">🔁 Retake Wrong Only</button>
+        <button onclick="resetExam()">🔄 Restart Full Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="grid" id="question-grid">
+      <!-- Dynamically filled -->
+    </div>
+    <button style="margin-top: 10px;" onclick="showFlagged()">📑 Show Flagged Questions</button>
+  </div>
+
+  <script>
+    const fullQuestionBank = [
+      {
+    "question": "What is the main goal of computer system forensics?",
+    "answers": [
+      "A. To collect, preserve, and analyze digital evidence",
+      "B. To optimize system performance under load",
+      "C. To develop new encryption algorithms",
+      "D. To monitor network traffic in real time"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which phase involves creating an exact bit‐for‐bit copy of a storage device?",
+    "answers": [
+      "A. Identification",
+      "B. Preservation",
+      "C. Acquisition",
+      "D. Reporting"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "A ‘forensically sound’ procedure requires that:",
+    "answers": [
+      "A. Evidence media remain unaltered throughout analysis",
+      "B. Only open-source tools are used",
+      "C. All data be encrypted at rest",
+      "D. Chain of custody logs be optional"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which acquisition type captures volatile memory contents?",
+    "answers": [
+      "A. Logical acquisition",
+      "B. Static acquisition",
+      "C. Live acquisition",
+      "D. Network acquisition"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Before seizing a suspect’s computer, the investigator must:",
+    "answers": [
+      "A. Obtain a valid search warrant",
+      "B. Install monitoring software",
+      "C. Run antivirus to clear malware",
+      "D. Encrypt the hard drive"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Chain of custody documentation ensures:",
+    "answers": [
+      "A. Evidence handling transparency and integrity",
+      "B. Faster processing times",
+      "C. Tool validation compliance",
+      "D. Encryption key security"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which principle restricts evidence access to essential personnel only?",
+    "answers": [
+      "A. Principle of Least Privilege",
+      "B. Principle of Separation of Duties",
+      "C. Principle of Fail-Safe Defaults",
+      "D. Principle of Least Knowledge"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "During the Preparation phase, investigators should:",
+    "answers": [
+      "A. Generate the final report",
+      "B. Select and verify forensic tools",
+      "C. Present evidence in court",
+      "D. Begin file carving"
+    ],
+    "correct": [1]
+  },
+
+  // Lecture 2: Process, Methodology, and Best Practices
+  {
+    "question": "What is the primary purpose of SOPs in a forensic lab?",
+    "answers": [
+      "A. To enable ad hoc workflows",
+      "B. To ensure consistent, repeatable processes",
+      "C. To reduce documentation overhead",
+      "D. To allow tool experimentation"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Under ISO/IEC 17025 accreditation, a lab must:",
+    "answers": [
+      "A. Encrypt all evidence with AES-256",
+      "B. Document competence and proficiency tests",
+      "C. Use only commercial software",
+      "D. Publicly share all case data"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which activity is NOT part of quality management?",
+    "answers": [
+      "A. Internal audits",
+      "B. Tool validation logs",
+      "C. Live malware experimentation",
+      "D. Document control"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Peer review in investigations helps to:",
+    "answers": [
+      "A. Validate findings and uncover errors",
+      "B. Speed up acquisition",
+      "C. Reduce storage requirements",
+      "D. Eliminate SOPs"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "What distinguishes a methodology from an ad hoc approach?",
+    "answers": [
+      "A. Documented, repeatable steps",
+      "B. Use of beta-version tools",
+      "C. Prioritizing speed over accuracy",
+      "D. Following no standard"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "In process modeling, a flowchart is used to:",
+    "answers": [
+      "A. Visualize each investigative step and decision point",
+      "B. Encrypt forensic images",
+      "C. Generate reports automatically",
+      "D. Speed up hashing operations"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which best practice mitigates analyst bias?",
+    "answers": [
+      "A. Skipping peer review",
+      "B. Blind testing of tools",
+      "C. Using unsupported software",
+      "D. Processing on production systems"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "A key benefit of documented procedures is:",
+    "answers": [
+      "A. Higher investigative speed",
+      "B. Legal defensibility of findings",
+      "C. Optional chain of custody",
+      "D. Reduced tool costs"
+    ],
+    "correct": [1]
+  },
+
+  // Lecture 3a: Computer Forensic Labs and Toolkit
+  {
+    "question": "Which feature is most critical for a forensic workstation?",
+    "answers": [
+      "A. Overclocked CPU",
+      "B. Multiple write-blocker interfaces",
+      "C. Gaming GPU",
+      "D. Built-in Wi-Fi"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "A hardware write-blocker is used to:",
+    "answers": [
+      "A. Encrypt source media",
+      "B. Prevent writes to evidence media",
+      "C. Accelerate imaging",
+      "D. Modify timestamps"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "What advantage does a hardware duplicator provide?",
+    "answers": [
+      "A. Real-time malware scanning",
+      "B. Simultaneous high-speed cloning of multiple drives",
+      "C. Automatic report generation",
+      "D. In-line data encryption"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which software is best for automated bulk evidence analysis?",
+    "answers": [
+      "A. EnCase",
+      "B. PuTTY",
+      "C. nmap",
+      "D. 7-Zip"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Maintaining a tool validation log ensures:",
+    "answers": [
+      "A. Tracking blog posts on tools",
+      "B. Verifying tool reliability with test images",
+      "C. Storing user credentials",
+      "D. Reducing storage costs"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "A portable forensic toolkit must:",
+    "answers": [
+      "A. Have minimal interfaces",
+      "B. Support multiple drive types and connectors",
+      "C. Include a battery charger",
+      "D. Auto-update OS"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which tool captures live network traffic on a forensic workstation?",
+    "answers": [
+      "A. Wireshark",
+      "B. Autopsy",
+      "C. FTK Imager",
+      "D. Cellebrite UFED"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which item is NOT typically part of a forensic toolkit?",
+    "answers": [
+      "A. Disk imaging software",
+      "B. Write-blocker",
+      "C. Thermal printer",
+      "D. Memory acquisition utility"
+    ],
+    "correct": [2]
+  },
+
+  // Lecture 3b: Hash Functions
+  {
+    "question": "Which property makes it infeasible to find two inputs producing the same hash?",
+    "answers": [
+      "A. Pre-image resistance",
+      "B. Collision resistance",
+      "C. Determinism",
+      "D. Avalanche effect"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "The avalanche effect refers to:",
+    "answers": [
+      "A. Small input changes causing large output changes",
+      "B. Multiple inputs mapping to identical hashes",
+      "C. Variable-length hash outputs",
+      "D. Reversible hash functions"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Why is MD5 deprecated for integrity verification?",
+    "answers": [
+      "A. It produces variable-length digests",
+      "B. Vulnerable to practical collisions",
+      "C. Too slow on modern hardware",
+      "D. Incompatible with write-blockers"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "A rainbow table attack is mitigated by:",
+    "answers": [
+      "A. Using faster hash functions",
+      "B. Salting each input uniquely",
+      "C. Truncating hash outputs",
+      "D. Running hashes multiple times"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which resistance ensures difficulty finding an input for a given hash?",
+    "answers": [
+      "A. Second pre-image resistance",
+      "B. Collision resistance",
+      "C. Determinism",
+      "D. Unkeyedness"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "In a Merkle tree, non-leaf nodes store:",
+    "answers": [
+      "A. Original data blocks",
+      "B. Hashes of child nodes’ hashes",
+      "C. File system metadata",
+      "D. Timestamps"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which hash function is most resistant to birthday attacks?",
+    "answers": [
+      "A. MD5",
+      "B. SHA-1",
+      "C. SHA-256",
+      "D. CRC32"
+    ],
+    "correct": [2]
+  },
+  // Lecture 4: Disk Drives and File Systems
+  {
+    "question": "What does Logical Block Addressing (LBA) abstract from the physical media?",
+    "answers": [
+      "A. Physical geometry (cylinders, heads, sectors)",
+      "B. File allocation tables",
+      "C. Bootloader code",
+      "D. Master Boot Record signatures"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "What is the primary function of the partition table on a disk?",
+    "answers": [
+      "A. To record file system journal entries",
+      "B. To map partitions and their starting offsets on the media",
+      "C. To store user data in logical volumes",
+      "D. To manage network boot configurations"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which statement accurately contrasts MBR and GPT partitioning schemes?",
+    "answers": [
+      "A. MBR supports more than 128 primary partitions by default",
+      "B. GPT uses a 32-bit partition entry for each partition",
+      "C. GPT stores CRC32 checksums and supports disks larger than 2 TB",
+      "D. MBR includes redundant backup of its header at the end of the disk"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "What is slack space on a disk?",
+    "answers": [
+      "A. Reserved area for swap files",
+      "B. Hidden recovery partitions",
+      "C. The gap between primary and extended partitions",
+      "D. Unused bytes in the last allocated cluster of a file"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Which of these describes the Cylinder-Head-Sector (CHS) addressing scheme?",
+    "answers": [
+      "A. Legacy method indexing tracks, heads, and sectors",
+      "B. Modern SSD logical mapping protocol",
+      "C. Encryption algorithm for disk partitions",
+      "D. File carving technique for deleted sectors"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which statement is TRUE about journaling file systems like ext4?",
+    "answers": [
+      "A. Journaling always encrypts file data",
+      "B. Journaling records metadata changes before committing them to disk",
+      "C. Journaling disables slack space",
+      "D. Journaling prevents any possibility of data loss"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which scenario would require analysis of the Volume Shadow Copy Service (VSS)?",
+    "answers": [
+      "A. Parsing HFS+ metadata on macOS",
+      "B. Recovering deleted emails from live memory",
+      "C. Decrypting BitLocker-protected volumes",
+      "D. Extracting previous versions of files from Windows backups"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Which feature of the NTFS file system supports recovery of deleted files?",
+    "answers": [
+      "A. Master File Table keeps records of files and metadata",
+      "B. Clusters are always overwritten immediately on deletion",
+      "C. NTFS lacks slack space",
+      "D. File names are stored in the registry"
+    ],
+    "correct": [0]
+  },
+
+  // Lecture 5: Graphics Files and Steganography
+  {
+    "question": "Which image format uses a palette of up to 256 colors and supports simple lossless compression?",
+    "answers": [
+      "A. BMP",
+      "B. GIF",
+      "C. JPEG",
+      "D. TIFF"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "In JPEG compression, what is the primary role of the quantization step?",
+    "answers": [
+      "A. Transform pixel blocks into frequency coefficients",
+      "B. Round DCT coefficients to reduce precision and discard visually insignificant information",
+      "C. Reorder scan lines for progressive decoding",
+      "D. Encode run-length sequences for lossless storage"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "What distinguishes PNG compression from GIF compression?",
+    "answers": [
+      "A. PNG uses LZW, GIF uses DEFLATE",
+      "B. PNG supports truecolor with alpha channel, GIF is limited to indexed palette",
+      "C. PNG is always lossy, GIF is lossless",
+      "D. PNG only supports animation, GIF does not"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "In least significant bit (LSB) steganography, data is hidden by:",
+    "answers": [
+      "A. Embedding data in the alpha channel only",
+      "B. Modifying the most significant bits of pixel values",
+      "C. Altering the least significant bits of pixel values",
+      "D. Reordering color palette entries"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Which marker signals the start of a JPEG file in hex?",
+    "answers": [
+      "A. FF D8 FF",
+      "B. 89 50 4E 47",
+      "C. 42 4D",
+      "D. 49 49 2A 00"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which steganalysis technique examines statistical anomalies in the least significant bit plane?",
+    "answers": [
+      "A. File header analysis",
+      "B. LSB flipping detection",
+      "C. Histogram analysis",
+      "D. Edge detection"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "In a steganographic tool that uses transform-domain techniques, data is typically embedded into:",
+    "answers": [
+      "A. Uncompressed pixel values in RGB space",
+      "B. Frequency coefficients after DCT or wavelet transform",
+      "C. Metadata fields in the image header",
+      "D. File slack space after the EOF marker"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "What method can help detect hidden data in a BMP file?",
+    "answers": [
+      "A. Comparing the file’s reported size to its header’s declared size",
+      "B. Checking for invalid EXIF fields",
+      "C. Running a full antivirus scan",
+      "D. Verifying CRC32 checksums in the file footer"
+    ],
+    "correct": [0]
+  },
+
+  // Lecture 6: Windows Forensics
+  {
+    "question": "Which Windows registry hive contains user-specific configuration and preferences?",
+    "answers": [
+      "A. HKEY_LOCAL_MACHINE",
+      "B. HKEY_USERS",
+      "C. HKEY_CURRENT_USER",
+      "D. HKEY_CLASSES_ROOT"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "What does the Windows Event ID 4624 signify?",
+    "answers": [
+      "A. A successful account logon",
+      "B. A failed account logon",
+      "C. Creation of a new user account",
+      "D. Modification of group membership"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which artifact is most commonly used to recover typed URLs in Internet Explorer?",
+    "answers": [
+      "A. index.dat files",
+      "B. webcachev01.dat",
+      "C. History.IE5 folder",
+      "D. TypedURLs registry key"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "In the Windows file system, which feature records the last time a file was accessed?",
+    "answers": [
+      "A. MFT entry timestamps",
+      "B. Recycle Bin metadata",
+      "C. USN Journal",
+      "D. Shortcut (LNK) file metadata"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which of these tools parses the USN Journal for forensic analysis?",
+    "answers": [
+      "A. Autoruns",
+      "B. FTK Imager",
+      "C. usnparser",
+      "D. Volatility"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Which registry key tracks programs configured to run at system startup?",
+    "answers": [
+      "A. HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "B. HKCU\\Software\\Policies\\Microsoft\\Windows\\System",
+      "C. HKLM\\SYSTEM\\CurrentControlSet\\Services",
+      "D. HKCU\\Software\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "What is the primary purpose of the Windows Prefetch folder?",
+    "answers": [
+      "A. Store user documents for quick access",
+      "B. Cache frequently used application data for faster launch",
+      "C. Log system errors for troubleshooting",
+      "D. Maintain backups of registry hives"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which Volatility plugin would you use to list running processes in a memory dump?",
+    "answers": [
+      "A. pstree",
+      "B. dlllist",
+      "C. connscan",
+      "D. mftparser"
+    ],
+    "correct": [0]
+  },
+
+  // Lecture 7: E-mail and Internet
+  {
+    "question": "Which email header field specifies the route an email took between mail servers?",
+    "answers": [
+      "A. Return-Path",
+      "B. Received",
+      "C. Message-ID",
+      "D. Subject"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "In forensic analysis of PST files, which file structure holds information about folder hierarchy and message properties?",
+    "answers": [
+      "A. FAT table",
+      "B. Node B-tree (NBT)",
+      "C. Global Descriptor Table (GDT)",
+      "D. Mail Envelope Header (MEH)"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which protocol is used to retrieve emails from a remote mail server while leaving messages on the server?",
+    "answers": [
+      "A. SMTP",
+      "B. POP3",
+      "C. IMAP",
+      "D. HTTP"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "What artifact would most reliably show a user’s browsing history in Chrome?",
+    "answers": [
+      "A. index.dat",
+      "B. webcachev01.dat",
+      "C. History SQLite database",
+      "D. Logs folder"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Which SMTP response code indicates that the requested action was not taken because the mailbox is unavailable?",
+    "answers": [
+      "A. 250",
+      "B. 421",
+      "C. 554",
+      "D. 550"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "When analyzing HTTP traffic captures, which header indicates the type of content returned by the server?",
+    "answers": [
+      "A. User-Agent",
+      "B. Content-Type",
+      "C. Host",
+      "D. Referer"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "In email forensics, which technique helps detect steganography in attachments?",
+    "answers": [
+      "A. Checking attachment file extensions",
+      "B. Comparing file size to known baselines",
+      "C. Performing statistical analysis on image LSBs",
+      "D. Inspecting SMTP envelope headers"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Which artifact in a Windows system stores recently accessed URLs by Internet Explorer?",
+    "answers": [
+      "A. TypedURLs registry key",
+      "B. Cookies folder",
+      "C. DNS cache file",
+      "D. Prefetch folder"
+    ],
+    "correct": [0]
+  },
+  // Lecture 8a: Social Media, P2P File Sharing, Social Engineering (Part A)
+  {
+    "question": "Which social media artifact is stored in a SQLite database on Android for Facebook Messenger?",
+    "answers": [
+      "A. messages.sqlite",
+      "B. chat_history.db",
+      "C. messenger.db",
+      "D. fb_messages.db"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "In BitTorrent forensics, the resume.dat file primarily contains:",
+    "answers": [
+      "A. Tracker URLs and torrent metadata",
+      "B. Hashed records of downloaded pieces and progress",
+      "C. User credentials for private trackers",
+      "D. Chunk reassembly logs"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Pretexting as a social engineering attack involves:",
+    "answers": [
+      "A. Leaving a malicious USB as bait",
+      "B. Creating a fake scenario to elicit information",
+      "C. Sending mass phishing emails",
+      "D. Redirecting DNS queries"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which eDonkey artifact lists known server addresses?",
+    "answers": [
+      "A. server.met",
+      "B. nodes.dat",
+      "C. preferences.ini",
+      "D. ed2k.hashes"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "A common indicator of spear-phishing in email headers is:",
+    "answers": [
+      "A. Mismatched SPF records",
+      "B. High TTL values",
+      "C. Missing Message-ID",
+      "D. Absent DKIM signatures"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which term describes manipulation of humans rather than systems?",
+    "answers": [
+      "A. Phishing",
+      "B. Social engineering",
+      "C. Tailgating",
+      "D. Hacking"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "In Gnutella P2P traffic, which file contains peer addresses?",
+    "answers": [
+      "A. hosts.dat",
+      "B. gnet_cache.dat",
+      "C. network.db",
+      "D. peerlist.dat"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Baiting differs from phishing because it:",
+    "answers": [
+      "A. Uses phone calls to trick victims",
+      "B. Relies on physical media left as lure",
+      "C. Spoofs legitimate websites",
+      "D. Redirects DNS queries"
+    ],
+    "correct": [1]
+  },
+
+  // Lecture 8b: Social Media, P2P File Sharing, Social Engineering (Part B)
+  {
+    "question": "Whaling attacks are targeted at:",
+    "answers": [
+      "A. Government agencies",
+      "B. Random social media users",
+      "C. High-level executives",
+      "D. Customer support staff"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Which artifact in WhatsApp’s Android folder stores chat database?",
+    "answers": [
+      "A. wa.db",
+      "B. msgstore.db",
+      "C. chat_history.sqlite",
+      "D. whatsapp.sqlite"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Pharming attacks often exploit:",
+    "answers": [
+      "A. Weak email headers",
+      "B. Hosts file or DNS cache poisoning",
+      "C. Social media APIs",
+      "D. Encrypted P2P tunnels"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "In P2P analysis, peers.dat typically contains:",
+    "answers": [
+      "A. User credentials",
+      "B. List of peer IPs and ports",
+      "C. Torrent metadata",
+      "D. Download logs"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Tailgating in social engineering refers to:",
+    "answers": [
+      "A. Following authorized personnel into secure areas",
+      "B. Sending spoofed SMS messages",
+      "C. Exploiting email attachments",
+      "D. Redirecting network traffic"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Which API endpoint retrieves recent tweets for a user?",
+    "answers": [
+      "A. GET /1.1/statuses/user_timeline.json",
+      "B. POST /2/tweets/search/all",
+      "C. GET /2/users/:id/tweets",
+      "D. POST /1.1/statuses/update.json"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "A common sign of content injection steganography is:",
+    "answers": [
+      "A. Excessively large file size for format",
+      "B. Invalid EXIF timestamps",
+      "C. Corrupted color palette",
+      "D. Changed file extension"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Vishing attacks leverage:",
+    "answers": [
+      "A. VoIP or phone calls to extract information",
+      "B. Malicious email attachments",
+      "C. Fake DNS entries",
+      "D. USB baiting"
+    ],
+    "correct": [0]
+  },
+
+  // Lecture 9: Mobile Forensics
+  {
+    "question": "Which mobile acquisition method captures all physical flash memory partitions?",
+    "answers": [
+      "A. Logical acquisition",
+      "B. File system acquisition",
+      "C. Physical acquisition",
+      "D. Cloud acquisition"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "On iOS, which feature complicates chip-off acquisition?",
+    "answers": [
+      "A. Secure Enclave",
+      "B. APFS formatting",
+      "C. iTunes backups",
+      "D. Activation Lock"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "ADB shell dumpheap is used to:",
+    "answers": [
+      "A. Acquire a physical image",
+      "B. Extract application heap memory",
+      "C. Backup APK files",
+      "D. Decrypt SD card contents"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which SQLite file on Android holds call history?",
+    "answers": [
+      "A. contacts2.db",
+      "B. calllog.db",
+      "C. mmssms.db",
+      "D. telephony.db"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Jailbreaking an iOS device allows:",
+    "answers": [
+      "A. Physical chip-off without encryption",
+      "B. Bypassing Apple restrictions for deeper access",
+      "C. Logical backups via iTunes",
+      "D. Cloud data extraction"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Cloud acquisition in mobile forensics requires:",
+    "answers": [
+      "A. Physical seizure of the device",
+      "B. Legal authorization for service provider data",
+      "C. Direct NAND access",
+      "D. Local root privileges"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which artifact contains user-installed app lists on Android?",
+    "answers": [
+      "A. packages.xml",
+      "B. apps.db",
+      "C. installed_apps.txt",
+      "D. app_list.json"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Chip-off acquisition bypasses:",
+    "answers": [
+      "A. File system encryption at OS level",
+      "B. Hardware write-blockers",
+      "C. Logical file permissions",
+      "D. Network-based anti-forensics"
+    ],
+    "correct": [0]
+  },
+
+  // Lecture 10: Investigating Network Traffic and Logs, Network Forensics
+  {
+    "question": "Capturing traffic on a SPAN port allows:",
+    "answers": [
+      "A. Injecting test packets",
+      "B. Mirroring live traffic without disruption",
+      "C. Blocking malicious flows",
+      "D. Decrypting SSL sessions"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "NetFlow data is primarily used to:",
+    "answers": [
+      "A. Store full packet payloads",
+      "B. Summarize traffic flows for analysis",
+      "C. Block suspicious IPs",
+      "D. Perform deep DPI"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "In pcap analysis, RTP streams are reassembled using:",
+    "answers": [
+      "A. HTTP dissector",
+      "B. SIP handshake",
+      "C. Sequence numbers and SSRC identifiers",
+      "D. TCP three-way handshake"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "A DNS tunneling indicator is:",
+    "answers": [
+      "A. Large A record responses",
+      "B. Excessive TXT queries to a single domain",
+      "C. High TCP SYN rate on port 53",
+      "D. Repeated MX record lookups"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "SSH log “Accepted publickey for user” appears in:",
+    "answers": [
+      "A. /var/log/auth.log",
+      "B. /etc/ssh/sshd_config",
+      "C. /var/log/syslog",
+      "D. /var/log/secure"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Windows Security Event logs help trace:",
+    "answers": [
+      "A. DHCP lease renewals",
+      "B. Lateral movement via SMB logons",
+      "C. DNS cache poisoning",
+      "D. HTTP GET requests"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Which tool reconstructs TCP sessions from a pcap?",
+    "answers": [
+      "A. tcpdump",
+      "B. tshark",
+      "C. netstat",
+      "D. ss"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "The three-way handshake sequence is:",
+    "answers": [
+      "A. SYN, ACK, FIN",
+      "B. SYN, SYN-ACK, ACK",
+      "C. ACK, SYN, SYN-ACK",
+      "D. FIN, ACK, SYN"
+    ],
+    "correct": [1]
+  },
+
+  // Lecture 11: Report Writing
+  {
+    "question": "An executive summary in a forensic report should:",
+    "answers": [
+      "A. Detail every log and hash value",
+      "B. Summarize key findings for non-technical readers",
+      "C. List all tools used",
+      "D. Present raw data excerpts"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "The Methodology section must include:",
+    "answers": [
+      "A. Final conclusions",
+      "B. Acquisition steps and hash values",
+      "C. Background theory",
+      "D. Personal opinions of the investigator"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Findings should be presented:",
+    "answers": [
+      "A. Objectively with evidence citations",
+      "B. As narrative anecdotes",
+      "C. In raw hex format",
+      "D. Omitted for brevity"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Recommendations in a report are best when they are:",
+    "answers": [
+      "A. Hypothetical scenarios",
+      "B. Actionable steps based on findings",
+      "C. Generic security advice",
+      "D. Unverified suggestions"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Sensitive details for external distribution should be:",
+    "answers": [
+      "A. Included fully for transparency",
+      "B. Redacted or summarized appropriately",
+      "C. Omitted entirely without note",
+      "D. Encrypted without explanation"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Consistent use of headings and white space improves:",
+    "answers": [
+      "A. Storage efficiency",
+      "B. Readability and navigation",
+      "C. Hash verification",
+      "D. Data encryption"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Industry standards referenced in reports add:",
+    "answers": [
+      "A. Irrelevant detail",
+      "B. Credibility and context",
+      "C. Legal liability",
+      "D. Unnecessary complexity"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "The Conclusion section should:",
+    "answers": [
+      "A. Introduce new evidence",
+      "B. Restate purpose and summarize findings",
+      "C. Pose unexplored hypotheses",
+      "D. List unrelated case studies"
+    ],
+    "correct": [1]
+  }
+    ];
+
+    let questions = [...fullQuestionBank];
+    let currentIndex = 0;
+    let userAnswers = Array(questions.length).fill().map(() => []);
+    let flagged = new Set();
+    let timerId;
+    const totalTime = questions.length * 60;
+
+    function loadQuestion() {
+  const q = questions[currentIndex];
+  document.getElementById('question-title').textContent = `Question ${currentIndex + 1}: ${q.question}`;
+  const answersDiv = document.getElementById('answers');
+  answersDiv.innerHTML = '';
+
+  const isMultiAnswer = q.correct.length > 1;
+  q.answers.forEach((ans, i) => {
+    const input = document.createElement('input');
+    input.type = isMultiAnswer ? 'checkbox' : 'radio';
+    input.name = 'answer';
+    input.value = i;
+    input.checked = userAnswers[currentIndex].includes(i);
+    input.addEventListener('change', () => {
+      const checked = Array.from(document.querySelectorAll('#answers input:checked')).map(cb => +cb.value);
+      userAnswers[currentIndex] = checked;
+    });
+
+    const label = document.createElement('label');
+    label.appendChild(input);
+    label.append(" " + ans);
+    answersDiv.appendChild(label);
+  });
+}
+
+    function updateGrid() {
+      const grid = document.getElementById('question-grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < questions.length; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i + 1;
+        btn.onclick = () => {
+          currentIndex = i;
+          loadQuestion();
+        };
+        grid.appendChild(btn);
+      }
+    }
+
+    function flagQuestion() {
+      if (flagged.has(currentIndex)) {
+        flagged.delete(currentIndex);
+      } else {
+        flagged.add(currentIndex);
+      }
+      alert(`Question ${currentIndex + 1} ${flagged.has(currentIndex) ? 'flagged' : 'unflagged'}`);
+    }
+
+    function showFlagged() {
+      if (!flagged.size) return alert("No flagged questions.");
+      alert("Flagged questions: " + Array.from(flagged).map(i => i + 1).join(', '));
+    }
+
+    function nextQuestion() {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        loadQuestion();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        loadQuestion();
+      }
+    }
+
+    function submitExam() {
+      clearInterval(timerId);
+      let correct = [], wrong = [];
+      questions.forEach((q, i) => {
+        const sortedUser = [...(userAnswers[i] || [])].sort().join(',');
+        const sortedCorrect = q.correct.slice().sort().join(',');
+        if (sortedUser === sortedCorrect) correct.push(i);
+        else wrong.push(i);
+      });
+
+      document.getElementById('exam-section').classList.add('hidden');
+      document.getElementById('review-section').classList.remove('hidden');
+      document.getElementById('correct-count').textContent = correct.length;
+      document.getElementById('wrong-count').textContent = wrong.length;
+      document.getElementById('percentage').textContent = ((correct.length / questions.length) * 100).toFixed(2);
+
+      sessionStorage.setItem('wrongIndexes', JSON.stringify(wrong));
+    }
+
+    function retakeWrongOnly() {
+      const wrong = JSON.parse(sessionStorage.getItem('wrongIndexes') || '[]');
+      if (!wrong.length) return alert("No wrong answers to retake!");
+      questions = wrong.map(i => fullQuestionBank[i]);
+      resetExam();
+    }
+
+    function resetExam() {
+      userAnswers = Array(questions.length).fill().map(() => []);
+      currentIndex = 0;
+      flagged = new Set();
+      document.getElementById('review-section').classList.add('hidden');
+      document.getElementById('exam-section').classList.remove('hidden');
+      updateGrid();
+      loadQuestion();
+      startTimer(questions.length * 60);
+    }
+
+    function startTimer(duration) {
+      let timer = duration;
+      const countdown = document.getElementById('countdown');
+      const update = () => {
+        const m = String(Math.floor(timer / 60)).padStart(2, '0');
+        const s = String(timer % 60).padStart(2, '0');
+        countdown.textContent = `${m}:${s}`;
+        if (--timer < 0) {
+          clearInterval(timerId);
+          submitExam();
+        }
+      };
+      update();
+      timerId = setInterval(update, 1000);
+    }
+
+    window.onload = () => {
+      updateGrid();
+      loadQuestion();
+      startTimer(totalTime);
+    };
+  </script>
+</body>
+</html>

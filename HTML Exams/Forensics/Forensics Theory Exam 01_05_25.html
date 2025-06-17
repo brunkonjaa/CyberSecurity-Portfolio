@@ -1,0 +1,3474 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Computer Systems Forensics Theory Exam</title>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, #3b2f2f, #cccccc);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #e0e0e0;
+    }
+    .container {
+      width: 800px;
+      max-width: 90%;
+      background: #3a3a3a;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .question-container {
+      display: none;
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .question-container.active {
+      display: block;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .correct {
+      color: green;
+    }
+    .wrong {
+      color: red;
+      text-decoration: line-through;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px 0 0;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+    }
+    .btn-next, .btn-prev {
+      background-color: #007bff;
+      color: white;
+    }
+    .btn-submit, .btn-reset {
+      background-color: #28a745;
+      color: white;
+    }
+    .btn-next:hover, .btn-prev:hover, .btn-submit:hover, .btn-reset:hover {
+      opacity: 0.9;
+    }
+    .btn-prev::before {
+      content: '⬅️';
+      margin-right: 8px;
+    }
+    .btn-next::after {
+      content: '➡️';
+      margin-left: 8px;
+    }
+    .btn-submit::after {
+      content: ' ✅';
+      opacity: 0.7;
+      transition: transform 0.2s ease;
+    }
+    .btn-submit:hover::after {
+      transform: rotate(8deg);
+      opacity: 1;
+    }
+    .timer {
+      text-align: right;
+      font-size: 18px;
+      color: red;
+      margin-bottom: 20px;
+    }
+    .results {
+      text-align: center;
+      display: none;
+    }
+    .progress-container {
+      width: 800px;
+      max-width: 90%;
+      height: 20px;
+      background-color: #ccc;
+      border-radius: 10px;
+      margin: 20px auto;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 20px;
+      width: 0%;
+      background-color: #28a745;
+      transition: width 1s ease;
+    }
+    .quote-container {
+      width: 800px;
+      max-width: 90%;
+      margin: 20px auto;
+      text-align: center;
+      font-family: 'Lucida Handwriting', 'Brush Script MT', cursive;
+      font-size: 1.2em;
+      color: #2e2e2e;
+    }
+    .quote-container p {
+      margin: 0;
+      line-height: 1.4;
+    }
+  
+  /* Review page styling */
+  .review-container { margin: 20px 0; }
+  .review-header { font-size: 1.5em; margin-bottom: 15px; }
+  .review-card { background: #1a202c; color: #edf2f7; border-radius: 8px; padding: 20px; margin-bottom: 15px; }
+  .review-question { font-weight: bold; margin-bottom: 10px; }
+  .review-options { list-style: none; padding: 0; margin: 0; }
+  .review-options li { margin-bottom: 5px; }
+  .correct { color: #48bb78; }
+  .wrong { color: #f56565; text-decoration: line-through; }
+  .unanswered { color: #63b3ed; }
+
+.skipped-correct {
+  color: green !important;
+}
+.skipped-wrong {
+  color: lightgray !important;
+}
+  .nav-box {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    background-color: #444;
+    border: 2px solid transparent;
+    color: #fff;
+    text-align: center;
+    line-height: 20px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+}
+  .nav-box.active {
+    border: 2px solid white;
+  }
+  .nav-box.correct {
+    background-color: green;
+  }
+  .nav-box.wrong {
+    background-color: red;
+  }
+  .nav-box.skipped {
+    background-color: #007bff;
+  }
+  #questionNavigator {
+    position: fixed;
+    right: 106px; /* moved 1 inch (96px) from the original 10px */
+    top: 100px;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-gap: 4px;
+    width: 240px;
+    background-color: #222;
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 1000;
+  }
+}
+  .nav-box {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    background-color: #444;
+    border: 2px solid transparent;
+    color: #fff;
+    text-align: center;
+    line-height: 20px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+}
+  .nav-box.active {
+    border: 2px solid white;
+  }
+  .nav-box.correct {
+    background-color: green;
+  }
+  .nav-box.wrong {
+    background-color: red;
+  }
+  .nav-box.skipped {
+    background-color: #007bff;
+  }
+}}}
+  .nav-box.flagged {
+  border: 2px dashed lightcoral !important;
+  background-color: #333 !important;
+  color: lightcoral !important;
+}
+
+#examDisclaimerBox {
+  position: fixed;
+  top: 100px;
+  left: 106px;
+  width: 260px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 16px;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  line-height: 1.5;
+  z-index: 1000;
+}
+#examDisclaimerBox h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+#examDisclaimerBox p {
+  margin: 8px 0;
+}
+#examDisclaimerBox p strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+</style>
+</head>
+<body>
+
+<div id="examDisclaimerBox">
+  <h2>Diploma In Cybersecurity<br/>NFQ Level 7</h2>
+  <p><strong>Disclaimer:</strong></p>
+  <p>
+    This is an unofficial mock<br/>
+    examination.<br/>
+    It was created solely for personal<br/>
+    learning purposes.<br/>
+    It is based on the knowledge<br/>
+    acquired during the second<br/>
+    semester.<br/>
+    It is not endorsed by any academic<br/>
+    institution.<br/>
+    It is not formal exam preparation<br/>
+    material.<br/>
+    It is neither an official exam.
+  </p>
+</div>
+
+<div class="container">
+<h1>Computer Systems Forensics Theory Exam</h1>
+<div class="timer" id="timer">Time Remaining: 80:00</div>
+<form id="examForm"><div id="flagControlWrapper">
+<button class="btn-next" id="flagButton" onclick="toggleCurrentFlag()" style="display: block; margin: 0 auto; position: relative; top: -1cm;" type="button">🚩 Flag This Question</button>
+</div>
+<div id="questions"></div>
+<div class="results" id="results">
+<h2>Exam Results</h2>
+<p>Total Questions: <span id="totalQuestions"></span></p>
+<p>Correct Answers: <span id="correctAnswers"></span></p>
+<p>Wrong Answers: <span id="wrongAnswers"></span></p>
+<p>Unanswered: <span id="unansweredQuestions"></span></p>
+<p>Percentage: <span id="percentage"></span>%</p>
+<button class="btn-reset" onclick="resetExam()" type="button">Restart Exam</button>
+<button class="btn-reset" onclick="showWrongQuestions()" type="button">Display Wrong Questions</button></div>
+<!-- Navigation row -->
+<div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px;"><div id="examNavButtons" style="display: block;">
+</div></div>
+<div style="display: flex; justify-content: center; gap: 10px; margin-top: 10px;"><button class="btn-next" onclick="showQuestion(currentQuestionIndex + 1)" type="button">Next</button><button class="btn-submit" id="submitButton" style="display: none;" type="submit">Submit Exam</button><button class="btn-prev" onclick="showQuestion(currentQuestionIndex - 1)" type="button">Previous</button></div></form>
+</div>
+<div class="progress-container">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+<div class="quote-container">
+<p>
+      “Life should not be a journey to the grave with the intention of arriving safely in a pretty and well preserved body, 
+      but rather to skid in broadside in a cloud of smoke, thoroughly used up, totally worn out, and loudly proclaiming 
+      'Wow! What a Ride!' – Hunter S. Thompson”
+    </p>
+</div>
+<script>
+        const questionPool = [
+  {
+    id: "q1",
+  question: "What is the primary focus of the Computer Systems Forensics module?",
+  options: [
+    "A. Financial analysis",
+    "B. Resources",
+    "C. Hardware upgrades",
+    "D. GUI design"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q2",
+  question: "What does computer forensics involve?",
+  options: [
+    "A. Identification",
+    "B. Preservation of digital data",
+    "C. Data deletion",
+    "D. Analysis"
+  ],
+  correctAnswer: ["A", "B", "D"]
+},
+{
+  id: "q3",
+  question: "Which devices can digital forensics be applied to?",
+  options: [
+    "A. Computers",
+    "B. Mobile phones",
+    "C. Photo printers",
+    "D. Non-digital typewriters"
+  ],
+  correctAnswer: ["A", "B"]
+},
+{
+  id: "q4",
+  question: "What challenges do investigators face with SSDs?",
+  options: [
+    "A. Wear leveling",
+    "B. Rotational speed limits",
+    "C. Noisy platters",
+    "D. Loose cables"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q5",
+  question: "What makes smartphones rich sources for digital evidence?",
+  options: [
+    "A. Fingerprint sensors",
+    "B. Cameras",
+    "C. 4G chipsets",
+    "D. Social media integration"
+  ],
+  correctAnswer: ["B", "D"]
+},
+{
+  id: "q6",
+  question: "What traits are valuable for a digital forensic investigator?",
+  options: [
+    "A. Persistence",
+    "B. Team sports",
+    "C. Salesmanship",
+    "D. Speed typing"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q7",
+  question: "Where is computer forensics commonly used?",
+  options: [
+    "A. Music production",
+    "B. Corporate investigations",
+    "C. Public relations",
+    "D. Catering"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q8",
+  question: "What are some opportunities in the corporate world for forensic investigators?",
+  options: [
+    "A. Interior decoration",
+    "B. Data recovery",
+    "C. Event planning",
+    "D. Payroll processing"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q9",
+  question: "What is the purpose of maintaining data integrity in computer forensics?",
+  options: [
+    "A. To enable online sharing",
+    "B. Ensuring evidence can be used in court",
+    "C. To speed up the CPU",
+    "D. To compress storage"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q10",
+  question: "Why is digital evidence from mobile phones increasingly important?",
+  options: [
+    "A. It improves display",
+    "B. It includes geolocation data",
+    "C. It extends battery life",
+    "D. It reduces noise"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q11",
+  question: "What challenges can cloud computing introduce to forensic investigations?",
+  options: [
+    "A. Inconsistent fonts",
+    "B. Low brightness",
+    "C. Dynamic server locations",
+    "D. No screen resolution"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q12",
+  question: "What personal characteristic is vital for a forensic investigator?",
+  options: [
+    "A. Ability to sing",
+    "B. Ability to handle frustration",
+    "C. Cooking skill",
+    "D. Fearlessness of heights"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q13",
+  question: "Which activities are considered part of computer forensic processes?",
+  options: [
+    "A. Execution",
+    "B. Identification",
+    "C. Multiplication",
+    "D. Authentication"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q14",
+  question: "Why might traditional hard drive wiping not work on SSDs?",
+  options: [
+    "A. SSD architecture moves data blocks",
+    "B. They rotate slowly",
+    "C. They have mechanical arms",
+    "D. Hard drives are magnetic"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q15",
+  question: "Why is the chain of custody important?",
+  options: [
+    "A. To control employee attendance",
+    "B. To back up files",
+    "C. To ensure evidence is not tampered with",
+    "D. To apply encryption"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q16",
+  question: "Which emerging technologies require new forensic methods?",
+  options: [
+    "A. Radio transmitters",
+    "B. Traffic lights",
+    "C. Electric scooters",
+    "D. Big Data systems"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q17",
+  question: "What is the difference between e-discovery and regular search?",
+  options: [
+    "A. E-discovery uses forensic tools to examine digital data",
+    "B. It requires a web browser",
+    "C. It's done via telephone",
+    "D. It uses encryption"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q18",
+  question: "What is the aim of presenting evidence in court?",
+  options: [
+    "A. To impress the judge",
+    "B. To highlight graphics",
+    "C. To entertain the jury",
+    "D. To show facts without contamination"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q19",
+  question: "What is the historical origin of forensic science?",
+  options: [
+    "A. Shakespearean plays",
+    "B. Cave paintings",
+    "C. Medieval courtroom records",
+    "D. Chinese book in 1248"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q20",
+  question: "Why do forensic professionals need to keep learning?",
+  options: [
+    "A. To get free hardware",
+    "B. To write books",
+    "C. Tools become obsolete",
+    "D. To increase income"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q21",
+  question: "Which steps are part of the scientific method applied to digital forensics?",
+  options: [
+    "A. Speedy execution",
+    "B. Accepted procedures",
+    "C. Personal judgment",
+    "D. Assumption of guilt"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q22",
+  question: "Why is verification important in forensic analysis?",
+  options: [
+    "A. To reduce legal cost",
+    "B. To entertain the court",
+    "C. To market forensic tools",
+    "D. To confirm findings match across parties"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q23",
+  question: "Which principles are outlined in the APCO 2012 guidelines?",
+  options: [
+    "A. Do not alter data",
+    "B. Encrypt all evidence",
+    "C. Disconnect from the internet",
+    "D. Avoid using backups"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q24",
+  question: "What should an investigator do before finalizing results?",
+  options: [
+    "A. Have another expert review them",
+    "B. Skip redundant checks",
+    "C. Destroy partial results",
+    "D. Publish findings early"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q25",
+  question: "Why might different methodologies be used in different forensic cases?",
+  options: [
+    "A. Software brand",
+    "B. Random selection",
+    "C. Analyst preference",
+    "D. Context affects approach"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q26",
+  question: "What is the top priority when responding to an incident scene?",
+  options: [
+    "A. Shut down all devices",
+    "B. Check email logs",
+    "C. Interview relevant individuals",
+    "D. Install anti-virus"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q27",
+  question: "What should be documented during a forensic investigation?",
+  options: [
+    "A. All tools used",
+    "B. Photos of scene",
+    "C. Tool temperature",
+    "D. Power draw"
+  ],
+  correctAnswer: ["A", "B"]
+},
+{
+  id: "q28",
+  question: "Why is an audit trail important in forensic processes?",
+  options: [
+    "A. Removes malware",
+    "B. Sorts files alphabetically",
+    "C. Improves device performance",
+    "D. Ensures reproducibility of results"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q29",
+  question: "Which of the following are appropriate first-response equipment?",
+  options: [
+    "A. Heater",
+    "B. Fan",
+    "C. Camera",
+    "D. Color printer"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q30",
+  question: "What is the role of a write blocker?",
+  options: [
+    "A. Prevents modification of original data",
+    "B. Removes encryption",
+    "C. Deletes duplicates",
+    "D. Fills empty space"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q31",
+  question: "What is the purpose of interview questions during incident response?",
+  options: [
+    "A. Understand case context",
+    "B. Gather information from witnesses",
+    "C. Teach suspects legal rights",
+    "D. Speed up hardware"
+  ],
+  correctAnswer: ["A", "B"]
+},
+{
+  id: "q32",
+  question: "How should evidence be transported?",
+  options: [
+    "A. Secured with straps",
+    "B. Without labels",
+    "C. In a backpack",
+    "D. On a rolling chair"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q33",
+  question: "What should be done with running computers during evidence collection?",
+  options: [
+    "A. Defragment disks",
+    "B. Run antivirus",
+    "C. Disable internet",
+    "D. Capture screen"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q34",
+  question: "What can RAM imaging reveal?",
+  options: [
+    "A. Cloud storage limits",
+    "B. Passwords",
+    "C. Disk partitions",
+    "D. BIOS settings"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q35",
+  question: "Which tools may be used to image a drive?",
+  options: [
+    "A. Google Drive",
+    "B. Disk Defragmenter",
+    "C. Voom Hardcopy",
+    "D. MS Paint"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q36",
+  question: "What information is relevant from browser history?",
+  options: [
+    "A. Mouse movement",
+    "B. RAM usage",
+    "C. CPU temperature",
+    "D. Visited URLs"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q37",
+  question: "What type of questions should be included in a witness interview?",
+  options: [
+    "A. Favorite apps",
+    "B. Device usage",
+    "C. Music taste",
+    "D. Typing speed"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q38",
+  question: "Why should you check computer BIOS time settings?",
+  options: [
+    "A. To install updates",
+    "B. To establish accurate file timelines",
+    "C. To log into admin mode",
+    "D. To change screen resolution"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q39",
+  question: "Which locations may contain relevant digital evidence?",
+  options: [
+    "A. Smart thermostats",
+    "B. Power strips",
+    "C. Cloud accounts",
+    "D. Flash drives"
+  ],
+  correctAnswer: ["C", "D"]
+},
+{
+  id: "q40",
+  question: "Why is it important to plan for multi-computer scenes?",
+  options: [
+    "A. To balance network load",
+    "B. To perform OS upgrades",
+    "C. To allow parallel internet browsing",
+    "D. To ensure organized imaging and transport"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q41",
+  question: "What are essential components of a computer forensic lab?",
+  options: [
+    "A. LED disco lights",
+    "B. Coffee machine",
+    "C. Workstations",
+    "D. Wi-Fi extenders"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q42",
+  question: "Why is controlled access important in a forensic lab?",
+  options: [
+    "A. To log more hours",
+    "B. To prevent unauthorized access to evidence",
+    "C. To boost internet speed",
+    "D. To improve AC efficiency"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q43",
+  question: "What types of documentation are critical in a forensic lab?",
+  options: [
+    "A. Holiday rosters",
+    "B. Cafeteria menus",
+    "C. Graphic design plans",
+    "D. Chain of custody forms"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q44",
+  question: "What are characteristics of a good forensic lab?",
+  options: [
+    "A. High ambient noise",
+    "B. Social media access",
+    "C. No power backup",
+    "D. Proper lighting"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q45",
+  question: "Why is temperature control relevant in forensic labs?",
+  options: [
+    "A. To run games",
+    "B. To dry cables",
+    "C. To protect hardware from damage",
+    "D. To clean monitors"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q46",
+  question: "Which of the following are typical forensic imaging tools?",
+  options: [
+    "A. Photoshop",
+    "B. EnCase",
+    "C. iTunes",
+    "D. FTK Imager"
+  ],
+  correctAnswer: ["B", "D"]
+},
+{
+  id: "q47",
+  question: "Why are write blockers used during imaging?",
+  options: [
+    "A. To speed up writing",
+    "B. To prevent data from being modified",
+    "C. To duplicate data faster",
+    "D. To scramble partitions"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q48",
+  question: "Which devices should a mobile forensics kit include?",
+  options: [
+    "A. Tripod",
+    "B. Mobile data cables",
+    "C. Battery pack",
+    "D. Laser pointer"
+  ],
+  correctAnswer: ["B", "C"]
+},
+{
+  id: "q49",
+  question: "Which storage media types might contain evidence?",
+  options: [
+    "A. Monitors",
+    "B. Extension cables",
+    "C. CD/DVD",
+    "D. Solar panels"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q50",
+  question: "Why is duplicate imaging performed?",
+  options: [
+    "A. To sync files",
+    "B. To allow analysis without altering original",
+    "C. To sell images",
+    "D. To save electricity"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q51",
+  question: "What does a hashed image ensure?",
+  options: [
+    "A. Better resolution",
+    "B. Integrity of the data",
+    "C. Compression",
+    "D. Auto repair"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q52",
+  question: "What kind of network setup is ideal in forensic labs?",
+  options: [
+    "A. No external internet access",
+    "B. Open VPN",
+    "C. Guest access",
+    "D. Public Wi-Fi"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q53",
+  question: "What should be done to maintain the forensic integrity of images?",
+  options: [
+    "A. Overwrite backups",
+    "B. Delete originals",
+    "C. Secure evidence drives",
+    "D. Use checksums"
+  ],
+  correctAnswer: ["C", "D"]
+},
+{
+  id: "q54",
+  question: "What is the main role of forensic toolkits?",
+  options: [
+    "A. Stream movies",
+    "B. Resize windows",
+    "C. Boost FPS",
+    "D. Assist in acquisition, examination, and reporting of digital evidence"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q55",
+  question: "Which of the following are disk imaging formats?",
+  options: [
+    "A. E01",
+    "B. PNG",
+    "C. TXT",
+    "D. DOCX"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q56",
+  question: "What should be recorded during the imaging process?",
+  options: [
+    "A. Hash values",
+    "B. Desk color",
+    "C. Operator height",
+    "D. Music played"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q57",
+  question: "Which hardware items help with storage in forensic labs?",
+  options: [
+    "A. Ink cartridges",
+    "B. RAID storage",
+    "C. Smart bulbs",
+    "D. Routers"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q58",
+  question: "Why are laptops useful in field forensics?",
+  options: [
+    "A. Video editing",
+    "B. DJing",
+    "C. Evidence capture",
+    "D. Gaming"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q59",
+  question: "What tools are needed to analyze mobile devices?",
+  options: [
+    "A. Cellebrite",
+    "B. Magnet AXIOM",
+    "C. Skype",
+    "D. Excel"
+  ],
+  correctAnswer: ["A", "B"]
+},
+{
+  id: "q60",
+  question: "Why is standardization important in forensic labs?",
+  options: [
+    "A. Facilitates training and documentation",
+    "B. Reduces color variation",
+    "C. Saves air conditioning",
+    "D. Ensures consistency across cases"
+  ],
+  correctAnswer: ["A", "D"]
+},
+  {
+  id: "q61",
+  question: "What are the main uses of hash functions in forensics?",
+  options: [
+    "A. Verifying data integrity",
+    "B. Enhancing display",
+    "C. Reducing size",
+    "D. Compressing files"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q62",
+  question: "Which of the following are common hash algorithms?",
+  options: [
+    "A. SHA-1",
+    "B. DES",
+    "C. AES",
+    "D. SHA-256"
+  ],
+  correctAnswer: ["A", "D"]
+},
+{
+  id: "q63",
+  question: "What is a hash collision?",
+  options: [
+    "A. Two inputs produce the same hash value",
+    "B. Buffer overflow",
+    "C. A hash that explodes",
+    "D. A random encryption key"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q64",
+  question: "Why are SHA-1 and MD5 considered insecure today?",
+  options: [
+    "A. They are vulnerable to collisions",
+    "B. They require GPUs",
+    "C. They work only on Linux",
+    "D. They can't be used online"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q65",
+  question: "What are the properties of a good cryptographic hash function?",
+  options: [
+    "A. Slow to execute",
+    "B. Reversible",
+    "C. Quick to compute",
+    "D. Lossy"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q66",
+  question: "Which of these best describes a digital fingerprint?",
+  options: [
+    "A. A password hint",
+    "B. A hash value used to identify data uniquely",
+    "C. A virus signature",
+    "D. A license number"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q67",
+  question: "Why do forensic investigators calculate hashes before and after imaging?",
+  options: [
+    "A. To generate a backup",
+    "B. To encrypt the evidence",
+    "C. To confirm that data was not altered",
+    "D. To speed up the analysis"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q68",
+  question: "What does it mean if the hash values of two files differ?",
+  options: [
+    "A. The files are not identical",
+    "B. The files were compressed",
+    "C. The files were downloaded",
+    "D. The files are encrypted"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q69",
+  question: "Which tools can compute hash values?",
+  options: [
+    "A. md5sum",
+    "B. Firefox",
+    "C. Excel",
+    "D. Notepad"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q70",
+  question: "What is the avalanche effect in hashing?",
+  options: [
+    "A. A small change in input causes a large change in output",
+    "B. A GPU failure",
+    "C. An error in hash function",
+    "D. A collision resistance bug"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q71",
+  question: "Which feature of hash functions ensures the same input gives the same output every time?",
+  options: [
+    "A. Determinism",
+    "B. Speed",
+    "C. Symmetry",
+    "D. Collision resistance"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q72",
+  question: "What happens if a hash function is not collision-resistant?",
+  options: [
+    "A. It may allow two different files to appear the same",
+    "B. It runs faster",
+    "C. It stores keys",
+    "D. It uses less RAM"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q73",
+  question: "In digital forensics, how are hash values commonly used?",
+  options: [
+    "A. To replace data",
+    "B. To run antivirus",
+    "C. To verify integrity of evidence",
+    "D. To install drivers"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q74",
+  question: "Which hash algorithms are considered more secure?",
+  options: [
+    "A. CRC32",
+    "B. SHA-3",
+    "C. SHA-256",
+    "D. ZIP"
+  ],
+  correctAnswer: ["B", "C"]
+},
+{
+  id: "q75",
+  question: "What happens if a file is altered even slightly?",
+  options: [
+    "A. It will look the same",
+    "B. Its hash value will change significantly",
+    "C. It will be compressed",
+    "D. It will be corrupted"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q76",
+  question: "What is the output length of SHA-256?",
+  options: [
+    "A. 128 bits",
+    "B. 256 bits",
+    "C. 16 characters",
+    "D. 32 digits"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q77",
+  question: "Which of these is true about MD5?",
+  options: [
+    "A. It’s a form of encryption",
+    "B. It produces 128-bit hash values",
+    "C. It uses 512-bit output",
+    "D. It’s used in TLS"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q78",
+  question: "What kind of data can be hashed?",
+  options: [
+    "A. Videos",
+    "B. Bluetooth devices",
+    "C. Wi-Fi signals",
+    "D. Passwords only"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q79",
+  question: "Which of the following are hash visualization tools?",
+  options: [
+    "A. Zoom",
+    "B. Paint",
+    "C. Md5deep",
+    "D. Outlook"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q80",
+  question: "Why is hash validation crucial for court-admissible evidence?",
+  options: [
+    "A. It proves that the evidence has not been altered",
+    "B. It changes format",
+    "C. It saves storage",
+    "D. It allows editing"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q81",
+  question: "What are primary components of a hard disk drive?",
+  options: [
+    "A. Wi-Fi card",
+    "B. Laser lens",
+    "C. Read/write head",
+    "D. Platters"
+  ],
+  correctAnswer: ["C", "D"]
+},
+{
+  id: "q82",
+  question: "What is the purpose of the file system?",
+  options: [
+    "A. Encrypts memory",
+    "B. Controls BIOS",
+    "C. Manages file access",
+    "D. Enables printing"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q83",
+  question: "Which are common file systems used in forensic analysis?",
+  options: [
+    "A. JPEG",
+    "B. WAV",
+    "C. FAT32",
+    "D. PNG"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q84",
+  question: "What is slack space?",
+  options: [
+    "A. Encrypted sectors",
+    "B. Network buffer space",
+    "C. May contain remnants of deleted files",
+    "D. Unused space in a cluster"
+  ],
+  correctAnswer: ["C", "D"]
+},
+{
+  id: "q85",
+  question: "Why is unallocated space important in forensics?",
+  options: [
+    "A. Houses drivers",
+    "B. May contain deleted data",
+    "C. Improves speed",
+    "D. Stores BIOS"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q86",
+  question: "What does MBR stand for?",
+  options: [
+    "A. Master Boot Record",
+    "B. Mapped Boot Route",
+    "C. Machine Boot Relay",
+    "D. Media Backup Repository"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q87",
+  question: "Which data is stored in a file system metadata?",
+  options: [
+    "A. Timestamps",
+    "B. Cookies",
+    "C. Bookmarks",
+    "D. Photos"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q88",
+  question: "What is the difference between logical and physical acquisition?",
+  options: [
+    "A. Physical copies emails only",
+    "B. Logical encrypts data",
+    "C. Logical captures file system data",
+    "D. Logical is for images"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q89",
+  question: "What can journaling file systems help with?",
+  options: [
+    "A. Compressing backups",
+    "B. Encrypting traffic",
+    "C. Recovering after improper shutdown",
+    "D. Streaming video"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q90",
+  question: "Which file system is used primarily by Windows?",
+  options: [
+    "A. ext4",
+    "B. FAT12",
+    "C. ZFS",
+    "D. NTFS"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q91",
+  question: "What are sectors on a disk?",
+  options: [
+    "A. BIOS routines",
+    "B. Smallest storage units",
+    "C. Monitor pixels",
+    "D. Network packets"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q92",
+  question: "What is a partition table?",
+  options: [
+    "A. Stores backup logs",
+    "B. Encrypts firmware",
+    "C. Tracks user activity",
+    "D. Holds data about disk partitions"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q93",
+  question: "What type of evidence can be found in slack space?",
+  options: [
+    "A. Active memory",
+    "B. Live camera feeds",
+    "C. App logs",
+    "D. Remnants of deleted files"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q94",
+  question: "Which command is used to view partitions in Linux?",
+  options: [
+    "A. ipconfig",
+    "B. fdisk",
+    "C. netstat",
+    "D. grep"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q95",
+  question: "What happens when a file is deleted in most file systems?",
+  options: [
+    "A. File markers are removed",
+    "B. Space is marked available",
+    "C. File is encrypted",
+    "D. File is compressed"
+  ],
+  correctAnswer: ["A", "B"]
+},
+{
+  id: "q96",
+  question: "Which file systems support journaling?",
+  options: [
+    "A. UDF",
+    "B. ext3",
+    "C. exFAT",
+    "D. FAT16"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q97",
+  question: "Why is understanding cluster size important?",
+  options: [
+    "A. Boosts GPU",
+    "B. Shrinks file size",
+    "C. Removes duplicates",
+    "D. Impacts data recovery"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q98",
+  question: "What is the purpose of file carving?",
+  options: [
+    "A. Editing metadata",
+    "B. Recovering deleted data based on signatures",
+    "C. Encrypting disks",
+    "D. Wiping unused space"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q99",
+  question: "What are file signatures?",
+  options: [
+    "A. Patterns identifying file types",
+    "B. User logins",
+    "C. IP addresses",
+    "D. Registry keys"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q100",
+  question: "Why is write protection necessary during analysis?",
+  options: [
+    "A. Prevents altering original evidence",
+    "B. Disables networking",
+    "C. Increases brightness",
+    "D. Speeds up analysis"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q101",
+  question: "What is steganography?",
+  options: [
+    "A. Compressing folders",
+    "B. Deleting duplicates",
+    "C. Hiding data within other files or media",
+    "D. Encrypting disk drives"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q102",
+  question: "Which media can be used for steganography?",
+  options: [
+    "A. Executable code",
+    "B. Video files",
+    "C. Keyboard input",
+    "D. BIOS chips"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q103",
+  question: "Why is steganography a concern in digital forensics?",
+  options: [
+    "A. It evades typical detection tools",
+    "B. It disables encryption",
+    "C. It speeds up networks",
+    "D. It can hide malicious content"
+  ],
+  correctAnswer: ["A", "D"]
+},
+{
+  id: "q104",
+  question: "What are common image file formats used for hiding data?",
+  options: [
+    "A. EXE",
+    "B. MP3",
+    "C. PNG",
+    "D. XLSX"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q105",
+  question: "What does LSB stand for in steganography?",
+  options: [
+    "A. Least Significant Bit",
+    "B. Local Storage Buffer",
+    "C. Last Secure Block",
+    "D. Low Sound Band"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q106",
+  question: "How does LSB steganography work?",
+  options: [
+    "A. Overwrites metadata",
+    "B. Modifies the least significant bits of image pixels",
+    "C. Encrypts entire file",
+    "D. Adds noise"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q107",
+  question: "Which tools are used for detecting steganography?",
+  options: [
+    "A. VLC",
+    "B. StegExpose",
+    "C. Calculator",
+    "D. Ping"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q108",
+  question: "Why are BMP files often used for steganography?",
+  options: [
+    "A. They are encrypted",
+    "B. They are text-based",
+    "C. They are uncompressed",
+    "D. They compress easily"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q109",
+  question: "What are signs of steganography in a file?",
+  options: [
+    "A. Metadata inconsistencies",
+    "B. Unusual file size",
+    "C. Fast rendering",
+    "D. Multiple file icons"
+  ],
+  correctAnswer: ["A", "B"]
+},
+{
+  id: "q110",
+  question: "Why is metadata important in graphics forensics?",
+  options: [
+    "A. Increases file size",
+    "B. Encrypts file",
+    "C. Speeds up processing",
+    "D. May hold device info"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q111",
+  question: "What is EXIF data?",
+  options: [
+    "A. A stego algorithm",
+    "B. An audio codec",
+    "C. Metadata embedded in image files by cameras",
+    "D. A hash algorithm"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q112",
+  question: "Which image formats are least suitable for steganography?",
+  options: [
+    "A. Lossy compressed images",
+    "B. TIFF",
+    "C. PNG",
+    "D. BMP"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q113",
+  question: "What can be extracted from EXIF metadata?",
+  options: [
+    "A. Network usage",
+    "B. File encryption key",
+    "C. Camera model",
+    "D. Image password"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q114",
+  question: "How can steganalysis assist forensic investigations?",
+  options: [
+    "A. Improves images",
+    "B. Changes resolution",
+    "C. Provides evidence of manipulation",
+    "D. Speeds up viewing"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q115",
+  question: "Which fields in image metadata might interest investigators?",
+  options: [
+    "A. Software used",
+    "B. Pixel count",
+    "C. RGB ratio",
+    "D. Icon size"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q116",
+  question: "What does steganalysis software often analyze?",
+  options: [
+    "A. Statistical patterns",
+    "B. Font types",
+    "C. Battery level",
+    "D. Password strength"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q117",
+  question: "Why might someone use steganography instead of encryption?",
+  options: [
+    "A. It removes logs",
+    "B. It's legally required",
+    "C. To avoid detection",
+    "D. It's faster"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q118",
+  question: "What makes PNG files suitable for steganography?",
+  options: [
+    "A. Preserves data bits",
+    "B. They convert to text",
+    "C. They are encrypted",
+    "D. They are audio files"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q119",
+  question: "Which of the following is a steganography detection method?",
+  options: [
+    "A. RAM benchmarking",
+    "B. Latency tracking",
+    "C. Histogram analysis",
+    "D. Keylogging"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q120",
+  question: "Why is file comparison useful in detecting image tampering?",
+  options: [
+    "A. Deletes thumbnails",
+    "B. Replaces originals",
+    "C. Reveals added noise or distortion",
+    "D. Compresses images"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q121",
+  question: "What types of digital evidence can be found in Windows systems?",
+  options: [
+    "A. Monitor drivers",
+    "B. Printer toner",
+    "C. Cloud backups",
+    "D. User documents"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q122",
+  question: "Which tool is commonly used to examine the Windows registry?",
+  options: [
+    "A. Task Manager",
+    "B. Paint",
+    "C. Regedit",
+    "D. Steam"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q123",
+  question: "What is the purpose of the Windows Registry in forensics?",
+  options: [
+    "A. Manages disk errors",
+    "B. Encrypts user passwords",
+    "C. Deletes unused files",
+    "D. Stores configuration settings"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q124",
+  question: "What kind of data can be found in Windows Event Logs?",
+  options: [
+    "A. Keyboard layout",
+    "B. Network cable length",
+    "C. RAM speeds",
+    "D. Program installations"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q125",
+  question: "Where is the Windows Registry located?",
+  options: [
+    "A. C:\\Windows\\System32\\config",
+    "B. C:\\Program Files",
+    "C. C:\\Users\\Public\\Documents",
+    "D. C:\\Recycle Bin"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q126",
+  question: "Which Windows artifact tracks recently opened files?",
+  options: [
+    "A. RecentDocs",
+    "B. System.ini",
+    "C. Prefetch",
+    "D. Boot.ini"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q127",
+  question: "What are Windows prefetch files used for?",
+  options: [
+    "A. Track internet history",
+    "B. Store wallpaper files",
+    "C. Encrypt documents",
+    "D. Track application execution"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q128",
+  question: "What information can be gathered from the Recycle Bin?",
+  options: [
+    "A. Deleted file names",
+    "B. Program versions",
+    "C. Login passwords",
+    "D. Encrypted keys"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q129",
+  question: "How does the Windows pagefile impact forensic analysis?",
+  options: [
+    "A. Deletes old photos",
+    "B. May contain fragments of memory data",
+    "C. Speeds up internet",
+    "D. Stores emails"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q130",
+  question: "What are the NTUSER.DAT files?",
+  options: [
+    "A. Pagefile copies",
+    "B. Kernel modules",
+    "C. Contain user-specific registry settings",
+    "D. Backup logs"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q131",
+  question: "Where is information about connected USB devices stored in Windows?",
+  options: [
+    "A. Hosts file",
+    "B. Paint registry",
+    "C. Registry",
+    "D. Temp folder"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q132",
+  question: "Which utility allows viewing of event logs in Windows?",
+  options: [
+    "A. Event Viewer",
+    "B. cmd",
+    "C. Services.msc",
+    "D. Notepad"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q133",
+  question: "What data is found in the SAM file?",
+  options: [
+    "A. Firewall rules",
+    "B. BIOS keys",
+    "C. Wi-Fi passwords",
+    "D. Password hashes"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q134",
+  question: "What are link (LNK) files?",
+  options: [
+    "A. Shortcuts to files or apps",
+    "B. Registry keys",
+    "C. Contain file paths and timestamps",
+    "D. Startup scripts"
+  ],
+  correctAnswer: ["A", "C"]
+},
+{
+  id: "q135",
+  question: "Which files track application usage over time?",
+  options: [
+    "A. Amcache",
+    "B. TEMP",
+    "C. Prefetch",
+    "D. Hosts"
+  ],
+  correctAnswer: ["A", "C"]
+},
+{
+  id: "q136",
+  question: "What does 'ShellBags' reveal?",
+  options: [
+    "A. CPU stats",
+    "B. Window size",
+    "C. Recycle Bin age",
+    "D. Folder view settings"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q137",
+  question: "How can the Windows registry assist in timeline analysis?",
+  options: [
+    "A. It syncs to cloud",
+    "B. Registry overwrites file hashes",
+    "C. It rotates logs",
+    "D. Registry keys have timestamp metadata"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q138",
+  question: "Which files are used to track installed applications?",
+  options: [
+    "A. drivers.sys",
+    "B. Settings.ini",
+    "C. hosts",
+    "D. Amcache.hve"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q139",
+  question: "What is the SYSTEM hive?",
+  options: [
+    "A. Firewall module",
+    "B. Update patch",
+    "C. DLL collection",
+    "D. Registry file for system-wide settings"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q140",
+  question: "Why is analysis of user profiles useful in forensics?",
+  options: [
+    "A. Boosts RAM",
+    "B. Reveals user habits",
+    "C. Unlocks BitLocker",
+    "D. Shows MAC address"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q141",
+  question: "What are common sources of email evidence?",
+  options: [
+    "A. Music libraries",
+    "B. Clipboard",
+    "C. Message body",
+    "D. DNS cache"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q142",
+  question: "Which protocols are used to send and receive email?",
+  options: [
+    "A. DHCP",
+    "B. ARP",
+    "C. FTP",
+    "D. POP3"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q143",
+  question: "What information does an email header contain?",
+  options: [
+    "A. File size",
+    "B. Window position",
+    "C. Browser name",
+    "D. Date/time"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q144",
+  question: "What tool can analyze email headers?",
+  options: [
+    "A. Photoshop",
+    "B. Header Analyzer",
+    "C. X-Ways",
+    "D. FTK"
+  ],
+  correctAnswer: ["B", "C", "D"]
+},
+{
+  id: "q145",
+  question: "What does 'spoofing' mean in email forensics?",
+  options: [
+    "A. Forging sender information",
+    "B. Encrypting traffic",
+    "C. Redirecting users",
+    "D. Boosting delivery speed"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q146",
+  question: "What is phishing?",
+  options: [
+    "A. Cloud syncing",
+    "B. Email forwarding",
+    "C. Data backup",
+    "D. Fraudulent emails designed to trick recipients"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q147",
+  question: "How can investigators detect spoofed emails?",
+  options: [
+    "A. Header analysis",
+    "B. Color scheme",
+    "C. Link color",
+    "D. Attachment type"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q148",
+  question: "Which artifacts are relevant to web forensics?",
+  options: [
+    "A. Wi-Fi password",
+    "B. Mouse speed",
+    "C. Monitor resolution",
+    "D. Cookies"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q149",
+  question: "What is a browser cookie?",
+  options: [
+    "A. Small data file stored by websites",
+    "B. Network driver",
+    "C. Antivirus patch",
+    "D. Login password"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q150",
+  question: "What information can be found in browser history?",
+  options: [
+    "A. Visited URLs",
+    "B. PDF content",
+    "C. IP blocklist",
+    "D. File sizes"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q151",
+  question: "What is the purpose of a cache in browsers?",
+  options: [
+    "A. Throttle bandwidth",
+    "B. Encrypt cookies",
+    "C. Store temporary web data",
+    "D. Log credentials"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q152",
+  question: "What is a user agent string?",
+  options: [
+    "A. Identifies browser and OS in web requests",
+    "B. MAC address",
+    "C. BIOS name",
+    "D. Password hash"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q153",
+  question: "Which tool can recover deleted browsing history?",
+  options: [
+    "A. Web Historian",
+    "B. Audacity",
+    "C. Zoom",
+    "D. BrowserHistoryView"
+  ],
+  correctAnswer: ["A", "D"]
+},
+{
+  id: "q154",
+  question: "What is a web cache useful for in forensics?",
+  options: [
+    "A. Compiling Java",
+    "B. Resetting passwords",
+    "C. Tracing access patterns",
+    "D. Fixing CSS"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q155",
+  question: "Why are timestamps important in email and internet forensics?",
+  options: [
+    "A. Measure mouse clicks",
+    "B. Resize images",
+    "C. Reconstruct activity timelines",
+    "D. Log screen size"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q156",
+  question: "What is a referrer in web traffic?",
+  options: [
+    "A. Printer host",
+    "B. The previous URL a user visited",
+    "C. Email sender",
+    "D. IP address"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q157",
+  question: "Which files might reveal stored credentials?",
+  options: [
+    "A. Keychains",
+    "B. Desktop.ini",
+    "C. Recycle Bin",
+    "D. Credential Manager entries"
+  ],
+  correctAnswer: ["A", "D"]
+},
+{
+  id: "q158",
+  question: "How can email attachments be analyzed?",
+  options: [
+    "A. Scan with antivirus",
+    "B. Rename extensions",
+    "C. Check metadata",
+    "D. Hide headers"
+  ],
+  correctAnswer: ["A", "C"]
+},
+{
+  id: "q159",
+  question: "Why is IP address tracking useful in email forensics?",
+  options: [
+    "A. Encrypts email",
+    "B. Improves delivery speed",
+    "C. Increases quota",
+    "D. Helps trace sender origin"
+  ],
+  correctAnswer: "D"
+},
+{
+  id: "q160",
+  question: "What tool logs and parses network and web traffic?",
+  options: [
+    "A. Excel",
+    "B. Wireshark",
+    "C. Trello",
+    "D. Zoom"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q161",
+  question: "Which of the following are challenges when investigating social media usage on a suspect’s device?",
+  options: [
+    "A. Most data is stored in the cloud",
+    "B. Users regularly delete apps",
+    "C. Artifacts rarely reside locally",
+    "D. There is a universal checklist for all platforms"
+  ],
+  correctAnswer: ["A", "C"]
+},
+{
+  id: "q162",
+  question: "Which tools can help uncover Facebook-related data in a forensic investigation?",
+  options: [
+    "A. Bulk Extractor",
+    "B. Packet Sniffer",
+    "C. AXIOM",
+    "D. Regedit"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q163",
+  question: "Which of the following Twitter-related identifiers remains consistent even if the user changes their handle?",
+  options: [
+    "A. UID",
+    "B. Twitter display name",
+    "C. Tweet ID",
+    "D. User email"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q164",
+  question: "Where can a forensic examiner look for historical Twitter UID data?",
+  options: [
+    "A. The file twid in browser cache",
+    "B. Twitter’s local app cache",
+    "C. Domain histogram analysis",
+    "D. gettwitterid.com website"
+  ],
+  correctAnswer: ["C", "D"]
+},
+{
+  id: "q165",
+  question: "Which applications are categorized under social media from a forensic analysis perspective?",
+  options: [
+    "A. WhatsApp",
+    "B. Kik",
+    "C. Tinder",
+    "D. Wireshark"
+  ],
+  correctAnswer: ["A", "B", "C"]
+},
+{
+  id: "q166",
+  question: "Which artifact files are generated by Ares Galaxy on the local system?",
+  options: [
+    "A. ShareH.net",
+    "B. ShareL.dat",
+    "C. downloads.log",
+    "D. NTUSER.dat keys"
+  ],
+  correctAnswer: ["A", "B", "D"]
+},
+{
+  id: "q167",
+  question: "Which folder paths are associated with eMule’s configuration?",
+  options: [
+    "A. %USER%\\AppData\\Local\\eMule",
+    "B. \\Temp and \\Incoming folders",
+    "C. %SYSTEM32%\\eMule",
+    "D. eMule\\Config folder"
+  ],
+  correctAnswer: ["A", "B", "D"]
+},
+{
+  id: "q168",
+  question: "What file in Shareaza contains information about completed downloads?",
+  options: [
+    "A. IncompletePath.xml",
+    "B. CollectionPath",
+    "C. Profile.xml",
+    "D. Sharedfiles.txt"
+  ],
+  correctAnswer: ["B", "C"]
+},
+{
+  id: "q169",
+  question: "What is the purpose of using Magnet AXIOM in forensic investigations involving Ares?",
+  options: [
+    "A. To decrypt encrypted Ares files",
+    "B. To analyze live network packets",
+    "C. To bypass login credentials",
+    "D. To generate chain of custody reports"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q170",
+  question: "Which file in Dropbox stores sync data such as filenames and paths?",
+  options: [
+    "A. filecache.dbx",
+    "B. sync_config.db",
+    "C. filelist.ini",
+    "D. config.dbx"
+  ],
+  correctAnswer: ["A", "D"]
+},
+{
+  id: "q171",
+  question: "What types of information are stored in the Google Drive `snapshot.db`?",
+  options: [
+    "A. Serial number of synced device",
+    "B. Modified timestamps",
+    "C. Folder status indicators",
+    "D. File size and path"
+  ],
+  correctAnswer: ["A", "B", "C", "D"]
+},
+{
+  id: "q172",
+  question: "Which cloud computing model provides complete OS and application deployment flexibility?",
+  options: [
+    "A. SaaS",
+    "B. IaaS",
+    "C. PaaS",
+    "D. DaaS"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q173",
+  question: "Which of the following correctly match cloud service models?",
+  options: [
+    "A. SaaS – Dropbox",
+    "B. PaaS – Google App Engine",
+    "C. IaaS – Amazon EC2",
+    "D. SaaS – VMware ESXi"
+  ],
+  correctAnswer: ["A", "B", "C"]
+},
+{
+  id: "q174",
+  question: "What best describes a hybrid cloud model?",
+  options: [
+    "A. A service hosted only by one vendor",
+    "B. A private cloud used by government only",
+    "C. A mix of multiple deployment models",
+    "D. A virtualized LAN with cloud integration"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q175",
+  question: "Which deployment method allows community members with shared interests to access the same cloud resource?",
+  options: [
+    "A. Public cloud",
+    "B. Community cloud",
+    "C. Shared VPN cluster",
+    "D. SaaS cloud"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q176",
+  question: "What is the primary forensic value of Dropbox’s config.dbx?",
+  options: [
+    "A. Contains device ID",
+    "B. Holds user ID and account info",
+    "C. Tracks USB syncs",
+    "D. Encrypts local folder paths"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q177",
+  question: "Which file contains shared directory settings in eMule?",
+  options: [
+    "A. sharedfiles.dat",
+    "B. preferences.ini",
+    "C. shareddir.dat",
+    "D. settings.cfg"
+  ],
+  correctAnswer: ["B", "C"]
+},
+{
+  id: "q178",
+  question: "Which service providers publish legal contact procedures for law enforcement?",
+  options: [
+    "A. Kik",
+    "B. WhatsApp",
+    "C. Reddit",
+    "D. Search.org"
+  ],
+  correctAnswer: ["A", "D"]
+},
+{
+  id: "q179",
+  question: "Which information does the Device_db.db in Google Drive contain?",
+  options: [
+    "A. USB device label",
+    "B. Upload timestamps",
+    "C. Cloud storage password",
+    "D. Synced file metadata"
+  ],
+  correctAnswer: ["A", "B", "D"]
+},
+{
+  id: "q180",
+  question: "What is the primary purpose of maintaining a chain of custody form?",
+  options: [
+    "A. To record malware infection events",
+    "B. To track every instance of evidence handling",
+    "C. To prevent duplicate file sharing",
+    "D. To comply with GDPR"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q181",
+  question: "Which of the following are common delivery methods for ransomware in social engineering attacks?",
+  options: [
+    "A. Malicious e-mail attachments",
+    "B. Infected mobile charging stations",
+    "C. Pretext phone calls",
+    "D. Phishing websites"
+  ],
+  correctAnswer: ["A", "D"]
+},
+{
+  id: "q182",
+  question: "Which categories do social engineering approaches typically fall into?",
+  options: [
+    "A. Technology-based",
+    "B. Human-based",
+    "C. Automated-based",
+    "D. Remote-based"
+  ],
+  correctAnswer: ["A", "B"]
+},
+{
+  id: "q183",
+  question: "What is the goal of most online social engineering attacks?",
+  options: [
+    "A. Encrypt the victim’s hard drive",
+    "B. Gain information or access through deception",
+    "C. Redirect traffic to proxy servers",
+    "D. Crack Wi-Fi encryption keys"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q184",
+  question: "Which methods are often used in telephone-based social engineering attacks?",
+  options: [
+    "A. Impersonation of authority figures",
+    "B. Vishing",
+    "C. Phreaking",
+    "D. Credential spoofing"
+  ],
+  correctAnswer: ["A", "B"]
+},
+{
+  id: "q185",
+  question: "What is “dumpster diving” in the context of social engineering?",
+  options: [
+    "A. Using thermal cameras to track keyboard input",
+    "B. Gaining access to network switches",
+    "C. Searching discarded physical documents for information",
+    "D. Exploiting DNS misconfigurations"
+  ],
+  correctAnswer: "C"
+},
+{
+  id: "q186",
+  question: "Which threats are commonly associated with mobile-based social engineering?",
+  options: [
+    "A. Shoulder surfing in public places",
+    "B. Fake support technician visits",
+    "C. Rogue wireless access points",
+    "D. Malicious voicemail messages (vishing)"
+  ],
+  correctAnswer: ["A", "C", "D"]
+},
+{
+  id: "q187",
+  question: "Which are examples of human psychological techniques used in in-person social engineering?",
+  options: [
+    "A. Intimidation",
+    "B. Brute-forcing access codes",
+    "C. Persuasion",
+    "D. Ingratiation"
+  ],
+  correctAnswer: ["A", "C", "D"]
+},
+{
+  id: "q188",
+  question: "What defines a reverse social engineering attack?",
+  options: [
+    "A. Attacker uses DNS spoofing to gain trust",
+    "B. Target initiates contact with the attacker thinking they are support",
+    "C. Attacker posts fake jobs to collect personal info",
+    "D. Attacker compromises IoT devices remotely"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q189",
+  question: "Which are valid techniques used in reverse social engineering?",
+  options: [
+    "A. Baiting",
+    "B. Quid pro quo",
+    "C. Vishing",
+    "D. Pretexting"
+  ],
+  correctAnswer: ["A", "B", "D"]
+},
+{
+  id: "q190",
+  question: "What is the most effective long-term strategy for preventing social engineering attacks?",
+  options: [
+    "A. Installing endpoint detection systems",
+    "B. Extensive user education and training",
+    "C. Frequent system reboots",
+    "D. Hiring penetration testers monthly"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q191",
+  question: "Which areas should a forensic investigator focus on when examining potential social engineering entry points?",
+  options: [
+    "A. Frontline employees",
+    "B. Internal VLAN configurations",
+    "C. Help desk technicians",
+    "D. Visitor and technician logs"
+  ],
+  correctAnswer: ["A", "C", "D"]
+},
+{
+  id: "q192",
+  question: "What is vishing in the context of mobile social engineering?",
+  options: [
+    "A. Voice-based phishing via voicemail or calls",
+    "B. Virtual desktop scanning",
+    "C. Viewing screen activity through video feed",
+    "D. A vulnerability in VoIP protocols"
+  ],
+  correctAnswer: "A"
+},
+{
+  id: "q193",
+  question: "How can a rogue access point assist a social engineer?",
+  options: [
+    "A. Exploits DNS tunnels",
+    "B. Enables interception of unencrypted traffic",
+    "C. Forces cloud service reauthentication",
+    "D. Decrypts VPN tunnels automatically"
+  ],
+  correctAnswer: "B"
+},
+{
+  id: "q194",
+  question: "Which threats are unique to waste management-based attacks?",
+  options: [
+    "A. Physical records revealing credentials",
+    "B. Sensitive documents tossed without shredding",
+    "C. Recovered USB drives with sensitive files",
+    "D. SIM card cloning"
+  ],
+  correctAnswer: ["A", "B", "C"]
+},
+{
+  id: "q195",
+  question: "Which principles are typically exploited during social engineering attacks?",
+  options: [
+    "A. Trust",
+    "B. Urgency",
+    "C. Repetition",
+    "D. Authority"
+  ],
+  correctAnswer: ["A", "B", "D"]
+},
+{
+  id: "q196",
+  question: "What does a social engineering vulnerability assessment involve?",
+  options: [
+    "A. Scanning ports on employee laptops",
+    "B. Reviewing policy gaps and attack surfaces",
+    "C. Mapping threats to current configurations",
+    "D. Identifying known APT groups"
+  ],
+  correctAnswer: ["B", "C"]
+},
+{
+  id: "q197",
+  question: "What steps should follow if a fake technician was allowed access to systems?",
+  options: [
+    "A. Verify the visit against support tickets",
+    "B. Review surveillance and logs",
+    "C. Notify law enforcement",
+    "D. Restore from backup"
+  ],
+  correctAnswer: ["A", "B", "C"]
+},
+{
+  id: "q198",
+  question: "Which indicators might suggest a successful phishing or spoofing attack?",
+  options: [
+    "A. Unusual login patterns",
+    "B. Outgoing emails the user never sent",
+    "C. Disabled firewall services",
+    "D. Increased social media usage"
+  ],
+  correctAnswer: ["A", "B"]
+},
+{
+  id: "q199",
+  question: "What roles often serve as the most vulnerable points in a social engineering scenario?",
+  options: [
+    "A. Receptionists and help desk staff",
+    "B. Database engineers",
+    "C. Mobile developers",
+    "D. Executive assistants"
+  ],
+  correctAnswer: ["A", "D"]
+},
+{
+  id: "q200",
+  question: "Which of the following are best practices to reduce risk from personal social engineering?",
+  options: [
+    "A. Educate staff on ingratiation and intimidation techniques",
+    "B. Use two-factor authentication",
+    "C. Monitor access logs regularly",
+    "D. Require device encryption"
+  ],
+  correctAnswer: ["A", "B", "C"]
+},
+{
+    "id": "q201",
+    "question": "What component of a cellular network is responsible for routing digital packets and maintaining subscriber databases?",
+    "options": [
+      "A. Base Transceiver Station (BTS)",
+      "B. Home Location Register (HLR)",
+      "C. Visitor Location Register (VLR)",
+      "D. Mobile Switching Center (MSC)"
+    ],
+    "correctAnswer": ["A", "D"]
+  },
+  {
+    "id": "q202",
+    "question": "The TAC portion of the IMEI identifies:",
+    "options": [
+      "A. the individual subscriber",
+      "B. the network operator",
+      "C. the device manufacturer and model type",
+      "D. the device’s radio capabilities"
+    ],
+    "correctAnswer": ["C"]
+  },
+  {
+    "id": "q203",
+    "question": "Which of the following is NOT a valid state of a mobile device in forensic analysis?",
+    "options": [
+      "A. Quiescent state",
+      "B. Semi-active state",
+      "C. Nascent state",
+      "D. Dormant state"
+    ],
+    "correctAnswer": ["D"]
+  },
+  {
+    "id": "q204",
+    "question": "On a SIM card, elementary files (EF) are stored directly under:",
+    "options": [
+      "A. Dedicated File (DF)",
+      "B. Master File (MF)",
+      "C. Application Layer",
+      "D. Presentation Layer"
+    ],
+    "correctAnswer": ["A", "C", "D"]
+  },
+  {
+    "id": "q205",
+    "question": "Which extraction method involves removing the memory chip and imaging it?",
+    "options": [
+      "A. Physical Extraction",
+      "B. Logical Extraction",
+      "C. Chip-Off",
+      "D. Micro Read"
+    ],
+    "correctAnswer": ["A"]
+  },
+  {
+    "id": "q206",
+    "question": "A hard handoff in cellular communication is characteristic of:",
+    "options": [
+      "A. CDMA (soft make-before-break)",
+      "B. GSM (break-before-make)",
+      "C. LTE",
+      "D. 5G NR"
+    ],
+    "correctAnswer": ["B", "C"]
+  },
+  {
+    "id": "q207",
+    "question": "Which tool is specifically designed for logical acquisition via standard file copy?",
+    "options": [
+      "A. Flasher box",
+      "B. Standard file copy to local storage",
+      "C. Chip-Off adapter",
+      "D. Electron microscope"
+    ],
+    "correctAnswer": ["B"]
+  },
+  {
+    "id": "q208",
+    "question": "The ICCID uniquely identifies:",
+    "options": [
+      "A. the mobile subscriber (IMSI)",
+      "B. the device’s hardware version",
+      "C. the cellular network",
+      "D. the SIM card itself"
+    ],
+    "correctAnswer": ["D"]
+  },
+  {
+    "id": "q209",
+    "question": "In mobile forensics, what does ‘jTAG’ refer to?",
+    "options": [
+      "A. A logical acquisition protocol",
+      "B. A hardware debugging interface",
+      "C. A SIM authentication algorithm",
+      "D. A file system format"
+    ],
+    "correctAnswer": ["B", "C", "D"]
+  },
+  {
+    "id": "q210",
+    "question": "Which network forensic artifact can reveal visited websites on a mobile device?",
+    "options": [
+      "A. HTTP proxy logs",
+      "B. Call Detail Records (CDR)",
+      "C. DHCP lease logs",
+      "D. SMS message store"
+    ],
+    "correctAnswer": ["A"]
+  },
+  {
+    "id": "q211",
+    "question": "What is the purpose of the SIM Application Toolkit (SAT)?",
+    "options": [
+      "A. To manage over-the-air updates",
+      "B. To encrypt voice calls",
+      "C. To enable applications on the SIM to interact with the mobile device",
+      "D. To store user contacts"
+    ],
+    "correctAnswer": ["C", "D"]
+  },
+  {
+    "id": "q212",
+    "question": "Which mobile forensic tool can capture volatile memory from a running device?",
+    "options": [
+      "A. Cellebrite UFED",
+      "B. FTK Imager",
+      "C. Volatility Framework",
+      "D. Oxygen Forensic Detective"
+    ],
+    "correctAnswer": ["C"]
+  },
+  {
+    "id": "q213",
+    "question": "What does the term ‘rooting’ an Android device mean?",
+    "options": [
+      "A. Installing official OS updates",
+      "B. Gaining administrative privileges",
+      "C. Unlocking the SIM network",
+      "D. Encrypting internal storage"
+    ],
+    "correctAnswer": ["B"]
+  },
+  {
+    "id": "q214",
+    "question": "Which log file on Android contains system events and application messages?",
+    "options": [
+      "A. logcat",
+      "B. wtmp",
+      "C. auth.log",
+      "D. messages"
+    ],
+    "correctAnswer": ["A", "C"]
+  },
+  {
+    "id": "q215",
+    "question": "In iOS forensics, which lockdown record holds pairing information?",
+    "options": [
+      "A. pairing-records.db",
+      "B. Lockdown.plist",
+      "C. com.apple.pairinglock",
+      "D. manifest.db"
+    ],
+    "correctAnswer": ["A", "B"]
+  },
+  {
+    "id": "q216",
+    "question": "Which of these mobile storage areas is LEAST likely to be encrypted by default?",
+    "options": [
+      "A. External SD card",
+      "B. Android /data partition",
+      "C. iOS keychain",
+      "D. Secure Enclave"
+    ],
+    "correctAnswer": ["A"]
+  },
+  {
+    "id": "q217",
+    "question": "What does the ‘-dump’ option typically do in mobile forensic command-line tools?",
+    "options": [
+      "A. Display help information",
+      "B. Overwrite data",
+      "C. Extract raw memory contents",
+      "D. Format the file system"
+    ],
+    "correctAnswer": ["D"]
+  },
+  {
+    "id": "q218",
+    "question": "Which forensic challenge is introduced by wear leveling on flash memory?",
+    "options": [
+      "A. Data fragmentation across blocks",
+      "B. Loss of timestamps",
+      "C. Increased encryption",
+      "D. SIM lock enforcement"
+    ],
+    "correctAnswer": ["A", "B", "C"]
+  },
+  {
+    "id": "q219",
+    "question": "Which mobile OS uses APFS as its file system?",
+    "options": [
+      "A. Android",
+      "B. iOS",
+      "C. Windows Phone",
+      "D. KaiOS"
+    ],
+    "correctAnswer": ["B"]
+  },
+  {
+    "id": "q220",
+    "question": "Which artifact would most likely contain GPS coordinates from mobile device usage?",
+    "options": [
+      "A. Contacts database",
+      "B. Call history database",
+      "C. SQLite location database",
+      "D. SMS database"
+    ],
+    "correctAnswer": ["C"]
+  },
+  {
+    "id": "q221",
+    "question": "Which of the following is a primary goal of network forensics?",
+    "options": [
+      "A. Encrypting network traffic",
+      "B. Capturing and analyzing packets for evidence",
+      "C. Improving network throughput",
+      "D. Designing network topologies"
+    ],
+    "correctAnswer": ["B"]
+  },
+  {
+    "id": "q222",
+    "question": "In packet analysis, what does the term 'full packet capture' mean?",
+    "options": [
+      "A. Capturing only headers",
+      "B. Capturing payload only",
+      "C. Capturing both headers and payload",
+      "D. Capturing metadata"
+    ],
+    "correctAnswer": ["C"]
+  },
+  {
+    "id": "q223",
+    "question": "Which protocol’s logs would you examine to investigate DNS queries?",
+    "options": [
+      "A. TCP",
+      "B. UDP",
+      "C. ICMP",
+      "D. DNS"
+    ],
+    "correctAnswer": ["D"]
+  },
+  {
+    "id": "q224",
+    "question": "What piece of information does a NetFlow record typically NOT include?",
+    "options": [
+      "A. Source IP",
+      "B. Destination IP",
+      "C. Packet payload content",
+      "D. Byte and packet counts"
+    ],
+    "correctAnswer": ["C"]
+  },
+  {
+    "id": "q225",
+    "question": "Which tool is commonly used for deep inspection of HTTP traffic?",
+    "options": [
+      "A. Wireshark",
+      "B. Nmap",
+      "C. Netcat",
+      "D. tcpdump"
+    ],
+    "correctAnswer": ["A", "D"]
+  },
+  {
+    "id": "q226",
+    "question": "What is the primary advantage of using SPAN/mirror ports on a switch?",
+    "options": [
+      "A. To block malicious traffic",
+      "B. To duplicate traffic for analysis",
+      "C. To increase bandwidth",
+      "D. To encrypt data in transit"
+    ],
+    "correctAnswer": ["B"]
+  },
+  {
+    "id": "q227",
+    "question": "Which layer of the OSI model does an intrusion detection system (IDS) primarily monitor?",
+    "options": [
+      "A. Physical",
+      "B. Data Link",
+      "C. Network",
+      "D. Application"
+    ],
+    "correctAnswer": ["C", "D"]
+  },
+  {
+    "id": "q228",
+    "question": "What does 'TCP three-way handshake' involve?",
+    "options": [
+      "A. SYN, ACK, FIN",
+      "B. SYN, SYN-ACK, ACK",
+      "C. ACK, FIN, RST",
+      "D. PSH, ACK, URG"
+    ],
+    "correctAnswer": ["B"]
+  },
+  {
+    "id": "q229",
+    "question": "Which log file on a Linux server records authentication attempts?",
+    "options": [
+      "A. /var/log/syslog",
+      "B. /var/log/auth.log",
+      "C. /var/log/kern.log",
+      "D. /var/log/dmesg"
+    ],
+    "correctAnswer": ["B"]
+  },
+  {
+    "id": "q230",
+    "question": "What is the function of a firewall in network forensics?",
+    "options": [
+      "A. To perform packet capture",
+      "B. To filter and log traffic",
+      "C. To analyze malware",
+      "D. To decrypt SSL/TLS"
+    ],
+    "correctAnswer": ["B"]
+  },
+  {
+    "id": "q231",
+    "question": "Which of these is a passive network capture tool?",
+    "options": [
+      "A. tcpdump",
+      "B. nmap",
+      "C. hping",
+      "D. ettercap"
+    ],
+    "correctAnswer": ["A", "D"]
+  },
+  {
+    "id": "q232",
+    "question": "In investigating network traffic, what does TTL stand for?",
+    "options": [
+      "A. Transmission Time Limit",
+      "B. Time To Live",
+      "C. Total Traffic Logged",
+      "D. Transfer Timing Latency"
+    ],
+    "correctAnswer": ["B"]
+  },
+  {
+    "id": "q233",
+    "question": "Which type of log would show DHCP lease assignments?",
+    "options": [
+      "A. Web server logs",
+      "B. DHCP server logs",
+      "C. DNS server logs",
+      "D. VPN logs"
+    ],
+    "correctAnswer": ["B"]
+  },
+  {
+    "id": "q234",
+    "question": "What is the purpose of an SSL/TLS man-in-the-middle proxy in forensics?",
+    "options": [
+      "A. To block encrypted traffic",
+      "B. To decrypt and inspect secure traffic",
+      "C. To generate fake certificates",
+      "D. To increase encryption strength"
+    ],
+    "correctAnswer": ["B", "C"]
+  },
+  {
+    "id": "q235",
+    "question": "Which artifact would you check to trace a user’s VPN connection times?",
+    "options": [
+      "A. VPN client logs",
+      "B. NetFlow records",
+      "C. ARP tables",
+      "D. Switch MAC address table"
+    ],
+    "correctAnswer": ["A"]
+  },
+  {
+    "id": "q236",
+    "question": "Which protocol is used to synchronize time across network devices?",
+    "options": [
+      "A. NTP",
+      "B. SNMP",
+      "C. ICMP",
+      "D. SMTP"
+    ],
+    "correctAnswer": ["A"]
+  },
+  {
+    "id": "q237",
+    "question": "When examining a pcap file, which filter would show only TCP traffic?",
+    "options": [
+      "A. udp",
+      "B. icmp",
+      "C. tcp",
+      "D. arp"
+    ],
+    "correctAnswer": ["C"]
+  },
+  {
+    "id": "q238",
+    "question": "Which network log entry would indicate a possible port scan?",
+    "options": [
+      "A. Multiple SYN packets to sequential ports",
+      "B. Single ACK packet",
+      "C. Continuous HTTP GET requests",
+      "D. Repeated DNS queries"
+    ],
+    "correctAnswer": ["A", "D"]
+  },
+  {
+    "id": "q239",
+    "question": "Which tool can reconstruct files transferred over HTTP from a pcap?",
+    "options": [
+      "A. foremost",
+      "B. wireshark",
+      "C. tcpflow",
+      "D. driftnet"
+    ],
+    "correctAnswer": ["B", "C", "D"]
+  },
+  {
+    "id": "q240",
+    "question": "What is the primary benefit of hashing captured network data?",
+    "options": [
+      "A. To compress data",
+      "B. To verify integrity",
+      "C. To encrypt data",
+      "D. To filter noise"
+    ],
+    "correctAnswer": ["B"]
+  }
+];
+
+        let selectedQuestions = [];
+    const totalQuestions = 80;
+    let currentQuestionIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let unansweredCount = 0;
+    let userResponses = new Array(totalQuestions).fill(null);
+    let timerInterval;
+    let timeRemaining = totalQuestions * 60;
+
+    const timerElement = document.getElementById('timer');
+    const questionsElement = document.getElementById('questions');
+    const resultsElement = document.getElementById('results');
+    const submitButton = document.getElementById('submitButton');
+    const progressBar = document.getElementById('progressBar');
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function startExam() {
+      selectedQuestions = shuffle(questionPool).slice(0, totalQuestions);
+      displayQuestions();
+      startTimer();
+      updateProgress(0);
+    }
+
+    function displayQuestions() {
+      questionsElement.innerHTML = '';
+      selectedQuestions.forEach((q, index) => {
+        const inputType = Array.isArray(q.correctAnswer) ? 'checkbox' : 'radio';
+        const correctAnswers = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
+
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-container';
+        // Attach correct answers for delayed feedback
+        questionDiv.setAttribute('data-correct', JSON.stringify(correctAnswers));
+        if (index === 0) questionDiv.classList.add('active');
+
+        questionDiv.innerHTML = `
+          <h3>Question ${index + 1}: ${q.question}</h3>
+          ${q.options.map((opt, i) => {
+            const optVal = String.fromCharCode(65 + i);
+            return `
+              <label data-index="${index}" data-value="${optVal}">
+                <input type="${inputType}" name="q${index}${inputType === 'checkbox' ? '[]' : ''}" value="${optVal}">
+                ${opt}
+              </label>
+            `;
+          }).join('')}
+        `;
+
+        questionsElement.appendChild(questionDiv);
+
+        setTimeout(() => {
+          const inputs = questionDiv.querySelectorAll('input');
+          const labels = questionDiv.querySelectorAll('label');
+
+          inputs.forEach(input => {
+            input.addEventListener('change', (e) => {
+              const selectedVal = e.target.value;
+              const label = e.target.parentElement;
+
+              if (inputType === 'radio') {
+                inputs.forEach(inp => (inp.disabled = true));
+                userResponses[index] = [selectedVal];
+
+                if (correctAnswers.includes(selectedVal)) {
+                  label.classList.add('correct');
+                  label.innerHTML += ' <span style="color: green;">✔</span>';
+                } else {
+                  label.classList.add('wrong');
+                  labels.forEach(lbl => {
+                    const val = lbl.getAttribute('data-value');
+                    if (correctAnswers.includes(val)) {
+                      lbl.classList.add('correct');
+                      if (!lbl.innerHTML.includes('✔')) {
+                        lbl.innerHTML += ' <span style="color: green;">✔ (Correct)</span>';
+                      }
+                    }
+                  });
+                  if (monster) {
+                    monster.classList.add('show');
+                    setTimeout(() => monster.classList.remove('show'), 6000);
+                  }
+                }
+
+              } else if (inputType === 'checkbox') {
+                e.target.disabled = true;
+                if (!userResponses[index]) userResponses[index] = [];
+                userResponses[index].push(selectedVal);
+
+                const selectedCount = Array.from(inputs).filter(inp => inp.checked).length;
+                if (selectedCount === correctAnswers.length) {
+                  inputs.forEach(inp => (inp.disabled = true));
+                  labels.forEach(lbl => {
+                    const val = lbl.getAttribute('data-value');
+                    const chk = lbl.querySelector('input');
+                    if (chk.checked) {
+                      if (correctAnswers.includes(val)) {
+                        lbl.classList.add('correct');
+                        lbl.innerHTML += ' <span style="color: green;">✔</span>';
+                      } else {
+                        lbl.classList.add('wrong');
+                        if (monster) {
+                          monster.classList.add('show');
+                          setTimeout(() => monster.classList.remove('show'), 6000);
+                        }
+                      }
+                    } else {
+                      if (correctAnswers.includes(val)) {
+                        lbl.classList.add('correct');
+                        if (!lbl.innerHTML.includes('(Correct)')) {
+                          lbl.innerHTML += ' <span style="color: green;">(Correct)</span>';
+                        }
+                      }
+                    }
+                  });
+                }
+              }
+            });
+          });
+        }, 100);
+      });
+
+      submitButton.style.display = 'block';
+    }
+
+    function showQuestion(index) {
+      const active = document.querySelector('.question-container.active');
+      if (active) active.classList.remove('active');
+      const newActive = document.querySelectorAll('.question-container')[index];
+      if (newActive) newActive.classList.add('active');
+      currentQuestionIndex = index;
+      updateProgress(index);
+    }
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          submitExam();
+        } else {
+          timeRemaining--;
+          const minutes = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+          const seconds = (timeRemaining % 60).toString().padStart(2, '0');
+          timerElement.textContent = `Time Remaining: ${minutes}:${seconds}`;
+        }
+      }, 1000);
+    }
+
+    function updateProgress(index) {
+      const fraction = ((index + 1) / totalQuestions) * 100;
+      progressBar.style.width = fraction.toFixed(1) + '%';
+    }
+
+    function submitExam() {
+      clearInterval(timerInterval);
+      correctCount = 0;
+      wrongCount = 0;
+      unansweredCount = 0;
+
+      selectedQuestions.forEach((q, index) => {
+        const userAnswer = userResponses[index] || [];
+        const correctAnswers = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
+
+        if (userAnswer.length === 0) {
+          unansweredCount++;
+      const questionLabels = document.querySelectorAll(`.question-container:nth-of-type(${index + 1}) label`);
+      questionLabels.forEach(label => {
+        const val = label.getAttribute('data-value');
+        if (correctAnswers.includes(val)) {
+          label.classList.add('skipped-correct');
+        } else {
+          label.classList.add('skipped-wrong');
+        }
+      });
+    
+        } else if (JSON.stringify(userAnswer.sort()) === JSON.stringify(correctAnswers.sort())) {
+          correctCount++;
+        } else {
+          wrongCount++;
+        }
+      });
+
+      displayResults();
+      buildReview();
+    }
+
+    function displayResults() {
+  const flagWrapper = document.getElementById('flagControlWrapper');
+  const flagBtn = document.getElementById('flagButton');
+  if (flagWrapper) flagWrapper.style.display = 'none';
+  if (flagBtn) flagBtn.style.display = 'none';
+      // hide Next/Previous buttons on results page
+      document.querySelectorAll('button.btn-next, button.btn-prev').forEach(btn => btn.style.display = 'none');
+      questionsElement.style.display = 'none';
+      submitButton.style.display = 'none';
+      resultsElement.style.display = 'block';
+
+      document.getElementById('totalQuestions').textContent = totalQuestions;
+      document.getElementById('correctAnswers').textContent = correctCount;
+      document.getElementById('wrongAnswers').textContent = wrongCount;
+      document.getElementById('unansweredQuestions').textContent = unansweredCount;
+      document.getElementById('percentage').textContent = ((correctCount / totalQuestions) * 100).toFixed(2);
+    }
+
+    function resetExam() {
+      location.reload();
+    }
+
+    document.getElementById('examForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitExam();
+    });
+
+    startExam();
+  
+    function buildReview() {
+      const reviewContainer = document.createElement('div');
+      reviewContainer.className = 'review-container';
+      const header = document.createElement('div');
+      header.className = 'review-header';
+      header.textContent = 'Review Your Answers';
+      reviewContainer.appendChild(header);
+
+      selectedQuestions.forEach((q, idx) => {
+        const userAns = userResponses[idx] || [];
+        const correctAns = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
+
+        const card = document.createElement('div');
+        card.className = 'review-card';
+
+        const qDiv = document.createElement('div');
+        qDiv.className = 'review-question';
+        qDiv.textContent = `Q${idx+1}: ${q.question}`;
+        card.appendChild(qDiv);
+
+        const ul = document.createElement('ul');
+        ul.className = 'review-options';
+        q.options.forEach(opt => {
+          const letter = opt.charAt(0);
+          const li = document.createElement('li');
+          li.textContent = opt;
+          if (userAns.length === 0) {
+            if (correctAns.includes(letter)) li.className = 'unanswered';
+          } else if (correctAns.includes(letter)) {
+            li.className = 'correct';
+          } else if (userAns.includes(letter)) {
+            li.className = 'wrong';
+          }
+          ul.appendChild(li);
+        });
+        card.appendChild(ul);
+
+        reviewContainer.appendChild(card);
+      });
+
+      resultsElement.after(reviewContainer);
+    }
+
+function createNavigator() {
+  const navigator = document.getElementById("questionNavigator");
+  navigator.innerHTML = "";
+  for (let i = 0; i < totalQuestions; i++) {
+    const box = document.createElement("div");
+    box.className = "nav-box";
+    box.textContent = i + 1;
+    box.addEventListener("click", () => showQuestion(i));
+    navigator.appendChild(box);
+  }
+}
+
+function updateNavigator() {
+  const boxes = document.querySelectorAll(".nav-box");
+  boxes.forEach((box, index) => {
+    box.classList.remove("active", "correct", "wrong", "skipped");
+
+    if (index === currentQuestionIndex) {
+      box.classList.add("active");
+    }
+
+    const answer = userResponses[index];
+    if (!answer || answer.length === 0) {
+      box.classList.add("skipped");
+    } else {
+      const correctAnswers = Array.isArray(selectedQuestions[index].correctAnswer) ?
+                              selectedQuestions[index].correctAnswer : [selectedQuestions[index].correctAnswer];
+      const isCorrect = answer.length === correctAnswers.length &&
+                        answer.every(val => correctAnswers.includes(val));
+      box.classList.add(isCorrect ? "correct" : "wrong");
+    }
+  });
+}
+
+const originalShowQuestion = showQuestion;
+showQuestion = function(index) {
+  originalShowQuestion(index);
+  updateNavigator();
+};
+
+window.addEventListener("load", () => {
+  createNavigator();
+  updateNavigator();
+});
+
+function showWrongQuestions() {
+  const reviewCards = document.querySelectorAll('.review-card');
+  reviewCards.forEach(card => {
+    const wrong = card.querySelector('.wrong');
+    if (wrong) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+function hideNavigationButtons() {
+  const nav = document.getElementById('examNavButtons');
+  if (nav) nav.style.display = 'none';
+}
+function showNavigationButtons() {
+  const nav = document.getElementById('examNavButtons');
+  if (nav) nav.style.display = 'block';
+}
+
+
+let flaggedQuestions = new Set();
+
+function toggleFlag(index) {
+  if (flaggedQuestions.has(index)) {
+    flaggedQuestions.delete(index);
+  } else {
+    flaggedQuestions.add(index);
+  }
+  updateNavigator();
+}
+
+function createNavigator() {
+  const navigator = document.getElementById("questionNavigator");
+  navigator.innerHTML = "";
+  for (let i = 0; i < totalQuestions; i++) {
+    const box = document.createElement("div");
+    box.className = "nav-box";
+    box.textContent = i + 1;
+    
+    box.addEventListener("click", () => {
+      showQuestion(i);
+    });
+
+    box.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      toggleFlag(i);
+    });
+
+    navigator.appendChild(box);
+  }
+}
+
+function updateNavigator() {
+  const boxes = document.querySelectorAll(".nav-box");
+  boxes.forEach((box, index) => {
+    box.classList.remove("active", "correct", "wrong", "skipped", "flagged");
+
+    if (index === currentQuestionIndex) {
+      box.classList.add("active");
+    }
+
+    const answer = userResponses[index];
+    if (flaggedQuestions.has(index)) {
+      box.classList.add("flagged");
+      box.textContent = "?";
+    } else if (!answer || answer.length === 0) {
+      box.classList.add("skipped");
+      box.textContent = index + 1;
+    } else {
+      const correctAnswers = Array.isArray(selectedQuestions[index].correctAnswer) ?
+                              selectedQuestions[index].correctAnswer : [selectedQuestions[index].correctAnswer];
+      const isCorrect = answer.length === correctAnswers.length &&
+                        answer.every(val => correctAnswers.includes(val));
+      box.classList.add(isCorrect ? "correct" : "wrong");
+      box.textContent = index + 1;
+    }
+  });
+}
+
+function toggleCurrentFlag() {
+  toggleFlag(currentQuestionIndex);
+}
+
+let flaggedOnlyMode = false;
+let flaggedQuestionIndices = [];
+let flaggedPosition = 0;
+
+function showFlaggedQuestions() {
+  flaggedOnlyMode = true;
+  flaggedQuestionIndices = [];
+
+  const navBoxes = document.querySelectorAll('.nav-box');
+  navBoxes.forEach((box, index) => {
+    if (box.classList.contains('flagged')) {
+      flaggedQuestionIndices.push(index);
+    }
+  });
+
+  if (flaggedQuestionIndices.length > 0) {
+    flaggedPosition = 0;
+    currentQuestionIndex = flaggedQuestionIndices[flaggedPosition];
+    showQuestion(currentQuestionIndex);
+    document.getElementById('flaggedControls').style.display = 'inline-block';
+    document.getElementById('flaggedModeBanner').style.display = 'block';
+  } else {
+    alert("No questions have been flagged.");
+    document.getElementById('flaggedControls').style.display = 'none';
+    document.getElementById('flaggedModeBanner').style.display = 'none';
+  }
+}
+
+function showNextFlagged() {
+  if (flaggedPosition < flaggedQuestionIndices.length - 1) {
+    flaggedPosition++;
+    showQuestion(flaggedQuestionIndices[flaggedPosition]);
+  } else {
+    alert("This is the last flagged question.");
+  }
+}
+
+function showPrevFlagged() {
+  if (flaggedPosition > 0) {
+    flaggedPosition--;
+    showQuestion(flaggedQuestionIndices[flaggedPosition]);
+  } else {
+    alert("This is the first flagged question.");
+  }
+}
+
+function exitFlaggedMode() {
+  flaggedOnlyMode = false;
+  flaggedQuestionIndices = [];
+  flaggedPosition = 0;
+  showQuestion(currentQuestionIndex);
+  document.getElementById('flaggedControls').style.display = 'none';
+  document.getElementById('flaggedModeBanner').style.display = 'none';
+}
+</script>
+<div id="questionNavigator"></div>
+<!-- Flagged question controls -->
+<div id="flaggedNavContainer" style="margin-top: 96px; text-align: center;">
+<button class="btn-next" onclick="showFlaggedQuestions()">
+    🏴 Show Flagged Questions
+  </button>
+<div id="flaggedControls" style="display: none; margin-top: 10px;">
+<button onclick="showPrevFlagged()" style="background-color: #007bff; color: white; padding: 8px 16px; border-radius: 6px; margin-right: 10px;">⬅️ Previous Flagged</button>
+<button onclick="showNextFlagged()" style="background-color: #007bff; color: white; padding: 8px 16px; border-radius: 6px; margin-right: 10px;">Next Flagged ➡️</button>
+<button onclick="exitFlaggedMode()" style="background-color: gray; color: white; padding: 8px 16px; border-radius: 6px;">🔙 Return to Full Exam</button>
+</div>
+<div id="flaggedModeBanner" style="display: none; margin-top: 20px; background-color: #3a3a3a; color: orange; padding: 12px 20px; border: 2px dashed orange; border-radius: 6px; font-size: 16px; font-weight: bold;">
+    🚩 You are now reviewing <span style="text-decoration: underline;">flagged questions only</span>.
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.question-container').forEach(questionEl => {
+    const correctAnswers = JSON.parse(questionEl.getAttribute('data-correct'));
+    const inputs = questionEl.querySelectorAll('input');
+    const labels = questionEl.querySelectorAll('label');
+    inputs.forEach(input => input.addEventListener('change', handleAnswerClick));
+    
+    function handleAnswerClick(e) {
+      const sel = e.target;
+      const type = sel.type;
+      if (type === 'radio') {
+        // Immediate grading for single-select
+        const val = sel.value;
+        labels.forEach(l => { l.classList.remove('correct','wrong'); l.querySelectorAll('.feedback').forEach(s=>s.remove()); });
+        inputs.forEach(i => i.disabled = true);
+        if (correctAnswers.includes(val)) {
+          const lbl = sel.closest('label');
+          lbl.classList.add('correct');
+          lbl.insertAdjacentHTML('beforeend',' <span class="feedback correct">✔</span>');
+        } else {
+          const lbl = sel.closest('label');
+          lbl.classList.add('wrong');
+          lbl.insertAdjacentHTML('beforeend',' <span class="feedback wrong">✖</span>');
+          labels.forEach(l => {
+            const inp = l.querySelector('input');
+            if (inp && correctAnswers.includes(inp.value)) {
+              l.classList.add('correct');
+              l.insertAdjacentHTML('beforeend',' <span class="feedback correct">✔</span>');
+            }
+          });
+        }
+      } else if (type === 'checkbox') {
+        // Delayed grading: wait until user selects N options
+        const checkedInputs = Array.from(questionEl.querySelectorAll('input[type="checkbox"]')).filter(i => i.checked);
+        if (checkedInputs.length < correctAnswers.length) {
+          return; // don't grade yet
+        }
+        // Once N selected, disable all and grade
+        questionEl.querySelectorAll('input[type="checkbox"]').forEach(i => i.disabled = true);
+        labels.forEach(l => {
+          const inp = l.querySelector('input');
+          const val = inp.value;
+          const hasFeedback = l.querySelector('.feedback');
+          if (inp.checked) {
+            if (correctAnswers.includes(val)) {
+              l.classList.add('correct');
+              if (!hasFeedback) l.insertAdjacentHTML('beforeend',' <span class="feedback correct">✔</span>');
+            } else {
+              l.classList.add('wrong');
+              if (!hasFeedback) l.insertAdjacentHTML('beforeend',' <span class="feedback wrong">✖</span>');
+            }
+          } else {
+            if (correctAnswers.includes(val)) {
+              l.classList.add('correct');
+              if (!hasFeedback) l.insertAdjacentHTML('beforeend',' <span class="feedback correct">✔</span>');
+            }
+          }
+        });
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>

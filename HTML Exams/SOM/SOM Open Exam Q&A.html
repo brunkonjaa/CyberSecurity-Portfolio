@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SOM Mock Exam</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #3c3b3f, #605c3c);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .sidebar, .grid {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .sidebar {
+      width: 250px;
+    }
+
+    .grid {
+  display: grid;
+  grid-template-columns: repeat(8, 15px);
+  grid-auto-rows: 5px;
+  grid-gap: 30px;
+}
+
+    .grid button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      height: 75%;
+    }
+
+    #main {
+      background: #2a2a2a;
+      margin-top: 30px;
+      padding: 30px;
+      border-radius: 10px;
+      width: 600px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    #question-title {
+      margin-bottom: 15px;
+    }
+
+    #answers label {
+      display: block;
+      margin: 8px 0;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #timer {
+      color: red;
+      font-weight: bold;
+      float: right;
+    }
+
+    .hidden {
+      display: none;
+    }
+	
+	.results li.correct label::before {
+  content: "✔";
+  display: inline-block;
+  color: green;
+  font-weight: bold;
+  width: 1em;
+  margin-right: 0.5em;
+  text-align: center;
+}
+
+.results li.incorrect label::before {
+  content: "✖";
+  display: inline-block;
+  color: red;
+  font-weight: bold;
+  width: 1em;
+  margin-right: 0.5em;
+  text-align: center;
+}
+
+/* optionally hide the native radio dot so only your icon shows */
+.results li.correct input,
+.results li.incorrect input {
+  visibility: hidden;
+}
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h3>Diploma In Cybersecurity<br>NFQ Level 7</h3>
+    <p><strong>Disclaimer:</strong><br>
+      This is an unofficial mock examination.<br><br>
+      It was created solely for personal learning purposes.<br><br>
+      It is based on the knowledge acquired during the second semester.<br><br>
+      It is not endorsed by any academic institution.<br><br>
+      It is not formal exam preparation material.<br><br>
+      It is neither an official exam.</p>
+  </div>
+
+  <div id="main">
+    <div id="timer">Time Remaining: <span id="countdown">00:00</span></div>
+    <h2 style="text-align:center;">SOM Mock Exam</h2>
+    
+    <div id="exam-section">
+      <h3 id="question-title">Loading question...</h3>
+      <div id="answers"></div>
+
+      <div class="controls">
+		<button onclick="nextQuestion()">➡️ Next</button>
+		<button onclick="prevQuestion()">⬅️ Previous</button>
+		<button onclick="submitExam()">✅ Submit Exam</button>
+        <button onclick="flagQuestion()">🔖 Flag This Question</button>
+      </div>
+    </div>
+
+    <div id="review-section" class="hidden">
+      <h2>Exam Results</h2>
+      <p>Correct Answers: <span id="correct-count"></span></p>
+      <p>Wrong Answers: <span id="wrong-count"></span></p>
+      <p>Score: <span id="percentage"></span>%</p>
+      <div>
+        <button onclick="retakeWrongOnly()">🔁 Retake Wrong Only</button>
+        <button onclick="resetExam()">🔄 Restart Full Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="grid" id="question-grid">
+      <!-- Dynamically filled -->
+    </div>
+    <button style="margin-top: 10px;" onclick="showFlagged()">📑 Show Flagged Questions</button>
+  </div>
+
+  <script>
+    const fullQuestionBank = [
+      {
+    id: "q1",
+    question: "What is the basic aim of Security Operations Management?",
+    options: [
+      "A. To develop and deploy new security products.",
+      "B. To conduct compliance audits of financial processes.",
+      "C. To proactively monitor, detect, and respond to security threats, managing principal security concerns.",
+      "D. To train end-users on standard business applications."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q2",
+    question: "What are the three principle components important for Security Operations Management?",
+    options: [
+      "A. Policy, Procedures, Partnerships",
+      "B. People (skilled analysts and operators), Process (defined workflows and playbooks), Technology (tools such as SIEM, IDS/IPS, and monitoring platforms)",
+      "C. Platforms, Programming, Performance Metrics",
+      "D. People, Power, Performance"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q3",
+    question: "What is 3LD?",
+    options: [
+      "A. The Second Line of Defense—risk and compliance functions.",
+      "B. The First Line of Defense—operational management.",
+      "C. The Fourth Line of Defense—external regulators and auditors.",
+      "D. The Third Line of Defense—typically internal audit—providing independent assurance on the effectiveness of governance, risk management, and internal controls."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q4",
+    question: "Name the security capabilities / categories that are described in a Security Architecture.",
+    options: [
+      "A. Data Analytics; User Training; Compliance Monitoring; Risk Assessment",
+      "B. Identity & Access Management; Network Security; Endpoint Security; Data Protection; Application Security; Threat Detection & Response",
+      "C. Physical Security; Fire Safety; Disaster Recovery",
+      "D. Budget Planning; Vendor Management; Audit Logging"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q5",
+    question: "Who are the security capabilities and control measures applied to?",
+    options: [
+      "A. Third-party vendors only.",
+      "B. External auditors and regulators.",
+      "C. Physical security staff only.",
+      "D. People, processes, systems, and data across the organization."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q6",
+    question: "What function deals with ensuring configuration baselines are applied appropriately?",
+    options: [
+      "A. The Configuration Management function (often within Change Management).",
+      "B. The Identity & Access Management function.",
+      "C. The Incident Response function.",
+      "D. The Threat Intelligence function."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q7",
+    question: "Who in an organisation has a keen interest in data security?",
+    options: [
+      "A. Only the CISO and IT manager.",
+      "B. External auditors only.",
+      "C. Data owners, data stewards, compliance officers, IT security teams, and business-unit leaders.",
+      "D. All employees equally, regardless of role."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q8",
+    question: "Where is threat modelling typically performed?",
+    options: [
+      "A. Only after production incidents occur.",
+      "B. During the design and development phase of systems and applications, often as part of architecture reviews.",
+      "C. During user acceptance testing.",
+      "D. At the end of each fiscal quarter."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q9",
+    question: "What are RACIs used for and why?",
+    options: [
+      "A. To map network access controls.",
+      "B. To classify data sensitivity levels.",
+      "C. To document incident response timelines.",
+      "D. To define Roles and Responsibilities (Responsible, Accountable, Consulted, Informed), ensuring clear accountability and communication in processes."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q10",
+    question: "What typical activities does the Security Architecture function pursue?",
+    options: [
+      "A. Writing user manuals; Conducting helpdesk support; Rolling out software patches.",
+      "B. Managing vendor contracts; Approving budgets; Scheduling training.",
+      "C. Developing security design standards; Performing risk assessments and threat modelling; Evaluating and selecting security technologies; Defining security principles and guidelines.",
+      "D. Performing financial audits; Overseeing HR policy compliance."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q11",
+    question: "Why does the security strategy and implementation functions need to work with an organisation's Project Office?",
+    options: [
+      "A. To outsource all security tasks to external consultants.",
+      "B. To align security requirements with project timelines, embed security in planning, and avoid late-stage rework.",
+      "C. To perform annual security training only.",
+      "D. To handle the hiring process for security staff."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q12",
+    question: "What interactions has a security engineering team with the incident response team?",
+    options: [
+      "A. Designing company logos; Writing press releases.",
+      "B. Only notifying HR of breaches.",
+      "C. Providing forensic tools and expertise; Integrating detection capabilities into systems; Assisting with malware analysis and remediation planning.",
+      "D. Scheduling company events."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q13",
+    question: "Which areas does security engineering activities cover in the NIST CSF?",
+    options: [
+      "A. Identify and Recover only.",
+      "B. Protect (e.g., access control, protective technology) and Detect (e.g., anomaly detection, continuous monitoring).",
+      "C. Governance and Awareness only.",
+      "D. All five functions except Protect and Detect."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q14",
+    question: "What are the 3 main core areas of security monitoring function concerns?",
+    options: [
+      "A. Planning; Budgeting; Auditing.",
+      "B. Development; Testing; Deployment.",
+      "C. Hiring; Training; Firing.",
+      "D. Alerting; Investigation; Response."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q15",
+    question: "What components do SIEM systems monitor?",
+    options: [
+      "A. Only firewall configurations.",
+      "B. Software licenses and inventory.",
+      "C. Logs, network traffic, user activity, system events, and alerts from various security sensors.",
+      "D. Physical access controls."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q16",
+    question: "How many levels of investigation usually exist in security monitoring?",
+    options: [
+      "A. Two: Detection and Response.",
+      "B. Four: Planning, Detection, Analysis, Recovery.",
+      "C. One: Centralized analysis only.",
+      "D. Typically three: Tier 1 (alert triage), Tier 2 (incident analysis), Tier 3 (advanced forensics)."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q17",
+    question: "What are the use case development & lifecycle phases?",
+    options: [
+      "A. Identification; Design; Implementation; Tuning; Review.",
+      "B. Planning; Execution; Reporting.",
+      "C. Drafting; Approval; Closure.",
+      "D. Concept; Prototype; Launch."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q18",
+    question: "What are the 3 basic vulnerability process steps?",
+    options: [
+      "A. Identification; Deployment; Retirement.",
+      "B. Planning; Execution; Validation.",
+      "C. Discovery (scanning); Assessment (prioritization); Remediation (fix or mitigate).",
+      "D. Testing; Reporting; Archiving."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q19",
+    question: "Which information is used for qualifying identified vulnerabilities?",
+    options: [
+      "A. User satisfaction surveys only.",
+      "B. CVSS scores, asset criticality, exploit availability, business impact, and threat intelligence.",
+      "C. Hardware inventory lists only.",
+      "D. Budget forecasts only."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q20",
+    question: "How does the TVM team collaborate with Threat Intelligence?",
+    options: [
+      "A. By outsourcing all vulnerability scans.",
+      "B. By ignoring external intelligence sources.",
+      "C. By consuming threat feeds to prioritize vulnerabilities and align remediation with emerging threats.",
+      "D. By only reporting to compliance teams."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q21",
+    question: "What information should be in a TVM standard?",
+    options: [
+      "A. Company mission statement only.",
+      "B. Employee contact list only.",
+      "C. Legal disclaimers only.",
+      "D. Scope and objectives; Roles & responsibilities; Scanning frequency and methods; Risk-rating methodology; Remediation timelines."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q22",
+    question: "What accounts should be managed by IAM?",
+    options: [
+      "A. Only guest accounts.",
+      "B. All user accounts (employees, contractors); Service and application accounts; Privileged/admin accounts.",
+      "C. Only vendor accounts.",
+      "D. Only personal social media accounts."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q23",
+    question: "Name the Provisioning steps and the key pre-requisite?",
+    options: [
+      "A. Plan → Build → Test → Deploy → Decommission.",
+      "B. Initiate → Execute → Monitor → Close.",
+      "C. Request → Approval → Creation → Delivery → Review, Pre-requisite: Defined access policies and role definitions.",
+      "D. Concept → Prototype → Launch → Support."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q24",
+    question: "What measure would you take to enhance security of privileged accounts?",
+    options: [
+      "A. Use default passwords for simplicity.",
+      "B. Share credentials among team members.",
+      "C. Disable logging to improve performance.",
+      "D. Implement MFA, just-in-time access, session recording, and credential vaulting."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q25",
+    question: "What characteristics would an organisation exhibit at an advanced IAM maturity level?",
+    options: [
+      "A. Manual user creation only.",
+      "B. Automated provisioning/de-provisioning; Continuous entitlement reviews; Adaptive access controls; Integrated identity governance.",
+      "C. Annual password resets only.",
+      "D. No formal access reviews."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q26",
+    question: "What are the 3 components that make up Threat Management?",
+    options: [
+      "A. Policy, Procedure, Platform.",
+      "B. Hardware, Software, Firmware.",
+      "C. Threat Intelligence; Threat Detection (monitoring/alerting); Threat Response (hunting & remediation).",
+      "D. Budget, Staffing, Training."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q27",
+    question: "What do you need or needs to be in place for starting threat hunting?",
+    options: [
+      "A. Only basic antivirus software.",
+      "B. Only a firewall.",
+      "C. Only user awareness training.",
+      "D. Access to logs/telemetry; Threat-intelligence context; Skilled analysts and analytical tools."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q28",
+    question: "What is the difference between a red and blue team?",
+    options: [
+      "A. Red Team simulates adversaries to test defenses; Blue Team defends, detects, and responds to attacks.",
+      "B. Red Team does compliance audits; Blue Team writes policies.",
+      "C. Red Team manages user accounts; Blue Team manages network devices.",
+      "D. Red Team develops software; Blue Team tests software."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q29",
+    question: "What threat intelligence types would you seek and look at in order to get an initial sense of threats your organisation might face?",
+    options: [
+      "A. Only financial intelligence.",
+      "B. Strategic intelligence; Tactical intelligence; Operational intelligence; Technical intelligence (industry-specific reports and IOCs).",
+      "C. Only legal intelligence.",
+      "D. Only HR intelligence."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q30",
+    question: "What application categories could be defined?",
+    options: [
+      "A. Only web applications.",
+      "B. Only desktop applications.",
+      "C. Only email applications.",
+      "D. Web applications; Mobile apps; APIs; Cloud-native services; Embedded systems; Legacy applications."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q31",
+    question: "What security challenges would you highlight trying to embed security in an agile development methodology?",
+    options: [
+      "A. Only documentation challenges.",
+      "B. Only budget challenges.",
+      "C. Speed vs. security trade-offs; Integrating security testing into sprints; Automating security tooling; Building a shift-left culture.",
+      "D. Only staffing challenges."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q32",
+    question: "Which application software testing tool would you use in order to identify weaknesses at runtime?",
+    options: [
+      "A. A static code linter only.",
+      "B. An IAST (Interactive Application Security Testing) solution; A RASP (Runtime Application Self-Protection) solution.",
+      "C. A spell-checker.",
+      "D. A network profiler only."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q33",
+    question: "How can you perform SCA on SaaS?",
+    options: [
+      "A. Use cloud-provider APIs; Integrate SCA into CI/CD pipelines; Employ proxy-based scanning of third-party dependencies.",
+      "B. Only manual code reviews.",
+      "C. Only user surveys.",
+      "D. Only firewall logs."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q34",
+    question: "Which Incident Response Phase should playbooks be created?",
+    options: [
+      "A. Detection & Analysis.",
+      "B. Preparation.",
+      "C. Containment, Eradication & Recovery.",
+      "D. Lessons Learned."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q35",
+    question: "Which Incident Response Phase should deal comprehensively with the root causes of an incident?",
+    options: [
+      "A. Preparation.",
+      "B. Detection & Analysis.",
+      "C. Containment, Eradication & Recovery.",
+      "D. Lessons Learned (Post-Incident Review)."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q36",
+    question: "What are the criticality categories for incidents, and for which would a crisis management team get involved?",
+    options: [
+      "A. Minor, Major only — team never activates.",
+      "B. Level 1, Level 2, Level 3 — team activates on Level 1.",
+      "C. Low, Medium, High, Critical — crisis-management team activates on Critical incidents.",
+      "D. Alert, Warning, Notice — team activates on Notice."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q37",
+    question: "What mistakes could be made during the response to an incident?",
+    options: [
+      "A. Writing too much documentation only.",
+      "B. Poor communication; Failure to contain the threat; Lack of coordination; Skipping root-cause analysis; Over- or under-escalation.",
+      "C. Only budget misallocation.",
+      "D. Only hardware failures."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q38",
+    question: "What is the main difference between Enterprise Security Architecture and Security Architecture implementation?",
+    options: [
+      "A. Enterprise Architecture is only about hardware; Implementation is only about software.",
+      "B. Enterprise Architecture is external; Implementation is internal only.",
+      "C. No difference.",
+      "D. Enterprise Architecture defines high-level principles and design; Implementation translates those designs into actual controls and deployments."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q39",
+    question: "What security architecture means would you employ to get a sense of controls for a specific business solution?",
+    options: [
+      "A. Solution-architecture review; Control-mapping frameworks (e.g., SABSA, TOGAF); Targeted threat-modelling workshops.",
+      "B. Only code reviews.",
+      "C. Only firewall rule audits.",
+      "D. Only user surveys."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q40",
+    question: "What information would you want to have to create a security strategy?",
+    options: [
+      "A. Only HR policies.",
+      "B. Business objectives and priorities; Risk appetite; Current-state security assessment; Regulatory requirements; Threat landscape.",
+      "C. Only financial budgets.",
+      "D. Only historical incident logs."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q41",
+    question: "How can you measure success of security awareness measures?",
+    options: [
+      "A. Only attendance at meetings.",
+      "B. Only number of slides in training.",
+      "C. Only firewall uptime.",
+      "D. Phishing-simulation click rates; Training completion rates; Number of user-reported incidents; Employee survey results."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q42",
+    question: "What mechanisms and means are available to get visibility and management information security risks across an organisation?",
+    options: [
+      "A. Only whiteboard sessions.",
+      "B. Only email newsletters.",
+      "C. GRC platforms and risk dashboards; Continuous monitoring tools; Security metrics and reporting frameworks.",
+      "D. Only physical signage."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q43",
+    question: "What is the key purpose of risk management?",
+    options: [
+      "A. To identify, assess, and mitigate risks to an acceptable level in line with business objectives.",
+      "B. To eliminate all risks completely.",
+      "C. To ignore low-priority issues.",
+      "D. To focus only on financial risk."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q44",
+    question: "What is a key advantage of defining governance structures?",
+    options: [
+      "A. Reduced need for documentation.",
+      "B. Clear accountability, consistent decision-making, and alignment of security with business goals.",
+      "C. Increased system performance.",
+      "D. Automatic compliance."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q45",
+    question: "Mean time to detection is a KPI for which metrics area?",
+    options: [
+      "A. System uptime.",
+      "B. Employee productivity.",
+      "C. Financial reporting accuracy.",
+      "D. Incident detection and response performance."
+    ],
+    correctAnswer: "D"
+  }
+    ];
+
+    let questions = [...fullQuestionBank];
+    let currentIndex = 0;
+    let userAnswers = Array(questions.length).fill().map(() => []);
+    let flagged = new Set();
+    let timerId;
+    const totalTime = questions.length * 60;
+
+    function loadQuestion() {
+  const q = questions[currentIndex];
+  document.getElementById('question-title').textContent = `Question ${currentIndex + 1}: ${q.question}`;
+  const answersDiv = document.getElementById('answers');
+  answersDiv.innerHTML = '';
+
+  const isMultiAnswer = q.correct.length > 1;
+  let submitted = false;
+
+  const feedback = document.createElement('div');
+  feedback.id = 'feedback';
+  feedback.style.marginTop = '15px';
+  feedback.style.fontWeight = 'bold';
+
+  const updateStyles = () => {
+    document.querySelectorAll('#answers label').forEach(label => {
+      label.style.backgroundColor = '';
+      label.style.padding = '';
+      label.style.borderRadius = '';
+    });
+  };
+
+  
+
+  q.answers.forEach((ans, i) => {
+    const input = document.createElement('input');
+    input.type = isMultiAnswer ? 'checkbox' : 'radio';
+    input.name = 'answer';
+    input.value = i;
+    input.checked = userAnswers[currentIndex].includes(i);
+
+    const label = document.createElement('label');
+    label.style.display = "block";
+    label.style.margin = "8px 0";
+    label.appendChild(input);
+    label.append(" " + ans);
+
+    input.addEventListener('change', () => {
+      const checked = Array.from(document.querySelectorAll('#answers input:checked')).map(cb => +cb.value);
+      userAnswers[currentIndex] = checked;
+
+      // Compare sorted user input with correct answers
+      const sortedUser = [...checked].sort().join(',');
+      const sortedCorrect = q.correct.slice().sort().join(',');
+
+      // Reset all styles first
+      updateStyles();
+
+      if (sortedUser === sortedCorrect) {
+        feedback.textContent = "✅ Correct!";
+        feedback.style.color = "limegreen";
+
+        // Mark correct answers in green
+        checked.forEach(idx => {
+          const label = document.querySelectorAll('#answers label')[idx];
+          label.style.backgroundColor = '#28a745';
+          label.style.padding = '5px';
+          label.style.borderRadius = '5px';
+        });
+      } else {
+        const correctText = q.correct.map(idx => q.answers[idx]).join(', ');
+        feedback.textContent = `❌ Incorrect. Correct answer: ${correctText}`;
+        feedback.style.color = "red";
+
+        // Highlight selected answers in red
+        checked.forEach(idx => {
+          const label = document.querySelectorAll('#answers label')[idx];
+          label.style.backgroundColor = '#dc3545';
+          label.style.padding = '5px';
+          label.style.borderRadius = '5px';
+        });
+
+        // Highlight correct answers in green
+        q.correct.forEach(idx => {
+          const label = document.querySelectorAll('#answers label')[idx];
+          label.style.backgroundColor = '#28a745';
+          label.style.padding = '5px';
+          label.style.borderRadius = '5px';
+        });
+      }
+    });
+
+    answersDiv.appendChild(label);
+  });
+}
+
+    function updateGrid() {
+      const grid = document.getElementById('question-grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < questions.length; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i + 1;
+        btn.onclick = () => {
+          currentIndex = i;
+          loadQuestion();
+        };
+        grid.appendChild(btn);
+      }
+    }
+
+    function flagQuestion() {
+      if (flagged.has(currentIndex)) {
+        flagged.delete(currentIndex);
+      } else {
+        flagged.add(currentIndex);
+      }
+      alert(`Question ${currentIndex + 1} ${flagged.has(currentIndex) ? 'flagged' : 'unflagged'}`);
+    }
+
+    function showFlagged() {
+      if (!flagged.size) return alert("No flagged questions.");
+      alert("Flagged questions: " + Array.from(flagged).map(i => i + 1).join(', '));
+    }
+
+    function nextQuestion() {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        loadQuestion();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        loadQuestion();
+      }
+    }
+
+    function submitExam() {
+      clearInterval(timerId);
+      let correct = [], wrong = [];
+      questions.forEach((q, i) => {
+        const sortedUser = [...(userAnswers[i] || [])].sort().join(',');
+        const sortedCorrect = q.correct.slice().sort().join(',');
+        if (sortedUser === sortedCorrect) correct.push(i);
+        else wrong.push(i);
+      });
+
+      document.getElementById('exam-section').classList.add('hidden');
+      document.getElementById('review-section').classList.remove('hidden');
+      document.getElementById('correct-count').textContent = correct.length;
+      document.getElementById('wrong-count').textContent = wrong.length;
+      document.getElementById('percentage').textContent = ((correct.length / questions.length) * 100).toFixed(2);
+
+      sessionStorage.setItem('wrongIndexes', JSON.stringify(wrong));
+    }
+
+    function retakeWrongOnly() {
+      const wrong = JSON.parse(sessionStorage.getItem('wrongIndexes') || '[]');
+      if (!wrong.length) return alert("No wrong answers to retake!");
+      questions = wrong.map(i => fullQuestionBank[i]);
+      resetExam();
+    }
+
+    function resetExam() {
+      userAnswers = Array(questions.length).fill().map(() => []);
+      currentIndex = 0;
+      flagged = new Set();
+      document.getElementById('review-section').classList.add('hidden');
+      document.getElementById('exam-section').classList.remove('hidden');
+      updateGrid();
+      loadQuestion();
+      startTimer(questions.length * 60);
+    }
+
+    function startTimer(duration) {
+      let timer = duration;
+      const countdown = document.getElementById('countdown');
+      const update = () => {
+        const m = String(Math.floor(timer / 60)).padStart(2, '0');
+        const s = String(timer % 60).padStart(2, '0');
+        countdown.textContent = `${m}:${s}`;
+        if (--timer < 0) {
+          clearInterval(timerId);
+          submitExam();
+        }
+      };
+      update();
+      timerId = setInterval(update, 1000);
+    }
+
+    window.onload = () => {
+      updateGrid();
+      loadQuestion();
+      startTimer(totalTime);
+    };
+  </script>
+</body>
+</html>

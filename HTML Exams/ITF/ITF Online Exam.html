@@ -1,0 +1,2230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITF Exam</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #0056b3, #87CEEB);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .question-container {
+            display: none;
+        }
+        .question-container.active {
+            display: block;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px 0 0;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        .btn-next, .btn-prev {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-submit, .btn-reset, .btn-retry {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-next:hover, .btn-prev:hover, .btn-submit:hover, .btn-reset:hover, .btn-retry:hover {
+            opacity: 0.9;
+        }
+        .timer {
+            text-align: right;
+            font-size: 18px;
+            color: red;
+            margin-bottom: 20px;
+        }
+        .results {
+            text-align: center;
+            display: none;
+        }
+        .motivational {
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ITF Exam</h1>
+        <div class="timer" id="timer">Time Remaining: 183:00</div>
+        <form id="examForm">
+            <div id="questions"></div>
+            <div class="results" id="results">
+                <h2>Exam Results</h2>
+                <p>Total Questions: <span id="totalQuestions"></span></p>
+                <p>Correct Answers: <span id="correctAnswers"></span></p>
+                <p>Wrong Answers: <span id="wrongAnswers"></span></p>
+                <p>Unanswered: <span id="unansweredQuestions"></span></p>
+                <p>Percentage: <span id="percentage"></span>%</p>
+                <p>Your Name: <span id="userNameOutput"></span></p>
+                <button type="button" class="btn-reset" onclick="resetExam()">Restart Exam</button>
+                <button type="button" class="btn-retry" onclick="retryWrongUnanswered()">Try Again with Wrong or Unanswered Questions</button>
+            </div>
+            <button type="submit" class="btn-submit" id="submitButton" style="display: none;">Submit Exam</button>
+        </form>
+    </div>
+
+    <script>
+        let questionPool = [
+            {
+        'id': 'q1',
+        'question': 'What should you do before attempting to set up a new computer system?',
+        'options': [
+            'A. Ignore the environment and proceed with the installation.',
+            'B. Verify that the environment is suitable, and that the installation will be safe.',
+            'C. Set up the system without checking the environment.',
+            'D. Wait for instructions from the manufacturer.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q2',
+        'question': 'When setting up a desktop computer, what factor should you consider when deciding on the location of the system case?',
+        'options': [
+            'A. Only the aesthetics of the room.',
+            'B. You should consider the position of power outlets and where peripheral devices will be placed.',
+            'C. Ensuring the system case is placed on the floor at all times.',
+            'D. Focusing only on the screen\'s visibility.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q3',
+        'question': 'What factors should you consider when positioning input and output devices?',
+        'options': [
+            'A. Only the color scheme of the devices.',
+            'B. Ensure that they can be used without exerting strain, especially on the arms/wrists and back/neck.',
+            'C. Ensure the cables are hidden completely.',
+            'D. Ensure the devices are only within arm’s reach.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q4',
+        'question': 'You have to sign in to Windows—does it matter if the CAPS LOCK light on the keyboard is activated?',
+        'options': [
+            'A. No, it doesn\'t matter since Windows passwords are case-insensitive.',
+            'B. Yes—passwords are case-sensitive.',
+            'C. No, passwords are always typed in uppercase.',
+            'D. Yes, but only in certain versions of Windows.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q5',
+        'question': 'You have to open a word processing application, but you cannot see an icon on the desktop. What should you do?',
+        'options': [
+            'A. Try searching for the application in the taskbar.',
+            'B. Look for the shortcut in Start Menu or Start Screen—not all programs add shortcuts on the Desktop.',
+            'C. Restart the computer and check again.',
+            'D. Ignore it and try to find the icon later.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q6',
+        'question': 'Your colleague has to run many applications at the same time and finds it difficult to know which icon to choose when switching between them. What alternative method could you suggest?',
+        'options': [
+            'A. Minimize all applications and start from the desktop.',
+            'B. Press Alt+Tab—this shows previews of the window.',
+            'C. Close all applications and reopen them one by one.',
+            'D. Use the taskbar only to switch between apps.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q7',
+        'question': 'Your colleague is using a laptop and you notice that he laboriously clicks the mouse repeatedly to scroll through the document you are co-editing. What technique could he use to be more productive?',
+        'options': [
+            'A. Use the mouse scroll wheel (or if it doesn\'t have one drag the scroll button in the scroll bar).',
+            'B. Switch to using keyboard shortcuts only.',
+            'C. Always use the touchpad to navigate.',
+            'D. Use a third-party software to scroll faster.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q8',
+        'question': 'What is the registry and how does it distinguish Windows and Linux?',
+        'options': [
+            'A. The registry is a database of configuration settings supporting Linux OS.',
+            'B. The registry is a database of configuration settings supporting the Windows OS. Linux uses individual text files to store settings.',
+            'C. The registry is used in both Windows and Linux for system configuration.',
+            'D. Linux does not have a registry; it uses a global configuration file.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q9',
+        'question': 'What term is used to describe terminating a process that is not responding to user input?',
+        'options': [
+            'A. Closing the application.',
+            'B. Killing the process.',
+            'C. Restarting the system.',
+            'D. Debugging the process.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q10',
+        'question': 'Why might you use the Services snap-in to manage background processes rather than Task Manager?',
+        'options': [
+            'A. Task Manager allows you to view the processes, but the Services snap-in also allows you to configure service properties.',
+            'B. Task Manager is outdated and not useful for managing services.',
+            'C. The Services snap-in can start and stop services, while Task Manager can only monitor them.',
+            'D. Task Manager is only useful for monitoring CPU usage.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q11',
+        'question': 'The Task Scheduler allows you to run a process automatically in Windows. What is a widely-used Linux equivalent?',
+        'options': [
+            'A. CRON is widely used to run tasks automatically in Linux.',
+            'B. Task Scheduler in Linux.',
+            'C. Cronjob is an external application used in Linux.',
+            'D. Linux does not have an equivalent tool for scheduling tasks.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q12',
+        'question': 'What part of the system memory setup is most user-configurable?',
+        'options': [
+            'A. Increasing physical RAM.',
+            'B. Use of virtual memory or a pagefile, where disk space is used to supplement system RAM.',
+            'C. Setting the maximum RAM size on the motherboard.',
+            'D. Installing a secondary memory device for backup.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q13',
+        'question': 'What two things are configured on a disk to make storage space on the disk available to the Windows OS?',
+        'options': [
+            'A. A partition and a formatted file system.',
+            'B. A disk drive letter and a backup system.',
+            'C. Disk encryption and a partition.',
+            'D. A folder and a disk image.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q14',
+        'question': 'What is a CLI?',
+        'options': [
+            'A. A Custom Layout Interface used for arranging desktop items.',
+            'B. A Command Line Interface allows the user to interact with the OS using typed commands or scripts rather than a GUI.',
+            'C. A graphical interface that supports text and images.',
+            'D. A Control Link Interface used to connect external devices.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q15',
+        'question': 'What protection feature in Windows is designed to prevent a script or software from making unauthorized changes to the OS configuration?',
+        'options': [
+            'A. Antivirus software.',
+            'B. User Access Control (UAC).',
+            'C. Firewall settings.',
+            'D. Windows Defender.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q16',
+        'question': 'True or false? A standard user cannot change their own password.',
+        'options': [
+            'A. True, only administrators can change passwords.',
+            'B. False—ordinary users can change their own password but cannot change anyone else\'s.',
+            'C. False—standard users can change any password.',
+            'D. True, unless the system is in Safe Mode.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q17',
+        'question': 'You are advising a colleague about best practices when troubleshooting. You have identified the following techniques to use to identify a problem: gather information, duplicate the problem, question users, identify symptoms, and approach multiple problems individually. If you are following CompTIA\'s troubleshooting model, what other piece of advice should you give?',
+        'options': [
+            'A. Ignore any recent changes to the system.',
+            'B. Determine if anything has changed—this is one of the most useful troubleshooting techniques.',
+            'C. Always restart the computer before starting the troubleshooting process.',
+            'D. Start by replacing the hardware before diagnosing the issue.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q18',
+        'question': 'You have asked a senior manager to authorize your plan of action for resolving a fault in a software application. What name is given to the process you are following?',
+        'options': [
+            'A. Restarting the application.',
+            'B. Escalating the problem.',
+            'C. Authorizing a patch.',
+            'D. Debugging the application.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q19',
+        'question': 'You are setting up a new computer, but it doesn\'t seem to be working. Should you check anything or contact the manufacturer?',
+        'options': [
+            'A. It\'s better to immediately contact the manufacturer.',
+            'B. It would be best to double-check you have connected the cables correctly (especially power).',
+            'C. Try restarting the computer multiple times.',
+            'D. Replace the power supply without further checks.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q20',
+        'question': 'Your computer locks up periodically and feels hot to the touch. Could these things be related?',
+        'options': [
+            'A. No, overheating is unrelated to lockup problems.',
+            'B. Yes, many lockup problems are caused by overheating. The first step would be to clean the fan exhaust vents of dust.',
+            'C. Yes, the software may be causing overheating.',
+            'D. No, you should immediately reinstall the operating system.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q21',
+        'question': 'What crucial piece of information would you need when trying to locate support information about a computer system on the manufacturer\'s website?',
+        'options': [
+            'A. The system\'s IP address.',
+            'B. The model number or a service code.',
+            'C. The serial number of the monitor.',
+            'D. The software version installed on the system.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q22',
+        'question': 'If you do not have a support contract, what is likely to be the best option for obtaining advice about a problem with an application?',
+        'options': [
+            'A. Call the manufacturer\'s customer service.',
+            'B. A product support or community forum.',
+            'C. Search for professional consultants.',
+            'D. Rely on social media for user feedback.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q23',
+        'question': 'You are looking for content on a topic but your search is returning millions of matches that are not particularly helpful. What two methods could you use to get better search results?',
+        'options': [
+            'A. Use more search keywords (ideally with "uncommon" words) or search for an exact phrase by enclosing it in quotes.',
+            'B. Narrow down the search to only websites from a specific country.',
+            'C. Search for one word only to avoid confusion.',
+            'D. Limit the search results to the past year.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q24',
+        'question': 'You want to find something on a particular website, but the site does not have a search tool. Could you use a general search engine, and if so, how?',
+        'options': [
+            'A. No, a general search engine can\'t be used for specific websites.',
+            'B. Yes—you use an advanced search form or use the site: operator (for example "certification site:comptia.org").',
+            'C. Yes, but only if the website is indexed by Google.',
+            'D. No, you would need to manually browse the site to find what you need.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q25',
+        'question': 'What is the best method to identify a recurring issue with a software application that users report experiencing?',
+        'options': [
+            'A. Gather information from users, duplicate the problem, and approach the issue systematically.',
+            'B. Reset the application settings to default and wait for user feedback.',
+            'C. Ignore the reports and wait for the problem to resolve itself.',
+            'D. Contact the developer directly for a patch without investigating further.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q26',
+        'question': 'Which notation system supports presenting the largest numbers using the fewest digits: Binary, Decimal, or Hexadecimal?',
+        'options': [
+            'A. Binary',
+            'B. Decimal',
+            'C. Hexadecimal',
+            'D. None of the above'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q27',
+        'question': 'What is the decimal number 75 in binary and hexadecimal?',
+        'options': [
+            'A. 0111 1011 in binary and 4B in hex.',
+            'B. 0100 1011 in binary and 4B in hex.',
+            'C. 0100 1011 in binary and 75 in hex.',
+            'D. 0101 0100 in binary and 75 in hex.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q28',
+        'question': 'Which data type provides for whole numbers only?',
+        'options': [
+            'A. Float',
+            'B. Double',
+            'C. Integer',
+            'D. String'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q29',
+        'question': 'What is the difference between the char and string data types?',
+        'options': [
+            'A. Char stores a single textual character and a string stores multiple characters.',
+            'B. Char stores a variable-length string, while a string stores fixed-length characters.',
+            'C. Char stores a sequence of numbers, while a string stores only characters.',
+            'D. Char stores floating-point numbers, and a string stores text.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q30',
+        'question': 'Which data representation format can encode the widest range of characters?',
+        'options': [
+            'A. ASCII',
+            'B. UTF-8',
+            'C. Unicode',
+            'D. Base64'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q31',
+        'question': 'What type of legal protection could be obtained for a novel software algorithm?',
+        'options': [
+            'A. Trademark',
+            'B. Patent',
+            'C. Copyright',
+            'D. Trade secret'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q32',
+        'question': 'What data protection technology could you implement in order to restrict the type of activity that users could employ on digital products that they have purchased or rented?',
+        'options': [
+            'A. Antivirus software',
+            'B. Firewalls',
+            'C. Digital Rights Management (DRM)',
+            'D. Encryption'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q33',
+        'question': 'What part of the process of data analytics is most closely supported by meaningful reporting?',
+        'options': [
+            'A. Data collection',
+            'B. Insights',
+            'C. Data cleaning',
+            'D. Visualization'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q34',
+        'question': 'What compatibility information should you confirm before installing a software application?',
+        'options': [
+            'A. The version of the operating system and system hardware requirements.',
+            'B. The operating system version only.',
+            'C. The type of software license you need.',
+            'D. The version of the browser to use.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q35',
+        'question': 'Following installation of a program written for an older version of Windows, you receive an alert that it might not have installed correctly. What feature could you use to make the program run correctly?',
+        'options': [
+            'A. Use the Windows Compatibility tab to adjust settings for the older version of Windows.',
+            'B. Reinstall the program and avoid compatibility settings.',
+            'C. Contact the software developer for an update.',
+            'D. Use a virtual machine to run the old software version.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q36',
+        'question': 'Why would Windows prompt you to enter a password if you try to install a software application?',
+        'options': [
+            'A. Installing software requires administrator privileges and is protected by User Account Control.',
+            'B. To verify your identity for warranty purposes.',
+            'C. It asks for a password to ensure the software is licensed.',
+            'D. Windows does this to avoid malware installation.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q37',
+        'question': 'Windows comes with web server software but it is not enabled by default. How would you install this software?',
+        'options': [
+            'A. Use the Turn Windows features on or off dialog from Programs and Features.',
+            'B. Download the web server software from a third-party website.',
+            'C. Use the Command Prompt to install it manually.',
+            'D. Install it through the Microsoft Store.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q38',
+        'question': 'Following installation of an application, another program on your computer has stopped working. What could you do to try to fix it?',
+        'options': [
+            'A. Try using the Repair option in Programs and Features (if available) or reinstalling the program.',
+            'B. Update the drivers for your computer.',
+            'C. Delete all temporary files and restart your computer.',
+            'D. Uninstall the problematic program and reinstall it.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q39',
+        'question': 'Why might one of your first tasks on receiving a new computer be to remove software applications?',
+        'options': [
+            'A. The computer may be bundled with pre-installed software that you do not want.',
+            'B. Pre-installed software is always faulty and needs to be removed.',
+            'C. The pre-installed software is always outdated and incompatible.',
+            'D. Removing software improves system performance.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q40',
+        'question': 'In order to obtain support, the software vendor wants to know the application\'s product ID. How would you locate this information?',
+        'options': [
+            'A. Usually via the Help > About menu.',
+            'B. By checking the file properties of the installation file.',
+            'C. By searching for it on the product website.',
+            'D. By contacting customer support directly.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q41',
+        'question': 'What is the difference between freeware and open source software?',
+        'options': [
+            'A. Freeware means the software is free to use, but the code is not available. Open source software means the code is available to modify and distribute.',
+            'B. Freeware allows you to modify the code, while open source software does not.',
+            'C. Open source software is free to use and freeware is paid software.',
+            'D. Freeware software is less secure than open source software.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q42',
+        'question': 'What type of software would you use to configure a server by connecting to it over the network?',
+        'options': [
+            'A. Remote Desktop.',
+            'B. File management software.',
+            'C. Virtual machine software.',
+            'D. Remote server software.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q43',
+        'question': 'What type of software manages tasks, dependencies, and timelines?',
+        'options': [
+            'A. Project management software.',
+            'B. Accounting software.',
+            'C. Word processing software.',
+            'D. Database management software.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q44',
+        'question': 'What shows the structure of code without using the specific syntax of any one language?',
+        'options': [
+            'A. Flowchart.',
+            'B. Pseudocode.',
+            'C. Algorithm.',
+            'D. Syntax diagram.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q45',
+        'question': 'What is an interpreted language?',
+        'options': [
+            'A. A language that needs to be compiled before running.',
+            'B. A language that is executed by a machine directly without an intermediary.',
+            'C. A language that runs within an interpreter, converting code to machine code during runtime.',
+            'D. A language that cannot be used in runtime environments.'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q46',
+        'question': 'How is a markup language different from a compiled language?',
+        'options': [
+            'A. Markup languages provide instructions for the CPU to run, while compiled languages do not.',
+            'B. Markup languages describe a document\'s structure using tags, while compiled languages provide instructions for execution by the CPU.',
+            'C. Compiled languages are written in binary, whereas markup languages are human-readable.',
+            'D. Markup languages are slower than compiled languages in execution.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q47',
+        'question': 'What are constants and variables examples of?',
+        'options': [
+            'A. Data types.',
+            'B. Programming identifiers.',
+            'C. Program modules.',
+            'D. Program outputs.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q48',
+        'question': 'What type of programming concept allows for a variable size container?',
+        'options': [
+            'A. An array.',
+            'B. A vector.',
+            'C. A stack.',
+            'D. A queue.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q49',
+        'question': 'You want to check whether a condition has been met, and if it has, perform one action. Otherwise, you want your program to perform a second action. What sort of programming operation would help achieve this?',
+        'options': [
+            'A. A loop.',
+            'B. A conditional branch, such as an If…Then statement.',
+            'C. A function.',
+            'D. A procedure.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q50',
+        'question': 'In a program, what does a loop do?',
+        'options': [
+            'A. It calls a function multiple times.',
+            'B. It performs one or more instructions until a condition is met.',
+            'C. It defines the structure of the program.',
+            'D. It handles input and output operations.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q51',
+        'question': 'What is the difference between a procedure and a function?',
+        'options': [
+            'A. A procedure performs an action, while a function performs an action and returns a value.',
+            'B. A function is faster than a procedure.',
+            'C. A procedure cannot accept parameters, while a function can.',
+            'D. A procedure is used for calculations, while a function is used for input/output operations.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q52',
+        'question': 'What three things define an object?',
+        'options': [
+            'A. Properties, attributes, and methods.',
+            'B. Variables, functions, and loops.',
+            'C. Methods, procedures, and events.',
+            'D. Classes, instances, and properties.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q53',
+        'question': 'What three scripting options are commonly used in Windows 10 to perform administrative tasks?',
+        'options': [
+            'A. Python scripts, Bash scripts, and Ruby scripts.',
+            'B. Batch files, Windows PowerShell scripts, and VBScripts.',
+            'C. JavaScript, HTML, and CSS.',
+            'D. Bash scripts, Python scripts, and Java files.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q54',
+        'question': 'True or false? You do not need to install a web application to your computer; it would be accessed via a browser.',
+        'options': [
+            'A. True.',
+            'B. False.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q55',
+        'question': 'What is the advantage of a local network hosted application, in terms of data storage?',
+        'options': [
+            'A. Data can be stored on the local workstation, allowing faster access.',
+            'B. Data is easier to back up and access controls can be applied.',
+            'C. Data is always stored on the cloud, offering more storage space.',
+            'D. Local network applications have better security compared to cloud-hosted ones.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q56',
+        'question': 'What are the structural elements of a database table?',
+        'options': [
+            'A. Tables, queries, and views.',
+            'B. Records (rows) and fields (columns).',
+            'C. Fields (columns) and indexes.',
+            'D. Primary keys and foreign keys.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q57',
+        'question': 'What term is used to describe selecting and viewing information in a database?',
+        'options': [
+            'A. Sorting.',
+            'B. Query.',
+            'C. Filtering.',
+            'D. Indexing.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q58',
+        'question': 'How does an RDBMS such as Microsoft SQL Server differ from Microsoft Excel when used to store a dataset?',
+        'options': [
+            'A. Excel supports concurrent users and large datasets, while RDBMS platforms are for single users and smaller datasets.',
+            'B. Excel stores data in rows and columns, while an RDBMS uses files.',
+            'C. RDBMS platforms can support multiple users and large datasets, while Excel is best suited for single users and smaller datasets.',
+            'D. RDBMS platforms use Excel formulas for data operations.'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q59',
+        'question': 'What language is usually used to request data from an RDBMS such as Oracle?',
+        'options': [
+            'A. JavaScript.',
+            'B. Structured Query Language (SQL).',
+            'C. Python.',
+            'D. C++.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q60',
+        'question': 'What defines the relationship between tables in an RDBMS?',
+        'options': [
+            'A. Foreign keys are used to establish relationships with primary keys in other tables.',
+            'B. Each table must have a unique name.',
+            'C. Tables must contain identical fields.',
+            'D. Relationships are only defined through indexes.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q61',
+        'question': 'Give an example of unstructured data.',
+        'options': [
+            'A. A text file.',
+            'B. A spreadsheet.',
+            'C. A relational database.',
+            'D. A number in a column.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q62',
+        'question': 'Give two examples of semi-structured data stores.',
+        'options': [
+            'A. Key/value pair databases and markup language document stores.',
+            'B. Relational databases and CSV files.',
+            'C. Binary files and structured data stores.',
+            'D. Text files and Excel sheets.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q63',
+        'question': 'Is an INSERT statement an example of a definition or manipulation language statement?',
+        'options': [
+            'A. Definition language.',
+            'B. Manipulation language.',
+            'C. Data definition language.',
+            'D. Both definition and manipulation language.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q64',
+        'question': 'You need a development environment with a library of database functions. What type of interface are you using?',
+        'options': [
+            'A. Graphical User Interface (GUI).',
+            'B. Programmatic access.',
+            'C. Command Line Interface (CLI).',
+            'D. User Interface (UI).'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q65',
+        'question': 'How can a client-server application architecture be described if there is the potential for the structure of the application platform to be developed further?',
+        'options': [
+            'A. Single-tier application.',
+            'B. Two-tier application.',
+            'C. Three-tier application.',
+            'D. Four-tier application.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q66',
+        'question': 'What type of component provides persistent storage?',
+        'options': [
+            'A. Mass storage device such as a Hard Disk Drive (HDD), Solid State Drive (SSD), or flash memory.',
+            'B. Central Processing Unit (CPU).',
+            'C. Random Access Memory (RAM).',
+            'D. Graphics Processing Unit (GPU).'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q67',
+        'question': 'What computer component is most restrictive in terms of determining upgrade potential for a desktop computer?',
+        'options': [
+            'A. Power Supply Unit (PSU).',
+            'B. Graphics Card (GPU).',
+            'C. Motherboard.',
+            'D. Storage Device (HDD/SSD).'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q68',
+        'question': 'True or false? A plug-in card is always required to support PC sound.',
+        'options': [
+            'A. True.',
+            'B. False.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q69',
+        'question': 'What is the main advantage of using a CPU in 64-bit mode?',
+        'options': [
+            'A. Makes more system memory accessible.',
+            'B. Increases the CPU clock speed.',
+            'C. Reduces the power consumption of the CPU.',
+            'D. Supports more peripheral devices.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q70',
+        'question': 'What is a typical speed for a modern CPU to run at?',
+        'options': [
+            'A. 1 GHz.',
+            'B. 2 GHz.',
+            'C. 3 GHz.',
+            'D. 4 GHz.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q71',
+        'question': 'You want to purchase a computer with a fast graphics interface. What type of expansion slot should you look for?',
+        'options': [
+            'A. PCIe x16.',
+            'B. PCIe x8.',
+            'C. PCI.',
+            'D. AGP.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q72',
+        'question': 'What type of component provides a passive cooling solution?',
+        'options': [
+            'A. Heat sink.',
+            'B. CPU fan.',
+            'C. Liquid cooling system.',
+            'D. Thermoelectric cooler.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q73',
+        'question': 'How would you access the system setup program on a PC?',
+        'options': [
+            'A. By pressing the appropriate key during startup (ESC, DEL, F1, F2, or F10).',
+            'B. By clicking the Start menu.',
+            'C. By typing "system setup" in the search bar.',
+            'D. By pressing Ctrl + Alt + Delete.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q74',
+        'question': 'True or false? Mice and keyboards must be connected to a computer via PS/2 ports.',
+        'options': [
+            'A. True.',
+            'B. False.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q75',
+        'question': 'True or false? USB cables have the same connectors at either end.',
+        'options': [
+            'A. True.',
+            'B. Partly false.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q76',
+        'question': 'A user has two USB drives connected to her PC. She complains that when she copies large files to both drives at the same time, it seems to take much longer. Why might this be?',
+        'options': [
+            'A. USB devices are not compatible with large files.',
+            'B. The USB drives are faulty.',
+            'C. Bandwidth on the USB bus is shared between all devices.',
+            'D. The operating system is slow at handling multiple file transfers.'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q77',
+        'question': 'You want to purchase a flat-panel monitor that can show widescreen movies. You are considering models with native resolutions of 1400x1050 and 1920x1200. Which should you choose?',
+        'options': [
+            'A. 1400x1050.',
+            'B. 1920x1200.',
+            'C. Both are equal.',
+            'D. Neither.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q78',
+        'question': 'True or false? HDMI is the only type of display interface that supports High Definition picture resolutions.',
+        'options': [
+            'A. True.',
+            'B. False.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q79',
+        'question': 'You are considering buying a new display device. The model you are considering accepts digital inputs only. Your computer\'s graphics adapter has a blue port with 15 holes. Would this flat-panel be a wise purchase?',
+        'options': [
+            'A. Yes, as the blue port supports digital signals.',
+            'B. No, as the blue port is VGA, which supports only analog output.',
+            'C. Yes, the blue port supports HDMI.',
+            'D. No, the display is outdated.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q80',
+        'question': 'You need to configure settings for an input device. What should be your first step?',
+        'options': [
+            'A. Open the Settings app or Control Panel.',
+            'B. Install the device driver.',
+            'C. Reboot the computer.',
+            'D. Check the device connection.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q81',
+        'question': 'A friend is asking for your help in using her computer. When she presses the key marked @, a different symbol appears. What could be the cause?',
+        'options': [
+            'A. The keyboard is set to use a UK layout.',
+            'B. The keyboard is malfunctioning.',
+            'C. The operating system needs to be updated.',
+            'D. The keyboard layout is set to a foreign language.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q82',
+        'question': 'What type of mouse would you recommend for someone who uses their computer principally to play computer games and why?',
+        'options': [
+            'A. Optical mouse, as it is inexpensive.',
+            'B. Mechanical mouse, for better durability.',
+            'C. Laser mouse, as it registers cursor movements more quickly and accurately.',
+            'D. Trackball mouse, for ergonomic comfort.'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q83',
+        'question': 'Which Windows interface is used for advanced management and troubleshooting of devices?',
+        'options': [
+            'A. Control Panel.',
+            'B. Settings app.',
+            'C. Device Manager.',
+            'D. Task Manager.'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q84',
+        'question': 'What do you need to know to connect to a device that is configured over the network?',
+        'options': [
+            'A. The device name and model.',
+            'B. The Internet Protocol (IP) address of its management page.',
+            'C. The operating system of the device.',
+            'D. The type of connection (USB or wireless).'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q85',
+        'question': 'True or false? If you want to configure the DPI of a display device, you would do so via the Personalization app.',
+        'options': [
+            'A. True.',
+            'B. False.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q86',
+        'question': 'You are configuring dual monitors positioned side-by-side. You want to increase the amount of screen space available. Which multiple display option should you set?',
+        'options': [
+            'A. Duplicate the displays.',
+            'B. Extend the displays.',
+            'C. Use a second desktop.',
+            'D. Mirror the displays.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q87',
+        'question': 'You need to plug a microphone into a computer to make a recording. How would you identify which jack to use?',
+        'options': [
+            'A. The jack is color-coded (pink).',
+            'B. The jack is labeled with "Microphone".',
+            'C. The jack is located on the front panel.',
+            'D. You need to consult the system documentation.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q88',
+        'question': 'What, if any, type of printer uses a fuser?',
+        'options': [
+            'A. Inkjet printer.',
+            'B. Laser printer.',
+            'C. Dot matrix printer.',
+            'D. Thermal printer.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q89',
+        'question': 'What are the four inks used to produce color prints?',
+        'options': [
+            'A. Cyan, Magenta, Yellow, Black (CMYK).',
+            'B. Red, Green, Blue, White (RGBW).',
+            'C. Cyan, Yellow, Green, Black.',
+            'D. Red, Green, Blue, Black (RGB).'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q90',
+        'question': 'What type of wired interface is a printer MOST likely to use?',
+        'options': [
+            'A. Serial port.',
+            'B. Parallel port.',
+            'C. USB.',
+            'D. HDMI.'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q91',
+        'question': 'You want to configure a printer to use both sides of the paper (duplex) by default. You have alt-clicked the printer object—which command should you select to proceed?',
+        'options': [
+            'A. Printer settings.',
+            'B. Printer properties.',
+            'C. Printing preferences.',
+            'D. Print setup.'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q92',
+        'question': 'What basic command demonstrates that a printer is connected properly to a computer and that its driver is installed correctly for Windows?',
+        'options': [
+            'A. Print Test Page.',
+            'B. Run Diagnostics.',
+            'C. Refresh the driver.',
+            'D. Reboot the computer.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q93',
+        'question': 'What function of a scanner would you use if you want to convert a letter that someone has mailed to you into a computer-editable document?',
+        'options': [
+            'A. OCR (Optical Character Recognition).',
+            'B. Scan as an image.',
+            'C. Scan in color.',
+            'D. Adjust resolution.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q94',
+        'question': 'True or false? If your PC does not have a flash memory card reader, you should be able to connect the camera itself to the PC over USB to copy images off the card.',
+        'options': [
+            'A. True.',
+            'B. False.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q95',
+        'question': 'You have a motherboard that is designed for DDR2 memory that works at a bus speed of 533 MHz. You have some DDR3 memory modules that also work at a bus speed of 533 MHz. Are the modules compatible with the motherboard?',
+        'options': [
+            'A. Yes, they are compatible because they have the same bus speed.',
+            'B. No, DDR3 modules cannot be used in DDR2 slots.',
+            'C. Yes, but only if you install additional cooling.',
+            'D. No, DDR2 modules would work faster in DDR3 slots.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q96',
+        'question': 'Why can\'t you use memory modules designed for a desktop computer in a laptop?',
+        'options': [
+            'A. Laptops use a smaller form factor called SO-DIMM while desktops use DIMMs.',
+            'B. Laptop memory is slower and not compatible with desktop systems.',
+            'C. Laptop modules use a different voltage.',
+            'D. Laptop and desktop memory have different data transfer speeds.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q97',
+        'question': 'A hard drive is rated at 10,000 RPM. What is the significance of this statistic?',
+        'options': [
+            'A. The number of revolutions per minute (RPM) determines the speed of the hard drive.',
+            'B. It indicates the capacity of the hard drive.',
+            'C. It refers to the amount of data transferred per minute.',
+            'D. It represents how fast the hard drive can power on.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q98',
+        'question': 'What type of connector would you use for an external hard drive to connect to a Windows PC?',
+        'options': [
+            'A. USB.',
+            'B. VGA.',
+            'C. HDMI.',
+            'D. DVI.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q99',
+        'question': 'Your computer has 4 SATA ports. How many hard drives can be installed?',
+        'options': [
+            'A. One.',
+            'B. Two.',
+            'C. Four.',
+            'D. Eight.'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q100',
+        'question': 'True or false? A single layer Blu-ray Disc has greater capacity than a dual-layer, double-sided DVD.',
+        'options': [
+            'A. True.',
+            'B. False.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q101',
+        'question': 'What sort of device would you need to transfer data from a "Memory Stick?"',
+        'options': [
+            'A. Flash drive.',
+            'B. USB memory card reader.',
+            'C. eSATA cable.',
+            'D. Optical drive.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q102',
+        'question': 'What sort of device could you use to expand the storage capacity of a smartphone?',
+        'options': [
+            'A. External hard drive.',
+            'B. USB flash drive.',
+            'C. Flash memory card.',
+            'D. Cloud storage.'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q103',
+        'question': 'In Windows, you can access data via letter-labeled "drives." Do these correspond exactly to physical disks?',
+        'options': [
+            'A. Yes, each drive letter corresponds to a physical disk.',
+            'B. Not necessarily in the case of hard disks, which can be configured with multiple partitions.',
+            'C. Yes, but only for optical drives.',
+            'D. No, drives are virtual and do not correspond to physical disks.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q104',
+        'question': 'What type of file system must the partition that Windows files are installed on use?',
+        'options': [
+            'A. FAT32.',
+            'B. NTFS.',
+            'C. exFAT.',
+            'D. HFS+.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q105',
+        'question': 'What default installation folders contain system and application files that should not normally be deleted or modified manually?',
+        'options': [
+            'A. Documents and Downloads.',
+            'B. Windows and Program Files.',
+            'C. Users and AppData.',
+            'D. Local and AppLogs.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q106',
+        'question': 'What is the file path to the Documents folder for a user named "David," assuming Windows is installed to a hard disk with a single partition using the default settings?',
+        'options': [
+            'A. C:\\Program Files\\David\\Documents.',
+            'B. C:\\Users\\David\\Documents.',
+            'C. C:\\Documents\\David.',
+            'D. C:\\Windows\\Users\\David\\Documents.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q107',
+        'question': 'How is a Windows library different from a folder?',
+        'options': [
+            'A. A library is a shortcut to a specific folder.',
+            'B. A library is a virtual folder by displaying the contents of multiple folders.',
+            'C. A library stores copies of files from different folders.',
+            'D. A library is used for system settings, not files.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q108',
+        'question': 'If you have made changes to a file and want to keep both the original file and the modified version, what command should you use?',
+        'options': [
+            'A. Save.',
+            'B. Save As.',
+            'C. Copy.',
+            'D. Export.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q109',
+        'question': 'Why should you be more careful about deleting files from a USB flash drive than from the main hard drive?',
+        'options': [
+            'A. The files will be permanently deleted without the possibility of recovery.',
+            'B. The files are automatically backed up to the cloud.',
+            'C. USB drives use a different file system that is more prone to corruption.',
+            'D. The files are stored on a server and can be restored later.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q110',
+        'question': 'What view options could you use to show files of a particular type sorted by date?',
+        'options': [
+            'A. Sort by size and group by date.',
+            'B. Group by file type and then sort by date.',
+            'C. Group by size and sort by file type.',
+            'D. Sort by file type only.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        "id": "q111",
+        "question": "What kind of data would you expect to find in a file with a TIFF extension?",
+        "options": [
+            "A. A text file.",
+            "B. An image file.",
+            "C. A compressed archive.",
+            "D. A video file."
+        ],
+        "correctAnswer": ["B"]
+    },
+    {
+        "id": "q112",
+        "question": "What is a zip file?",
+        "options": [
+            "A. A file containing text and images in a compressed format.",
+            "B. A file that stores multiple files in a single compressed format.",
+            "C. A video file format.",
+            "D. A backup file format."
+        ],
+        "correctAnswer": ["B"]
+    },
+    {
+        'id': 'q113',
+        'question': 'What is a WAN?',
+        'options': [
+            'A. A local network that connects computers within a small area.',
+            'B. A Wide Area Network that connects sites in different geographic locations.',
+            'C. A network that connects devices in a single home or office.',
+            'D. A type of network that only operates over wireless connections.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q114',
+        'question': 'What is a packet made up of?',
+        'options': [
+            'A. Only data.',
+            'B. A header section and a payload.',
+            'C. A header and a checksum only.',
+            'D. A data payload and error correction codes.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q115',
+        'question': 'What are the key features of a packet switching network?',
+        'options': [
+            'A. It requires a dedicated path for each communication.',
+            'B. Nodes can forward packets through multiple paths, ensuring robustness.',
+            'C. It only works with large data transfers.',
+            'D. Packets are sent to a central hub before reaching their destination.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q116',
+        'question': 'What protocol is usually used to provide logical addressing on networks?',
+        'options': [
+            'A. TCP',
+            'B. UDP',
+            'C. Internet Protocol (IP)',
+            'D. Ethernet'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q117',
+        'question': 'What type of address identifies a network interface in the context of the local network segment only?',
+        'options': [
+            'A. IP address',
+            'B. MAC address',
+            'C. Subnet mask',
+            'D. DNS address'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q118',
+        'question': 'What type of device is used to transfer packets between different networks?',
+        'options': [
+            'A. Hub',
+            'B. Router',
+            'C. Switch',
+            'D. Bridge'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q119',
+        'question': 'Which protocol allows people to use names/labels to address network resources rather than numeric addresses?',
+        'options': [
+            'A. HTTP',
+            'B. DNS',
+            'C. FTP',
+            'D. IP'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q120',
+        'question': 'Which of the following parts of a web address is usually dependent on a name resolution service: protocol type, host location, file path?',
+        'options': [
+            'A. Protocol type',
+            'B. Host location',
+            'C. File path',
+            'D. None of the above'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q121',
+        'question': 'What does HTTP stand for?',
+        'options': [
+            'A. HyperText Transfer Protocol',
+            'B. Hypertext Transmission Protocol',
+            'C. HyperText Text Protocol',
+            'D. Hyper Transfer Protocol'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q122',
+        'question': 'Which email protocol(s) are used to download messages from a mail server?',
+        'options': [
+            'A. SMTP',
+            'B. POP or IMAP',
+            'C. FTP',
+            'D. HTTP'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q123',
+        'question': 'What device is used to connect computers together in an Ethernet network?',
+        'options': [
+            'A. Router',
+            'B. Switch',
+            'C. Modem',
+            'D. Hub'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q124',
+        'question': 'What is the difference between a modem and a router?',
+        'options': [
+            'A. A modem connects different networks, while a router connects computers.',
+            'B. A modem creates a serial link, while a router forwards data between networks.',
+            'C. A modem works at the data link layer, while a router works at the application layer.',
+            'D. A modem routes traffic between local and remote networks, while a router connects individual computers.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q125',
+        'question': 'Can you list at least four Internet access methods?',
+        'options': [
+            'A. DSL, Cable, Fiber, Satellite',
+            'B. Ethernet, Wi-Fi, Bluetooth, 4G',
+            'C. 5G, Wi-Fi, Bluetooth, Dial-up',
+            'D. Cable, Ethernet, Fiber, VPN'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q126',
+        'question': 'What is the latest Wi-Fi standard and which frequency band(s) does it use?',
+        'options': [
+            'A. IEEE 802.11b, 2.4 GHz',
+            'B. IEEE 802.11ac, 5 GHz',
+            'C. IEEE 802.11n, 2.4 GHz and 5 GHz',
+            'D. IEEE 802.11ax, 6 GHz'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q127',
+        'question': 'What information do you need to configure a wireless connection manually?',
+        'options': [
+            'A. IP address, DNS server, username',
+            'B. SSID, encryption type, authentication info',
+            'C. Router IP address, wireless key, subnet mask',
+            'D. Username, password, gateway address'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q128',
+        'question': 'What is the risk of using a free Wi-Fi network to make an order from an online shop?',
+        'options': [
+            'A. The online store will not charge your credit card.',
+            'B. Data may be intercepted by attackers or other users on the network.',
+            'C. The Wi-Fi network will slow down your transaction.',
+            'D. You might not be able to access certain websites.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q129',
+        'question': 'What does attenuation mean?',
+        'options': [
+            'A. The speed of the data transfer over a network.',
+            'B. The loss of signal strength over distance.',
+            'C. The interference caused by other wireless devices.',
+            'D. The increase in power required to maintain a network signal.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q130',
+        'question': 'If you use an open network, what email configuration setting should you ensure is enabled?',
+        'options': [
+            'A. Enable Secure Sockets Layer/Transport Layer Security (SSL/TLS) encryption',
+            'B. Use a VPN for email access',
+            'C. Disable IMAP and use only POP3',
+            'D. Set up two-factor authentication'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q131',
+        'question': 'You have installed a screensaver application. Later, after updating your anti-virus software, a malicious program is found. This appears to have infected your system at the same time as the screensaver was installed. What class of malware is this?',
+        'options': [
+            'A. Virus',
+            'B. Worm',
+            'C. Trojan Horse',
+            'D. Adware'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q132',
+        'question': 'You want to use a website that hosts training modules in a custom media format. What type of add-on would you need to install to play this media?',
+        'options': [
+            'A. Extension',
+            'B. Plugin',
+            'C. Java applet',
+            'D. Codec'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q133',
+        'question': 'What type of file might a website use to track whether you have visited it before?',
+        'options': [
+            'A. Cache',
+            'B. Cookie',
+            'C. Log file',
+            'D. HTML file'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q134',
+        'question': 'True or false? Browser pop-up windows are definite symptoms of virus infection.',
+        'options': [
+            'A. True',
+            'B. False'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q135',
+        'question': 'You are using a computer in an Internet cafe. What should you do at the end of the session?',
+        'options': [
+            'A. Log out of all accounts and clear the browser cache',
+            'B. Turn off the computer and leave',
+            'C. Leave the browser open for the next user',
+            'D. Use the computer as usual and leave the session open'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q136',
+        'question': 'What identifies a website as using the secure HTTPS protocol with a valid certificate?',
+        'options': [
+            'A. The URL shows "http://" and the browser shows a padlock icon',
+            'B. The URL shows "https://" and the browser shows a padlock icon',
+            'C. The website must be part of a specific domain',
+            'D. The website must be verified by Google'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q137',
+        'question': 'You want to restrict access to a computer on your network to a single Internet host running a particular application. What two things do you need to configure in your firewall\'s access control list?',
+        'options': [
+            'A. The IP address and the application\'s port number',
+            'B. The MAC address and the IP address',
+            'C. The subnet mask and the IP address',
+            'D. The username and the password'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q138',
+        'question': 'True or false? A hard disk connected to a computer via a USB port could be described as "Direct Attached Storage."',
+        'options': [
+            'A. True',
+            'B. False'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q139',
+        'question': 'What type of connection would a NAS device use?',
+        'options': [
+            'A. USB',
+            'B. Ethernet or Wi-Fi',
+            'C. Serial',
+            'D. Bluetooth'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q140',
+        'question': 'Which admin tool or screen would you use to configure a Windows computer to join a domain?',
+        'options': [
+            'A. Device Manager',
+            'B. Network and Sharing Center',
+            'C. System applet in Control Panel or Settings app',
+            'D. Command Prompt'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q141',
+        'question': 'True or false? Any version or edition of Windows can be used to share files with other users.',
+        'options': [
+            'A. True',
+            'B. False'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q142',
+        'question': 'How could you access a network folder called DATA on a network server called TOWER1 using the Explorer address bar?',
+        'options': [
+            'A. \\TOWER1\DATA',
+            'B. \\Data\TOWER1',
+            'C. \\Server\DATA',
+            'D. \\TOWER1\\Network'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q143',
+        'question': 'What is a mapped drive?',
+        'options': [
+            'A. A folder shared by a network server that the client connects to via a drive letter',
+            'B. A backup drive connected to the network',
+            'C. A device used to encrypt files',
+            'D. A software application for managing drives'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q144',
+        'question': 'What protocol would be used to provide encrypted file downloads from a web server?',
+        'options': [
+            'A. FTP',
+            'B. HTTP',
+            'C. HTTPS',
+            'D. SMB'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q145',
+        'question': 'You have made a backup of system data using a removable hard disk. What should you do next?',
+        'options': [
+            'A. Delete the backup to free up space',
+            'B. Store the disk in a secure location',
+            'C. Format the disk for use again',
+            'D. Share the backup with others'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q146',
+        'question': 'What type of gesture is typically used for zooming on a touchscreen?',
+        'options': [
+            'A. Tap',
+            'B. Swipe',
+            'C. Pinch',
+            'D. Hold'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q147',
+        'question': 'What is the purpose of an accelerometer, as fitted in a mobile device?',
+        'options': [
+            'A. To detect network signals',
+            'B. To measure temperature',
+            'C. To detect how the device is moved',
+            'D. To control screen brightness'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q148',
+        'question': 'What feature allows data to be removed from a device if it is lost or stolen?',
+        'options': [
+            'A. Remote wipe',
+            'B. Antivirus software',
+            'C. Encryption',
+            'D. Backup'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q149',
+        'question': 'True or false? A smartphone cannot join a Wi-Fi network if the SSID is not being broadcast.',
+        'options': [
+            'A. True',
+            'B. False'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q150',
+        'question': 'What is "airplane mode"?',
+        'options': [
+            'A. A mode for reducing battery usage',
+            'B. A mode that disables all wireless functionality',
+            'C. A mode for controlling device brightness',
+            'D. A mode for turning off the screen'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q151',
+        'question': 'Which property of secure information is compromised by snooping?',
+        'options': [
+            'A. Integrity',
+            'B. Availability',
+            'C. Confidentiality',
+            'D. Authenticity'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q152',
+        'question': 'An attacker has used a rogue access point to intercept traffic passing between wireless clients and the wired network segment. What type of attack is this?',
+        'options': [
+            'A. Denial of Service (DoS)',
+            'B. Man-in-the-Middle (MitM)',
+            'C. Phishing',
+            'D. Replay attack'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q153',
+        'question': 'What type of access mechanism is MOST vulnerable to a replay attack?',
+        'options': [
+            'A. Token generated by software',
+            'B. Biometric authentication',
+            'C. Smartcard authentication',
+            'D. Multi-factor authentication'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q154',
+        'question': 'Which specific attack uses a botnet to threaten availability?',
+        'options': [
+            'A. Distributed Denial of Service (DDoS)',
+            'B. Cross-Site Scripting (XSS)',
+            'C. Phishing',
+            'D. SQL Injection'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q155',
+        'question': 'In considering availability concerns, what use might a lockable faceplate on a server-class computer be?',
+        'options': [
+            'A. It prevents unauthorized access to the server’s hardware.',
+            'B. It encrypts data stored on the server.',
+            'C. It protects the server from malware.',
+            'D. It is used to store backup data.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q156',
+        'question': 'What does AAA stand for?',
+        'options': [
+            'A. Authentication, Authorization, Accounting',
+            'B. Authentication, Accessibility, Auditing',
+            'C. Authorization, Accounting, Audit',
+            'D. Accessibility, Authorization, Accounting'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q157',
+        'question': 'Why should a security policy instruct users not to reveal their password to technical support staff?',
+        'options': [
+            'A. It exposes users to social engineering attacks.',
+            'B. It leads to increased server downtime.',
+            'C. It allows unauthorized system access.',
+            'D. It creates vulnerabilities in data encryption.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q158',
+        'question': 'How might someone masquerade as someone else when using email or Instant Messaging?',
+        'options': [
+            'A. By using a stolen login or malware',
+            'B. By changing their IP address',
+            'C. By using encryption software',
+            'D. By using a different device'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q159',
+        'question': 'What are the three main areas where redundancy should be provisioned?',
+        'options': [
+            'A. Data/storage, network links, and power',
+            'B. Backup, encryption, and hardware',
+            'C. Software, hardware, and communication',
+            'D. Memory, bandwidth, and processing power'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q160',
+        'question': 'Part of host hardening is to reduce the attack surface. What configuration changes does reducing the attack surface involve?',
+        'options': [
+            'A. Removing unnecessary software, disabling unused services, closing ports',
+            'B. Installing additional security software',
+            'C. Disabling antivirus programs',
+            'D. Increasing user permissions'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q161',
+        'question': 'What is the main difference between virus and worm malware?',
+        'options': [
+            'A. A virus spreads via email, while a worm spreads via network vulnerabilities.',
+            'B. A virus requires a file to infect, while a worm propagates in memory and over networks.',
+            'C. A virus cannot spread by itself, while a worm can self-replicate.',
+            'D. A virus is more harmful than a worm.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q162',
+        'question': 'How might malware hosted on a website be able to infect your computer simply by your browsing the site?',
+        'options': [
+            'A. By exploiting a vulnerability in your operating system or browser.',
+            'B. By sending phishing emails to your inbox.',
+            'C. By using a botnet to steal your credentials.',
+            'D. By forcing you to download malicious software.'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q163',
+        'question': 'How might spyware be able to steal a password?',
+        'options': [
+            'A. By intercepting network traffic',
+            'B. By monitoring keystrokes using a key logger',
+            'C. By installing a backdoor into the operating system',
+            'D. By exploiting vulnerabilities in email services'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q164',
+        'question': 'What type of malware is being described? The malware encrypts the user\'s documents folder and any attached removable disks, then extorts the user for money to release the encryption key.',
+        'options': [
+            'A. Virus',
+            'B. Trojan Horse',
+            'C. Ransomware',
+            'D. Spyware'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q165',
+        'question': 'True or false? Most anti-virus software can remediate a system by blocking access to an infected file but not actually deleting it.',
+        'options': [
+            'A. True',
+            'B. False'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q166',
+        'question': 'What is the main means by which anti-virus software identifies infected files?',
+        'options': [
+            'A. By analyzing file size and modification date',
+            'B. By comparing files to virus definitions or signatures',
+            'C. By checking file access permissions',
+            'D. By monitoring network activity'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q167',
+        'question': 'What are the two main ways that spam might expose recipients to hazardous content?',
+        'options': [
+            'A. By containing infected attachments and links to malicious websites',
+            'B. By revealing personal information and tracking web activity',
+            'C. By spreading via social media accounts',
+            'D. By altering browser settings and redirecting users'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q168',
+        'question': 'Your friend sent you an email link, which you have opened, and now the browser is asking whether you should install a plug-in to view all the content on the page. Should you proceed?',
+        'options': [
+            'A. Yes, if the email appears legitimate.',
+            'B. No, this is likely a phishing attack.',
+            'C. Yes, because the plug-in is necessary for viewing content.',
+            'D. No, if the website is unfamiliar to you.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q169',
+        'question': 'True or false? An OEM site is a reputable source of management software and drivers for a particular system.',
+        'options': [
+            'A. True',
+            'B. False'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q170',
+        'question': 'What are the four processes of an access control system?',
+        'options': [
+            'A. Authentication, Authorization, Accounting, Auditing',
+            'B. Identification, Authentication, Authorization, Accounting',
+            'C. Identification, Authentication, Authorization, Auditing',
+            'D. Authorization, Identification, Authentication, Auditing'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q171',
+        'question': 'Users should only be granted the minimum sufficient permissions. What system policy ensures that users do not receive rights unless granted explicitly?',
+        'options': [
+            'A. Implicit deny',
+            'B. Explicit allow',
+            'C. Least privilege',
+            'D. Role-based access control'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q172',
+        'question': 'What is the main type of non-discretionary access control?',
+        'options': [
+            'A. Discretionary Access Control (DAC)',
+            'B. Role-based Access Control (RBAC)',
+            'C. Mandatory Access Control (MAC)',
+            'D. Attribute-based Access Control (ABAC)'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q173',
+        'question': 'What type of control prevents a user from denying they performed an action?',
+        'options': [
+            'A. Authentication',
+            'B. Authorization',
+            'C. Non-repudiation',
+            'D. Auditing'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q174',
+        'question': 'What sort of account allows someone to access a computer without providing a user name or password?',
+        'options': [
+            'A. User account',
+            'B. Administrator account',
+            'C. Guest account',
+            'D. Service account'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q175',
+        'question': 'How does a one-time password work?',
+        'options': [
+            'A. It is generated randomly each time the user logs in.',
+            'B. It is generated by an asymmetric encryption algorithm, proving the authenticity of the user.',
+            'C. It is sent to the user via email or SMS and changes every 5 minutes.',
+            'D. It is a static password that does not change over time.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q176',
+        'question': 'What type of system allows a user to authenticate once to access multiple services?',
+        'options': [
+            'A. Single Sign-On (SSO)',
+            'B. Multi-Factor Authentication (MFA)',
+            'C. Role-based Access Control (RBAC)',
+            'D. Federated Identity Management (FIM)'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q177',
+        'question': 'What type of cryptographic operation(s) are non-reversible?',
+        'options': [
+            'A. Symmetric encryption',
+            'B. Asymmetric encryption',
+            'C. Cryptographic hashing',
+            'D. Digital signature'
+        ],
+        'correctAnswer': ['C']
+    },
+    {
+        'id': 'q178',
+        'question': 'What class of data is a transport encryption protocol designed to protect?',
+        'options': [
+            'A. Data at rest',
+            'B. Data in transit',
+            'C. Data in use',
+            'D. Data in backup'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q179',
+        'question': 'Why is it important not to use simple words or names as a password?',
+        'options': [
+            'A. They are easy to remember.',
+            'B. They can be easily guessed using password-cracking software.',
+            'C. They are harder to remember for the user.',
+            'D. They don\'t need encryption.'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q180',
+        'question': 'What is a SOP?',
+        'options': [
+            'A. System Operations Procedure',
+            'B. Standard Operating Procedure',
+            'C. Security Operations Policy',
+            'D. Standard Online Protocol'
+        ],
+        'correctAnswer': ['B']
+    },
+    {
+        'id': 'q181',
+        'question': 'Apart from passwords and PII, what other type(s) of confidential information should be governed by classification and handling procedures?',
+        'options': [
+            'A. Company confidential information and customer information',
+            'B. Financial data only',
+            'C. Personal social media profiles',
+            'D. Publicly available information'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q182',
+        'question': 'Why might a company ban use of the corporate network and desktop software for personal communications?',
+        'options': [
+            'A. To maintain security and prevent misuse of company resources',
+            'B. To reduce the load on the corporate network',
+            'C. To ensure employees are not wasting time on personal matters',
+            'D. To avoid excessive personal emails being sent'
+        ],
+        'correctAnswer': ['A']
+    },
+    {
+        'id': 'q183',
+        'question': 'What two main privacy issues arise from using a social networking site?',
+        'options': [
+            'A. The risk of data being shared and how the company uses the collected data',
+            'B. The ability to keep all posts private and not shared with anyone',
+            'C. Data encryption and anonymous usage',
+            'D. Sharing content with other platforms and accessing publicly available data'
+        ],
+        'correctAnswer': ['A']
+    }
+        ];
+
+        let selectedQuestions = [];
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let unansweredCount = 0;
+        let wrongQuestions = [];
+        let unansweredQuestions = [];
+        let timerInterval;
+        let timeRemaining = questionPool.length * 60; // Adjust timer for total questions
+
+        const timerElement = document.getElementById('timer');
+        const questionsElement = document.getElementById('questions');
+        const resultsElement = document.getElementById('results');
+        const submitButton = document.getElementById('submitButton');
+        const userNameOutput = document.getElementById('userNameOutput');
+        const userName = prompt("Please enter your name:");
+        userNameOutput.textContent = userName + ", GO ON MY SON, YOU CAN DO IT :)";
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startExam() {
+            selectedQuestions = shuffle(questionPool).slice(0, questionPool.length);
+            displayQuestions();
+            startTimer();
+        }
+
+        function displayQuestions() {
+            questionsElement.innerHTML = '';
+            selectedQuestions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container';
+                if (index === 0) questionDiv.classList.add('active');
+
+                // Determine input type (radio for single answer, checkbox for multiple answers)
+                const inputType = Array.isArray(q.correctAnswer) ? 'checkbox' : 'radio';
+
+                questionDiv.innerHTML = `
+                    <h3>Question ${index + 1}: ${q.question}</h3>
+                    ${q.options.map((opt, i) => `
+                        <label>
+                            <input type="${inputType}" name="q${index}${inputType === 'checkbox' ? '[]' : ''}" value="${String.fromCharCode(65 + i)}">
+                            ${opt}
+                        </label><br>
+                    `).join('')}
+                    <div>
+                        ${index > 0 ? '<button type="button" class="btn-prev" onclick="showQuestion(' + (index - 1) + ')">Previous</button>' : ''}
+                        ${index < selectedQuestions.length - 1 ? '<button type="button" class="btn-next" onclick="showQuestion(' + (index + 1) + ')">Next</button>' : ''}
+                    </div>
+                `;
+
+                questionsElement.appendChild(questionDiv);
+            });
+
+            submitButton.style.display = 'block';
+        }
+
+        function showQuestion(index) {
+            const activeQuestion = document.querySelector('.question-container.active');
+            if (activeQuestion) activeQuestion.classList.remove('active');
+            document.querySelectorAll('.question-container')[index].classList.add('active');
+            currentQuestionIndex = index;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    submitExam();
+                } else {
+                    timeRemaining--;
+                    const minutes = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+                    const seconds = (timeRemaining % 60).toString().padStart(2, '0');
+                    timerElement.textContent = `Time Remaining: ${minutes}:${seconds}`;
+                }
+            }, 1000);
+        }
+
+        function submitExam() {
+            clearInterval(timerInterval);
+            const formData = new FormData(document.getElementById('examForm'));
+            selectedQuestions.forEach((q, index) => {
+                const userAnswers = formData.getAll(`q${index}[]`); // Use getAll() for checkboxes
+                const correctAnswers = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
+
+                if (userAnswers.length === 0) {
+                    unansweredCount++;
+                    unansweredQuestions.push(q);
+                } else if (JSON.stringify(userAnswers.sort()) === JSON.stringify(correctAnswers.sort())) {
+                    correctCount++;
+                } else {
+                    wrongCount++;
+                    wrongQuestions.push(q);
+                }
+            });
+
+            displayResults();
+        }
+
+        function displayResults() {
+            questionsElement.style.display = 'none';
+            submitButton.style.display = 'none';
+            resultsElement.style.display = 'block';
+
+            document.getElementById('totalQuestions').textContent = questionPool.length;
+            document.getElementById('correctAnswers').textContent = correctCount;
+            document.getElementById('wrongAnswers').textContent = wrongCount;
+            document.getElementById('unansweredQuestions').textContent = unansweredCount;
+            document.getElementById('percentage').textContent = ((correctCount / questionPool.length) * 100).toFixed(2);
+        }
+
+        function retryWrongUnanswered() {
+            const retryQuestions = [...wrongQuestions, ...unansweredQuestions]; // Combine both arrays
+            if (retryQuestions.length === 0) {
+                alert('No wrong or unanswered questions to retry!');
+                return;
+            }
+
+            // Reinitialize exam with retry questions
+            selectedQuestions = retryQuestions;
+            correctCount = 0;
+            wrongCount = 0;
+            unansweredCount = 0;
+            timeRemaining = selectedQuestions.length * 60; // Adjust timer for retry
+            displayQuestions();
+            resultsElement.style.display = 'none';
+            questionsElement.style.display = 'block';
+            startTimer();
+        }
+
+        function resetExam() {
+            location.reload();
+        }
+
+        document.getElementById('examForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitExam();
+        });
+
+        startExam();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SOM Mock Exam</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #3c3b3f, #605c3c);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .sidebar, .grid {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .sidebar {
+      width: 250px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(8, 15px);
+      grid-auto-rows: 5px;
+      grid-gap: 30px;
+    }
+
+    .grid button {
+      background: grey;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      height: 30px;
+      width: 30px;
+      font-size: 10px;
+      line-height: 30px;
+      padding: 0;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    #main {
+      background: #2a2a2a;
+      margin-top: 30px;
+      padding: 30px;
+      border-radius: 10px;
+      width: 600px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    #question-title {
+      margin-bottom: 15px;
+    }
+
+    #answers label {
+      display: block;
+      margin: 8px 0;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #timer {
+      color: red;
+      font-weight: bold;
+      float: right;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .results li.correct label::before {
+      content: "✔";
+      display: inline-block;
+      color: green;
+      font-weight: bold;
+      width: 1em;
+      margin-right: 0.5em;
+      text-align: center;
+    }
+
+    .results li.incorrect label::before {
+      content: "✖";
+      display: inline-block;
+      color: red;
+      font-weight: bold;
+      width: 1em;
+      margin-right: 0.5em;
+      text-align: center;
+    }
+
+    .results li.correct input,
+    .results li.incorrect input {
+      visibility: hidden;
+    }
+
+    .grid button.correct {
+      background-color: green !important;
+      color: white !important;
+    }
+
+    .grid button.incorrect {
+      background-color: red !important;
+      color: white !important;
+    }
+
+    .grid button.unanswered {
+      background-color: grey !important;
+      color: white !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h3>Diploma In Cybersecurity<br>NFQ Level 7</h3>
+    <p><strong>Disclaimer:</strong><br>
+      This is an unofficial mock examination.<br><br>
+      It was created solely for personal learning purposes.<br><br>
+      It is based on the knowledge acquired during the second semester.<br><br>
+      It is not endorsed by any academic institution.<br><br>
+      It is not formal exam preparation material.<br><br>
+      It is neither an official exam.</p>
+  </div>
+
+  <div id="main">
+    <div id="timer">Time Remaining: <span id="countdown">00:00</span></div>
+    <h2 style="text-align:center;">SOM Mock Exam</h2>
+    
+    <div id="exam-section">
+      <h3 id="question-title">Loading question...</h3>
+      <div id="answers"></div>
+      <div id="feedback" class="mt-2 mb-2"></div>
+      <div id="explanation" style="margin-top: 10px; color: #aaa; font-style: italic;"></div>
+
+      <div class="controls">
+        <button onclick="nextQuestion()">➡️ Next</button>
+        <button onclick="prevQuestion()">⬅️ Previous</button>
+        <button onclick="submitExam()">✅ Submit Exam</button>
+      </div>
+    </div>
+
+    <div id="review-section" class="hidden">
+      <h2>Exam Results</h2>
+      <p>Correct Answers: <span id="correct-count"></span></p>
+      <p>Wrong Answers: <span id="wrong-count"></span></p>
+      <p>Score: <span id="percentage"></span>%</p>
+      <div>
+        <button onclick="retakeWrongOnly()">🔁 Retake Wrong Only</button>
+        <button onclick="resetExam()">🔄 Reset Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="grid" id="question-grid">
+      <!-- Dynamically filled -->
+    </div>
+  </div>
+
+  <script>
+    const fullQuestionBank = [
+      {
+  "question": "Your organization sends critical configuration files between data centers. Recent network logs show intermittent packet loss but no file corruption alerts. Which CIA triad component are you most concerned about ensuring stays intact?",
+  "answers": [
+    "A. Confidentiality",
+    "B. Integrity",
+    "C. Availability",
+    "D. Authenticity",
+    "E. Non-repudiation"
+  ],
+  "correct": [1],
+  "explanation": "Integrity ensures that data isn't altered or tampered with during transfer, even if packets are lost."
+},
+{
+  "question": "During a scheduled maintenance window, users report they cannot access payroll systems. Which CIA component governs your requirement that they regain access quickly?",
+  "answers": [
+    "A. Integrity",
+    "B. Confidentiality",
+    "C. Availability",
+    "D. Accountability",
+    "E. Authenticity"
+  ],
+  "correct": [2],
+  "explanation": "Availability ensures systems and data are accessible when needed—like during outages."
+},
+{
+  "question": "Your CISO asks you to outline the next steps after you’ve identified and documented all system assets. Which sequence correctly reflects what you do next?",
+  "answers": [
+    "A. Identify → Assess → Treat → Monitor",
+    "B. Identify → Treat → Assess → Monitor",
+    "C. Treat → Identify → Monitor → Assess",
+    "D. Assess → Monitor → Treat → Identify",
+    "E. Monitor → Assess → Treat → Identify"
+  ],
+  "correct": [0],
+  "explanation": "The risk management lifecycle starts with identifying, then assessing, treating, and finally monitoring."
+},
+{
+  "question": "At an executive workshop, the board wants clarity on who sets policies, allocates budget, and oversees security strategy. Which GRC pillar covers that?",
+  "answers": [
+    "A. Risk",
+    "B. Compliance",
+    "C. Governance",
+    "D. Architecture",
+    "E. Assurance"
+  ],
+  "correct": [2],
+  "explanation": "Governance refers to who defines policy, strategy, and oversees resources and accountability."
+},
+{
+  "question": "You’ve been tasked to draft a document that links the company’s growth goals, risk appetite, and proposed network security zones. What deliverable are you creating?",
+  "answers": [
+    "A. Incident Playbook",
+    "B. Vulnerability Report",
+    "C. Security Strategy & Roadmap",
+    "D. Alert Triage Guide",
+    "E. Risk Register"
+  ],
+  "correct": [2],
+  "explanation": "A Security Strategy & Roadmap links goals, risks, and technical implementations."
+},
+{
+  "question": "During an architecture review, stakeholders ask which layer you secure first—firewalls at the internet edge, host-based controls on servers, or application WAFs. You explain the normal order starts at the:",
+  "answers": [
+    "A. Host",
+    "B. Application",
+    "C. Perimeter",
+    "D. Data",
+    "E. User"
+  ],
+  "correct": [2],
+  "explanation": "The Perimeter (e.g., firewalls) is typically the first layer in defense-in-depth architecture."
+},
+{
+  "question": "Your risk team has set a “moderate” appetite for financial application outages. In which phase do you map that appetite into network segmentation and redundancy plans?",
+  "answers": [
+    "A. Incident Response",
+    "B. Vulnerability Scanning",
+    "C. Architecture Design and Review",
+    "D. SIEM Tuning",
+    "E. Risk Assessment"
+  ],
+  "correct": [2],
+  "explanation": "Architecture design translates risk appetites into technical blueprints and segmentation."
+},
+{
+  "question": "A new regulator asks you for evidence of your “Identify” controls under NIST CSF. Which two activities demonstrate you’ve met that requirement?",
+  "answers": [
+    "A. Incident containment",
+    "B. Security monitoring",
+    "C. Asset management and risk assessment",
+    "D. Disaster recovery",
+    "E. Change management"
+  ],
+  "correct": [2],
+  "explanation": "Asset management and risk assessments are core activities under NIST CSF's Identify function."
+},
+{
+  "question": "During BCP tabletop you debate how much data loss is tolerable before business impact is unacceptable. Which metric captures that?",
+  "answers": [
+    "A. RTO",
+    "B. RPO",
+    "C. MTTR",
+    "D. MTTD",
+    "E. MTBF"
+  ],
+  "correct": [1],
+  "explanation": "RPO (Recovery Point Objective) defines acceptable data loss measured in time."
+},
+{
+  "question": "Your DR plan specifies systems must be back online within a target window after a major outage. Which metric is that?",
+  "answers": [
+    "A. Maximum tolerable data loss",
+    "B. Maximum acceptable outage duration (RTO)",
+    "C. Frequency of backups",
+    "D. Time between snapshots",
+    "E. MTTD"
+  ],
+  "correct": [1],
+  "explanation": "RTO (Recovery Time Objective) defines how quickly systems should be restored."
+},
+{
+  "question": "The CIO wants a framework that ties your audit, metrics, and dashboard reviews into a single continuous-monitoring process. Which do you propose?",
+  "answers": [
+    "A. ISO 27001 Annex A",
+    "B. CIS Controls v8",
+    "C. COBIT MEA (Monitoring, Evaluation & Assessment)",
+    "D. NIST SP 800-37",
+    "E. NIST CSF"
+  ],
+  "correct": [2],
+  "explanation": "COBIT MEA focuses on monitoring and evaluating governance and control effectiveness."
+},
+{
+  "question": "A developer requested a hot-fix deployment outside standard windows. Which process ensures only approved changes go live?",
+  "answers": [
+    "A. Incident Management",
+    "B. Change Management",
+    "C. Vulnerability Assessment",
+    "D. Business Continuity Planning",
+    "E. Release Management"
+  ],
+  "correct": [1],
+  "explanation": "Change Management ensures only approved, documented changes are implemented."
+},
+{
+  "question": "Your SOC analyst asks what a runbook should include for a ransomware play-through. You tell them it must have:",
+  "answers": [
+    "A. Broad security objectives",
+    "B. Step-by-step technical actions",
+    "C. Vendor SLAs only",
+    "D. Annual review dates",
+    "E. Contact lists"
+  ],
+  "correct": [1],
+  "explanation": "Runbooks provide step-by-step instructions to respond to incidents consistently."
+},
+{
+  "question": "The board wants to know how quickly your team resolves incidents. Which metric do you report?",
+  "answers": [
+    "A. Mean Time to Detect (MTTD)",
+    "B. Number of open tickets",
+    "C. Mean Time to Respond (MTTR)",
+    "D. Annual audit findings",
+    "E. Mean Time to Contain"
+  ],
+  "correct": [2],
+  "explanation": "MTTR (Mean Time to Respond) measures how fast incidents are resolved."
+},
+{
+  "question": "A peer organization asks why you ran a maturity assessment. You explain the top goal was to:",
+  "answers": [
+    "A. Benchmark against peers",
+    "B. Generate compliance reports",
+    "C. Identify gaps and improvement opportunities",
+    "D. Satisfy regulators",
+    "E. Train staff"
+  ],
+  "correct": [2],
+  "explanation": "Maturity assessments identify current capabilities and guide improvement planning."
+},
+{
+  "question": "A new Windows OS version is rolling out. Your security engineer asks if the baseline standard needs revision. You say it must be updated because:",
+  "answers": [
+    "A. The CISO changed",
+    "B. The legal department requested it",
+    "C. New technology or OS version is adopted",
+    "D. The security budget increased",
+    "E. Vendor recommendations"
+  ],
+  "correct": [2],
+  "explanation": "Security baselines must evolve as new technologies or OS versions are introduced."
+},
+{
+  "question": "Your team debates whether to add a control that stops bad actors before they launch exploits. Which control type fits?",
+  "answers": [
+    "A. Detective",
+    "B. Corrective",
+    "C. Preventive",
+    "D. Compensating",
+    "E. Directive"
+  ],
+  "correct": [2],
+  "explanation": "Preventive controls stop threats before they occur—e.g., firewalls or access controls."
+},
+{
+  "question": "After a malware outbreak, you implement a measure to roll back affected systems to pre-infected snapshots. Which control category is this?",
+  "answers": [
+    "A. Detective",
+    "B. Preventive",
+    "C. Corrective",
+    "D. Compensating",
+    "E. Recovery"
+  ],
+  "correct": [2],
+  "explanation": "Corrective controls restore systems after incidents—like snapshot rollbacks."
+},
+{
+  "question": "Your SIEM project charter states it must collect logs from all servers and correlate them in real time. What’s the SIEM’s primary function?",
+  "answers": [
+    "A. Patch endpoints",
+    "B. Manage user provisioning",
+    "C. Aggregate and correlate logs for real-time analysis",
+    "D. Conduct penetration tests",
+    "E. Generate reports"
+  ],
+  "correct": [2],
+  "explanation": "SIEM tools correlate logs for threat detection and real-time security insights."
+},
+{
+  "question": "After deployment, your SOC floods you with noise. Your priority tuning task is to:",
+  "answers": [
+    "A. Archive logs",
+    "B. Reduce false positives",
+    "C. Increase alert volume",
+    "D. Encrypt data",
+    "E. Update signatures"
+  ],
+  "correct": [1],
+  "explanation": "Tuning SIEMs helps reduce false positives and improves actionable alerting."
+},
+{
+  "question": "The CISO asks: “What portion of incidents do we detect internally vs. from external reports?” Which metric answers that?",
+  "answers": [
+    "A. False Positive Rate",
+    "B. Patch Compliance Rate",
+    "C. Internal/External Detection Ratio",
+    "D. MTTA",
+    "E. MTTD"
+  ],
+  "correct": [2],
+  "explanation": "Internal/External Detection Ratio shows how effective internal detection is compared to third-party notifications."
+},
+{
+  "question": "You’re documenting how alerts become tickets, who escalates and when, and how closures are validated. What process are you mapping?",
+  "answers": [
+    "A. Change Management",
+    "B. Risk Assessment",
+    "C. Incident Management",
+    "D. Configuration Management",
+    "E. Service Management"
+  ],
+  "correct": [2],
+  "explanation": "Incident Management includes workflows for detection, escalation, and closure."
+},
+{
+  "question": "Before going live, your new payroll system must receive formal approval. Which document grants that?",
+  "answers": [
+    "A. Security Policy",
+    "B. System Security Plan",
+    "C. Incident Report",
+    "D. Change Request",
+    "E. Architecture Review Board Approval"
+  ],
+  "correct": [3],
+  "explanation": "A Change Request must be approved to ensure the system aligns with policies."
+},
+{
+  "question": "You plan a tabletop drill for a simulated DDoS attack. The goal is to confirm that decision-makers know their roles. What are you validating?",
+  "answers": [
+    "A. Recovering data",
+    "B. Installing new tools",
+    "C. Roles and decision-making",
+    "D. Auditing firewall rules",
+    "E. Communication plans"
+  ],
+  "correct": [2],
+  "explanation": "Tabletop drills verify that stakeholders understand their roles during incidents."
+},
+{
+  "question": "When a critical patch is released, which team typically coordinates testing and roll-out?",
+  "answers": [
+    "A. Security Architecture",
+    "B. IT Operations",
+    "C. SOC Analysts",
+    "D. Risk & Compliance",
+    "E. Incident Response Team"
+  ],
+  "correct": [1],
+  "explanation": "IT Operations typically handles patch testing and deployment coordination."
+},
+{
+  "question": "After a major breach, you run post-mortem reviews and feed lessons back into playbooks. Which practice is this?",
+  "answers": [
+    "A. One-off risk assessments",
+    "B. Static policy docs",
+    "C. Regular post-incident reviews and lessons learned",
+    "D. Annual budgeting",
+    "E. Quarterly audits"
+  ],
+  "correct": [2],
+  "explanation": "Post-incident reviews improve playbooks and prevent recurring issues."
+},
+{
+  "question": "Your vulnerability report lists dozens of findings. You start fixing based on business impact, criticality, and exploitability. What approach is this?",
+  "answers": [
+    "A. Exploit availability only",
+    "B. Asset value only",
+    "C. Business impact, asset criticality, exploitability",
+    "D. Number of findings",
+    "E. Vendor recommendations"
+  ],
+  "correct": [2],
+  "explanation": "Risk-based vulnerability prioritization considers business impact and exploitability."
+},
+{
+  "question": "The CIO wants a simple framework to guide detection, response, and recovery stage-gates in your SOC. Which do you choose?",
+  "answers": [
+    "A. COBIT 5",
+    "B. NIST CSF",
+    "C. HIPAA",
+    "D. SOX",
+    "E. ISO 27001"
+  ],
+  "correct": [1],
+  "explanation": "NIST CSF provides a high-level SOC framework for detection, response, and recovery."
+},
+{
+  "question": "You brief the board on new ransomware variants, supply-chain risks, and geopolitical tensions. You tell them this is part of the overall:",
+  "answers": [
+    "A. Baseline Risk",
+    "B. Regression",
+    "C. Threat Landscape",
+    "D. Residual Risk",
+    "E. Control Effectiveness"
+  ],
+  "correct": [2],
+  "explanation": "The Threat Landscape includes evolving risks like ransomware and geopolitical issues."
+},
+{
+  "question": "In your quarterly architecture review, you validate that you have perimeter firewalls, network segmentation, host-based controls, and application WAFs. What workshop are you running?",
+  "answers": [
+    "A. SIEM tuning",
+    "B. Phishing simulations",
+    "C. Defense-in-Depth review workshops",
+    "D. Single-factor authentication deployment",
+    "E. Network hardening session"
+  ],
+  "correct": [2],
+  "explanation": "Defense-in-Depth involves layered security from perimeter to endpoint."
+},
+{
+  "question": "Your team adopts a SOAR platform to automatically triage phishing alerts. What does SOAR stand for?",
+  "answers": [
+    "A. Security Orchestration, Automation, and Response",
+    "B. Security Operations & Analytics Reporting",
+    "C. System Operations Audit Review",
+    "D. Secure Online Access Regulation",
+    "E. Security Orchestration and Reporting"
+  ],
+  "correct": [0],
+  "explanation": "SOAR automates incident triage and orchestrates responses efficiently."
+},
+{
+  "question": "After moving from reactive ticket handling, your next goal is defining standard procedures and playbooks. Which maturity stage is that?",
+  "answers": [
+    "A. Optimized",
+    "B. Defined",
+    "C. Automated",
+    "D. Proactive",
+    "E. Initial"
+  ],
+  "correct": [1],
+  "explanation": "Defined maturity means standardized procedures exist and are repeatable."
+},
+{
+  "question": "New Tier 1 analysts struggle to know which alerts to escalate. Which factor is most critical for consistent triage?",
+  "answers": [
+    "A. Unlimited budget",
+    "B. Outsourcing all alerts",
+    "C. Clear playbooks and triage criteria",
+    "D. High staffing levels",
+    "E. Vendor SLAs"
+  ],
+  "correct": [2],
+  "explanation": "Clear triage criteria help Tier 1 analysts know what to escalate."
+},
+{
+  "question": "Your SOC, inundated with noise, needs a metric to focus on reducing wasted effort. Which metric helps?",
+  "answers": [
+    "A. Number of analysts",
+    "B. Total alerts per day",
+    "C. False-positive rate",
+    "D. Vendor SLAs",
+    "E. Alert throughput"
+  ],
+  "correct": [2],
+  "explanation": "False-positive rate helps reduce wasted analyst time on benign alerts."
+},
+{
+  "question": "A network engineer submits a new access rule. Which team usually approves these changes for policy alignment?",
+  "answers": [
+    "A. Security Monitoring",
+    "B. Risk Team",
+    "C. Security Architecture",
+    "D. Security Engineering",
+    "E. IT Operations"
+  ],
+  "correct": [2],
+  "explanation": "Security Architecture approves rules to align with overall security posture."
+},
+{
+  "question": "Your SOC reports feeling overwhelmed by alerts and missing real threats. What term describes this condition?",
+  "answers": [
+    "A. Alert saturation",
+    "B. No alerts at all",
+    "C. Alerts that never fire",
+    "D. Alert fatigue",
+    "E. Alert overload syndrome"
+  ],
+  "correct": [3],
+  "explanation": "Alert fatigue results from too many unprioritized or false alerts."
+},
+{
+  "question": "To spot insider threats, you implement a system that profiles user behavior. Which tool type is this?",
+  "answers": [
+    "A. Firewall",
+    "B. IDS",
+    "C. Antivirus",
+    "D. UEBA (User and Entity Behavior Analytics)",
+    "E. DLP"
+  ],
+  "correct": [3],
+  "explanation": "UEBA detects anomalies in user behavior, flagging potential insider threats."
+},
+{
+  "question": "In adopting lean principles, you map SOC workflows to identify waste. What do you do with non-value-adding tasks?",
+  "answers": [
+    "A. Audited more",
+    "B. Documented extensively",
+    "C. Eliminated or automated",
+    "D. Delegated",
+    "E. Outsourced"
+  ],
+  "correct": [2],
+  "explanation": "Lean SOC workflows aim to remove or automate non-value-adding tasks."
+},
+{
+  "question": "Your SOC ingests external IOC feeds to enrich alerts with context. What primary purpose does this serve?",
+  "answers": [
+    "A. Generate compliance reports",
+    "B. Automate patching",
+    "C. Enrich detections with contextual threat data",
+    "D. Replace firewalls",
+    "E. Improve endpoint performance"
+  ],
+  "correct": [2],
+  "explanation": "IOC feeds add context, helping analysts assess alerts quickly."
+},
+{
+  "question": "Your red team presents their findings structured by reconnaissance, weaponization, delivery, exploitation, and more. What model are they following?",
+  "answers": [
+    "A. The Kill Chain",
+    "B. Attack Spectrum",
+    "C. Diamond Model",
+    "D. Cyber Pyramid",
+    "E. MITRE ATT&CK"
+  ],
+  "correct": [0],
+  "explanation": "The Kill Chain models attacker behavior in phases: recon to exfiltration."
+},
+{
+  "question": "Your DevOps team sets up a CI/CD pipeline. You require a security review before code reaches production. What control is this?",
+  "answers": [
+    "A. Gating control",
+    "B. Change window",
+    "C. Role-based access",
+    "D. Output validation",
+    "E. Firewall filter"
+  ],
+  "correct": [0],
+  "explanation": "Gating controls enforce security checks before code reaches production."
+},
+{
+  "question": "You’re reviewing ways to catch security bugs earlier in your software lifecycle. What principle is this?",
+  "answers": [
+    "A. Shift-right",
+    "B. Shift-left",
+    "C. Triage-last",
+    "D. Post-deploy enforcement",
+    "E. Canary deployment"
+  ],
+  "correct": [1],
+  "explanation": "Shift-left security integrates controls early in the development lifecycle."
+},
+{
+  "question": "Your security lead proposes combining source code scanning and web app testing. What are you implementing?",
+  "answers": [
+    "A. SAST + SCA",
+    "B. SIEM + SOAR",
+    "C. IPS + IDS",
+    "D. SAST + DAST",
+    "E. CI/CD Gating"
+  ],
+  "correct": [3],
+  "explanation": "SAST tests source code; DAST tests running apps—both are complementary."
+},
+{
+  "question": "In your CI/CD pipeline, you want to automate decisions like approving clean code and rejecting insecure builds. What task type fits best?",
+  "answers": [
+    "A. Creative code refactor",
+    "B. Rule-based logic task",
+    "C. Manual testing only",
+    "D. Peer review",
+    "E. AI threat modeling"
+  ],
+  "correct": [1],
+  "explanation": "Rule-based tasks are perfect for automation in CI/CD pipelines."
+},
+{
+  "question": "Who is typically responsible for maintaining and updating incident response playbooks?",
+  "answers": [
+    "A. Tier 1 SOC Analyst",
+    "B. Business Stakeholders",
+    "C. Incident Response Team Lead",
+    "D. Help Desk",
+    "E. Application Developers"
+  ],
+  "correct": [2],
+  "explanation": "The IR Team Lead owns and updates incident playbooks."
+},
+{
+  "question": "You isolate an infected endpoint to stop malware from spreading to others. What’s this step called?",
+  "answers": [
+    "A. Containment",
+    "B. Detection",
+    "C. Eradication",
+    "D. Prevention",
+    "E. Monitoring"
+  ],
+  "correct": [0],
+  "explanation": "Containment prevents malware spread before full remediation."
+},
+{
+  "question": "Which group reviews proposed technical changes to validate they’re safe before being implemented?",
+  "answers": [
+    "A. NOC",
+    "B. SOC",
+    "C. Risk Committee",
+    "D. CAB (Change Advisory Board)",
+    "E. Threat Intel Team"
+  ],
+  "correct": [3],
+  "explanation": "CABs enforce review of all impactful changes to minimize risk."
+},
+{
+  "question": "Which analysis identifies which systems or processes are most critical to business operations?",
+  "answers": [
+    "A. Penetration Testing",
+    "B. Patch Management",
+    "C. Business Impact Analysis",
+    "D. SAST",
+    "E. IR Plan Review"
+  ],
+  "correct": [2],
+  "explanation": "Business impact analysis prioritizes which systems must be restored first."
+},
+{
+  "question": "You need to show your CISO how many incidents your SOC is handling monthly. Which report would you use?",
+  "answers": [
+    "A. Vulnerability summary",
+    "B. Patch compliance rate",
+    "C. Run-rate report",
+    "D. RPO dashboard",
+    "E. Incident timeline"
+  ],
+  "correct": [2],
+  "explanation": "Run-rate reports show operational workload trends over time."
+},
+{
+  "question": "Which document helps restore systems and data after a major outage like fire or flood?",
+  "answers": [
+    "A. Risk Matrix",
+    "B. Disaster Recovery Plan",
+    "C. Security Policy",
+    "D. Incident Runbook",
+    "E. Compliance Checklist"
+  ],
+  "correct": [1],
+  "explanation": "A Disaster Recovery Plan (DRP) restores IT after a disaster."
+},
+{
+  "question": "Which metric indicates how reliable a system is between failures?",
+  "answers": [
+    "A. MTTR",
+    "B. RTO",
+    "C. RPO",
+    "D. MTBF",
+    "E. SLA"
+  ],
+  "correct": [3],
+  "explanation": "MTBF (Mean Time Between Failures) measures reliability of systems."
+},
+{
+  "question": "Which of the following is a detective control used to identify unauthorized behavior?",
+  "answers": [
+    "A. Security awareness training",
+    "B. Two-factor authentication",
+    "C. Audit logging",
+    "D. Data classification",
+    "E. Encryption"
+  ],
+  "correct": [2],
+  "explanation": "Audit logging is a detective control—used to identify anomalies."
+},
+{
+  "question": "Which of the following is outside the scope of IAM?",
+  "answers": [
+    "A. Role-based access",
+    "B. Firewall rule enforcement",
+    "C. Password policy",
+    "D. Single sign-on",
+    "E. Identity federation"
+  ],
+  "correct": [1],
+  "explanation": "IAM doesn’t handle firewall rules; it governs identity-related access."
+},
+{
+  "question": "You review permissions and confirm that each user only has access to what’s necessary for their job. What principle is being applied?",
+  "answers": [
+    "A. Need to know",
+    "B. Separation of duties",
+    "C. Least privilege",
+    "D. Privilege escalation",
+    "E. Identity sprawl"
+  ],
+  "correct": [2],
+  "explanation": "Least privilege ensures users get only what’s necessary—no more."
+},
+{
+  "question": "Which authentication factor is biometric?",
+  "answers": [
+    "A. Password",
+    "B. Security token",
+    "C. Fingerprint scan",
+    "D. PIN",
+    "E. Email confirmation"
+  ],
+  "correct": [2],
+  "explanation": "Biometric factors like fingerprints fall under 'something you are'."
+},
+{
+  "question": "Which of the following enables users to log into multiple systems with one account?",
+  "answers": [
+    "A. VPN",
+    "B. Federation",
+    "C. Role-based access control",
+    "D. Static password reuse",
+    "E. Endpoint agents"
+  ],
+  "correct": [1],
+  "explanation": "Federated Identity lets users authenticate across systems with one ID."
+},
+{
+  "question": "In vulnerability management, what happens after discovery?",
+  "answers": [
+    "A. Deployment",
+    "B. Verification",
+    "C. Prioritization",
+    "D. Alerting",
+    "E. Assignment"
+  ],
+  "correct": [2],
+  "explanation": "Discovery is followed by prioritization in vulnerability management."
+},
+{
+  "question": "A vulnerability has a high attack complexity. What does that mean?",
+  "answers": [
+    "A. It’s easy to exploit",
+    "B. Exploit requires advanced skills or multiple conditions",
+    "C. The attacker needs physical access",
+    "D. The vulnerability affects multiple systems",
+    "E. It can only be triggered during boot"
+  ],
+  "correct": [1],
+  "explanation": "High Attack Complexity means more steps are needed to exploit a flaw."
+},
+{
+  "question": "Which report would best show how your patch team is progressing over time?",
+  "answers": [
+    "A. Trend report on open vulnerabilities",
+    "B. Current open issues",
+    "C. Executive dashboard",
+    "D. Annual security audit",
+    "E. Patch frequency log"
+  ],
+  "correct": [0],
+  "explanation": "Trend reports show vulnerability remediation progress over time."
+},
+{
+  "question": "What’s the key value of using risk-based remediation guidance from a tool like Tenable or Qualys?",
+  "answers": [
+    "A. Remediate low-risk issues first",
+    "B. Prioritize based on business risk and exploitability",
+    "C. Treat all CVEs equally",
+    "D. Patch only servers",
+    "E. Delay patching until next quarter"
+  ],
+  "correct": [1],
+  "explanation": "Risk-based guidance prioritizes based on impact, not ease."
+},
+{
+  "question": "Your organization requires vendors to undergo regular security reviews and complete questionnaires. What kind of program is this?",
+  "answers": [
+    "A. Governance training",
+    "B. Vulnerability scanning",
+    "C. Third-party risk management",
+    "D. Threat modeling",
+    "E. Compliance auditing"
+  ],
+  "correct": [2],
+  "explanation": "Ongoing security evaluations form the core of third-party risk management."
+},
+{
+  "question": "You’ve hired a new Tier 1 SOC analyst. What is their typical first responsibility?",
+  "answers": [
+    "A. Update firewalls",
+    "B. Build dashboards",
+    "C. Triage alerts and escalate as needed",
+    "D. Draft security policies",
+    "E. Conduct red team exercises"
+  ],
+  "correct": [2],
+  "explanation": "Tier 1 SOC Analysts triage initial alerts and escalate as needed."
+},
+{
+  "question": "Your CI/CD pipeline blocks builds if code fails security tests. What is this called?",
+  "answers": [
+    "A. Manual override",
+    "B. Canary release",
+    "C. CI/CD gating",
+    "D. Static enforcement",
+    "E. Deployment bypass"
+  ],
+  "correct": [2],
+  "explanation": "CI/CD gating ensures code is blocked unless it passes security checks."
+},
+{
+  "question": "Which of the following measures success and which identifies future risk trends?",
+  "answers": [
+    "A. KPI for success; KTI for trends",
+    "B. KRI for success; KPI for risk",
+    "C. KTI for both",
+    "D. KPI only",
+    "E. SLA for success; KPI for risk"
+  ],
+  "correct": [0],
+  "explanation": "KPI tracks success; KTI highlights emerging risks."
+},
+{
+  "question": "What does “Secure by Design” mean?",
+  "answers": [
+    "A. Adding security after go-live",
+    "B. Starting with security in the planning phase",
+    "C. Implementing user access reviews annually",
+    "D. Using multi-cloud providers",
+    "E. Encrypting all database traffic"
+  ],
+  "correct": [1],
+  "explanation": "Secure by Design means embedding security early in planning."
+},
+{
+  "question": "Which artifact is an output of a threat modeling session?",
+  "answers": [
+    "A. Firewall config",
+    "B. SOAR playbook",
+    "C. Attack paths and mitigations",
+    "D. Audit log reports",
+    "E. Phishing campaign plan"
+  ],
+  "correct": [2],
+  "explanation": "Threat models output attack paths and mitigation strategies."
+},
+{
+  "question": "After scanning an environment, an attacker builds a malicious payload. What phase of the Kill Chain is this?",
+  "answers": [
+    "A. Reconnaissance",
+    "B. Weaponization",
+    "C. Exploitation",
+    "D. Delivery",
+    "E. Installation"
+  ],
+  "correct": [1],
+  "explanation": "Weaponization follows recon and prepares a payload in the Kill Chain."
+},
+{
+  "question": "Which NIST publication introduced Zero Trust Architecture?",
+  "answers": [
+    "A. SP 800-37",
+    "B. SP 800-53",
+    "C. SP 800-207",
+    "D. SP 800-61",
+    "E. SP 800-82"
+  ],
+  "correct": [2],
+  "explanation": "NIST SP 800-207 outlines the Zero Trust Architecture principles."
+},
+{
+  "question": "In Zero Trust, what principle is core to all access decisions?",
+  "answers": [
+    "A. Implicit trust based on location",
+    "B. Least effort",
+    "C. Context-only access",
+    "D. Verify everything always",
+    "E. Trust corporate IP range"
+  ],
+  "correct": [3],
+  "explanation": "Zero Trust means no implicit trust—verify every request."
+},
+{
+  "question": "What’s one of the most effective protections against prompt injection in GenAI?",
+  "answers": [
+    "A. Escalation logic",
+    "B. Output sanitization",
+    "C. Password policy",
+    "D. CAPTCHA",
+    "E. Static passwords"
+  ],
+  "correct": [1],
+  "explanation": "Input/output sanitization prevents prompt manipulation and model abuse."
+},
+{
+  "question": "Who is most responsible for ensuring GDPR-aligned privacy governance?",
+  "answers": [
+    "A. CISO",
+    "B. Head of IT",
+    "C. Data Protection Officer (DPO)",
+    "D. CTO",
+    "E. Threat Intel Analyst"
+  ],
+  "correct": [2],
+  "explanation": "DPO ensures privacy compliance, governance, and user rights."
+},
+{
+  "question": "Which regulation most directly requires the appointment of a DPO in certain organizations?",
+  "answers": [
+    "A. PCI DSS",
+    "B. HIPAA",
+    "C. GDPR",
+    "D. NIST",
+    "E. ISO 27001"
+  ],
+  "correct": [2],
+  "explanation": "GDPR is the primary regulation requiring a DPO in many orgs."
+},
+{
+  "question": "Which of the following is a physical control used to restrict entry into secure facilities?",
+  "answers": [
+    "A. Biometric login",
+    "B. Smart card reader",
+    "C. Mantrap",
+    "D. IAM system",
+    "E. VLAN"
+  ],
+  "correct": [2],
+  "explanation": "A mantrap provides layered physical access control."
+},
+{
+  "question": "You’re reviewing controls for the data center and someone says password policies are physical. What’s your response?",
+  "answers": [
+    "A. Agree",
+    "B. Disagree — it’s a logical control",
+    "C. Partially agree",
+    "D. Physical if stored in vault",
+    "E. Only physical if printed"
+  ],
+  "correct": [1],
+  "explanation": "Password policies are logical—not part of physical security surveys."
+},
+{
+  "question": "Which plan ensures your business continues key functions during events like natural disasters?",
+  "answers": [
+    "A. DRP",
+    "B. MOU",
+    "C. BCP",
+    "D. SLA",
+    "E. PEN"
+  ],
+  "correct": [2],
+  "explanation": "Business Resilience Planning ensures continuity after events like floods."
+},
+{
+  "question": "During failover testing, which plan should define restoration order of IT systems?",
+  "answers": [
+    "A. Security policy",
+    "B. DRP",
+    "C. AUP",
+    "D. NDA",
+    "E. Change log"
+  ],
+  "correct": [1],
+  "explanation": "A DRP guides restoring IT during failover testing."
+},
+{
+  "question": "Who is usually responsible for policy approval at an executive level?",
+  "answers": [
+    "A. System admin",
+    "B. Risk officer",
+    "C. CISO or board designee",
+    "D. Tier 1 analyst",
+    "E. Change manager"
+  ],
+  "correct": [2],
+  "explanation": "Policy approval typically falls under a cybersecurity-executive board member."
+},
+{
+  "question": "What does the 'Recover' function in NIST CSF focus on?",
+  "answers": [
+    "A. Preventing future attacks",
+    "B. Investigating insider threats",
+    "C. Planning for restoration and improvements",
+    "D. Deploying WAFs",
+    "E. Installing SIEM"
+  ],
+  "correct": [2],
+  "explanation": "The Recover function includes planning improvements post-incident."
+},
+{
+  "question": "Your threat hunting team finds no indicators of compromise but documents lessons and validates detections. What type of activity is this?",
+  "answers": [
+    "A. Containment",
+    "B. Detection tuning",
+    "C. Proactive threat hunting",
+    "D. Exploit chaining",
+    "E. Evidence logging"
+  ],
+  "correct": [2],
+  "explanation": "Proactive threat hunts aim to uncover stealthy threats early."
+},
+{
+  "question": "Your red and blue teams collaborate to identify gaps and improve defenses. What is this process called?",
+  "answers": [
+    "A. War gaming",
+    "B. Capture the flag",
+    "C. Purple teaming",
+    "D. Incident simulation",
+    "E. Kill switch drill"
+  ],
+  "correct": [2],
+  "explanation": "Purple teaming unites red (attack) and blue (defend) teams for better detection."
+},
+{
+  "question": "What’s the primary goal of an Acceptable Use Policy (AUP)?",
+  "answers": [
+    "A. Restrict software updates",
+    "B. Define employee login hours",
+    "C. Set expectations for how systems may be used",
+    "D. Replace antivirus tools",
+    "E. Eliminate monitoring"
+  ],
+  "correct": [2],
+  "explanation": "AUPs define acceptable behavior and system usage guidelines."
+},
+{
+  "question": "Which kind of agreement typically outlines mutual expectations, roles, and responsibilities between two business parties?",
+  "answers": [
+    "A. SLA",
+    "B. NDA",
+    "C. BIA",
+    "D. MOU",
+    "E. KPI"
+  ],
+  "correct": [3],
+  "explanation": "An MOU outlines mutual expectations and cooperative responsibilities."
+},
+{
+  "question": "Which control ensures users cannot both request and approve the same financial transaction?",
+  "answers": [
+    "A. Least privilege",
+    "B. MFA",
+    "C. Segregation of duties",
+    "D. Logging",
+    "E. Defense in depth"
+  ],
+  "correct": [2],
+  "explanation": "Segregation of duties separates conflicting responsibilities to prevent fraud."
+},
+{
+  "question": "You receive an alert about abnormal login times. Which type of detection triggered this?",
+  "answers": [
+    "A. Signature-based",
+    "B. Heuristic",
+    "C. Behavioral (anomaly-based)",
+    "D. Static code analysis",
+    "E. Compliance scan"
+  ],
+  "correct": [2],
+  "explanation": "Behavioral or anomaly-based detection spots deviations from user baselines."
+},
+{
+  "question": "Which vulnerability scoring system uses metrics like CVSS to assign severity?",
+  "answers": [
+    "A. CWE",
+    "B. CVE",
+    "C. SOC",
+    "D. NIST 800-53",
+    "E. STRIDE"
+  ],
+  "correct": [1],
+  "explanation": "CVEs are standardized IDs scored using CVSS for risk prioritization."
+},
+{
+  "question": "Which technique would most help prevent SQL injection?",
+  "answers": [
+    "A. Role-based access control",
+    "B. Input validation and parameterized queries",
+    "C. Logging",
+    "D. SSL encryption",
+    "E. Two-factor authentication"
+  ],
+  "correct": [1],
+  "explanation": "Sanitizing input and using parameterized queries block SQL injection attacks."
+},
+{
+  "question": "In STRIDE threat modeling, what does the R stand for?",
+  "answers": [
+    "A. Redundancy",
+    "B. Recovery",
+    "C. Repudiation",
+    "D. Reflection",
+    "E. Reuse"
+  ],
+  "correct": [2],
+  "explanation": "Repudiation means denying an action occurred—without proper logging or proof."
+},
+{
+  "question": "Which concept ensures users cannot deny actions they performed?",
+  "answers": [
+    "A. Confidentiality",
+    "B. Non-repudiation",
+    "C. Availability",
+    "D. Obfuscation",
+    "E. Federation"
+  ],
+  "correct": [1],
+  "explanation": "Non-repudiation ensures user actions are provable and cannot be denied later."
+},
+{
+  "question": "A risk is identified that’s above tolerance and cannot be mitigated technically. What is a typical next step?",
+  "answers": [
+    "A. Ignore the risk",
+    "B. Fire the system owner",
+    "C. Risk acceptance or transfer (e.g., insurance)",
+    "D. Redesign the architecture completely",
+    "E. Raise RPO thresholds"
+  ],
+  "correct": [2],
+  "explanation": "When risks can't be mitigated, they’re accepted or transferred (e.g., via insurance)."
+},
+{
+  "question": "What does an SLA typically define?",
+  "answers": [
+    "A. Budget allocations",
+    "B. Project charter details",
+    "C. Service level expectations like uptime or response time",
+    "D. Disaster recovery plans",
+    "E. Control mappings"
+  ],
+  "correct": [2],
+  "explanation": "SLAs define measurable service delivery standards—like uptime or RTOs."
+},
+{
+  "question": "Which practice helps ensure systems stay aligned to the current threat landscape?",
+  "answers": [
+    "A. Static policies",
+    "B. Annual budgeting",
+    "C. Continuous control validation and tuning",
+    "D. Daily backups only",
+    "E. Default allow rules"
+  ],
+  "correct": [2],
+  "explanation": "Continuous control validation ensures defenses stay effective as threats evolve."
+},
+{
+  "question": "You notice your DLP system is alerting on outbound traffic containing SSNs. What type of control is this?",
+  "answers": [
+    "A. Preventive",
+    "B. Compensating",
+    "C. Detective",
+    "D. Corrective",
+    "E. Directive"
+  ],
+  "correct": [2],
+  "explanation": "DLP alerts identify data leaks—this is a detective control."
+},
+{
+  "question": "Which tool visualizes lateral movement paths an attacker might exploit inside your network?",
+  "answers": [
+    "A. Firewall config tool",
+    "B. Threat intelligence feed",
+    "C. Attack path analysis",
+    "D. SIEM dashboard",
+    "E. Compliance scanner"
+  ],
+  "correct": [2],
+  "explanation": "Attack path analysis shows potential attacker routes once inside the network."
+},
+{
+  "question": "Which of the following ensures you can trace a user’s actions back to them?",
+  "answers": [
+    "A. Encryption",
+    "B. Federation",
+    "C. Accountability and audit logs",
+    "D. MFA",
+    "E. Port mirroring"
+  ],
+  "correct": [2],
+  "explanation": "Audit logs establish accountability by linking actions to users."
+},
+{
+  "question": "Which control would help enforce MFA at scale across multiple cloud services?",
+  "answers": [
+    "A. Local account password policy",
+    "B. Identity federation and policy enforcement",
+    "C. Host-based IDS",
+    "D. Device hardening baseline",
+    "E. GRC workflow"
+  ],
+  "correct": [1],
+  "explanation": "Federation enables centralized identity policy enforcement—like MFA."
+},
+{
+  "question": "You’re testing your response plan by simulating a ransomware attack. What are you conducting?",
+  "answers": [
+    "A. Threat modeling",
+    "B. Business Impact Assessment",
+    "C. Tabletop or simulation exercise",
+    "D. Phishing campaign",
+    "E. MOU review"
+  ],
+  "correct": [2],
+  "explanation": "Simulation exercises validate IR readiness under realistic conditions."
+},
+{
+  "question": "After assessing your IR program, you define expected steps and assign roles/responsibilities. What artifact is created?",
+  "answers": [
+    "A. SIEM runbook",
+    "B. IR playbook",
+    "C. Risk register",
+    "D. Policy manual",
+    "E. Audit report"
+  ],
+  "correct": [1],
+  "explanation": "Playbooks document defined steps for responding to incidents."
+},
+{
+  "question": "A new tool generates 10,000 alerts/day. What key step prevents overwhelming the team?",
+  "answers": [
+    "A. Increase staffing only",
+    "B. Enable full logging",
+    "C. Define tuning and suppression rules",
+    "D. Ignore most alerts",
+    "E. Pause all tickets"
+  ],
+  "correct": [2],
+  "explanation": "Tuning and suppressing irrelevant alerts improves analyst focus and SOC efficiency."
+},
+{
+  "question": "The security team runs a regular review of AD group memberships and disables stale accounts. This is an example of:",
+  "answers": [
+    "A. Threat intelligence",
+    "B. Account lifecycle management",
+    "C. Defense in depth",
+    "D. Compensating control",
+    "E. Vulnerability management"
+  ],
+  "correct": [1],
+  "explanation": "Lifecycle management includes provisioning, deprovisioning, and review of user accounts."
+},
+{
+  "question": "Which document outlines asset ownership, responsibilities, and protections for company data?",
+  "answers": [
+    "A. Data classification policy",
+    "B. Risk register",
+    "C. DR plan",
+    "D. SIEM log review checklist",
+    "E. Phishing awareness report"
+  ],
+  "correct": [0],
+  "explanation": "The data classification policy defines how different data types must be handled and protected."
+},
+{
+  "question": "What’s the primary purpose of an NDA in vendor relationships?",
+  "answers": [
+    "A. Control login access",
+    "B. Ensure system uptime",
+    "C. Protect confidentiality of shared information",
+    "D. Require two-factor authentication",
+    "E. Enforce backup schedules"
+  ],
+  "correct": [2],
+  "explanation": "An NDA (Non-Disclosure Agreement) protects sensitive information exchanged between parties."
+},
+{
+  "question": "What control ensures logs cannot be altered once written?",
+  "answers": [
+    "A. Backup policy",
+    "B. Immutable logging",
+    "C. Port scanning",
+    "D. Alert suppression",
+    "E. Asset tagging"
+  ],
+  "correct": [1],
+  "explanation": "Immutable logging prevents tampering or modification of log records."
+},
+{
+  "question": "Which type of backup includes only files changed since the last full backup?",
+  "answers": [
+    "A. Snapshot",
+    "B. Full backup",
+    "C. Incremental backup",
+    "D. Image backup",
+    "E. Mirroring"
+  ],
+  "correct": [2],
+  "explanation": "Incremental backups save only changes since the last full backup, optimizing space and speed."
+},
+{
+  "question": "Which plan addresses how your business maintains operations during a disruption?",
+  "answers": [
+    "A. Incident Response Plan",
+    "B. Data Retention Plan",
+    "C. Business Continuity Plan",
+    "D. Exit Strategy",
+    "E. Information Security Policy"
+  ],
+  "correct": [2],
+  "explanation": "A BCP (Business Continuity Plan) ensures mission-critical functions continue during incidents."
+},
+{
+  "question": "You’ve enabled audit logging for user access to sensitive databases. This helps enforce what principle?",
+  "answers": [
+    "A. Least functionality",
+    "B. Least privilege",
+    "C. Accountability",
+    "D. Availability",
+    "E. Federation"
+  ],
+  "correct": [2],
+  "explanation": "Audit logs help enforce accountability by tracking user actions."
+},
+{
+  "question": "Which control type detects issues without actively stopping them?",
+  "answers": [
+    "A. Preventive",
+    "B. Compensating",
+    "C. Corrective",
+    "D. Detective",
+    "E. Directive"
+  ],
+  "correct": [3],
+  "explanation": "Detective controls identify issues—like IDS alerts—without blocking them."
+},
+{
+  "question": "The security team adds context tags to alerts like ‘ransomware’ or ‘exfiltration’. This process is called?",
+  "answers": [
+    "A. Alert prioritization",
+    "B. Threat labeling",
+    "C. Alert enrichment",
+    "D. Remediation prep",
+    "E. Suppression"
+  ],
+  "correct": [2],
+  "explanation": "Alert enrichment adds metadata to improve understanding and triage."
+},
+{
+  "question": "Which phase of incident response includes forensic evidence collection?",
+  "answers": [
+    "A. Preparation",
+    "B. Detection & Analysis",
+    "C. Containment",
+    "D. Eradication",
+    "E. Recovery"
+  ],
+  "correct": [1],
+  "explanation": "Forensics usually happens during detection/analysis to support root cause and legal needs."
+},
+{
+  "question": "An attacker uses stolen credentials to access sensitive cloud storage. Which control could best prevent this?",
+  "answers": [
+    "A. Logging",
+    "B. RBAC",
+    "C. MFA",
+    "D. DLP",
+    "E. Immutable backups"
+  ],
+  "correct": [2],
+  "explanation": "MFA (Multi-Factor Authentication) helps stop unauthorized access even with valid credentials."
+},
+{
+  "question": "What’s the main advantage of automated patching systems?",
+  "answers": [
+    "A. Lower license costs",
+    "B. Reduces manual error and increases speed",
+    "C. Improved endpoint performance",
+    "D. Stronger encryption",
+    "E. Longer uptime"
+  ],
+  "correct": [1],
+  "explanation": "Automated patching ensures timely fixes and reduces human error risks."
+},
+{
+  "question": "You inherit a legacy app with hardcoded credentials. Which control would reduce this risk?",
+  "answers": [
+    "A. Data masking",
+    "B. Secrets management tool",
+    "C. VPN tunneling",
+    "D. Multi-cloud deployment",
+    "E. SSL pinning"
+  ],
+  "correct": [1],
+  "explanation": "Secrets managers store sensitive credentials securely—avoiding hardcoding."
+},
+{
+  "question": "What is a key concern with shadow IT?",
+  "answers": [
+    "A. Increased audit speed",
+    "B. Duplicate ticket queues",
+    "C. Unmanaged and insecure systems",
+    "D. Overstaffing",
+    "E. High SLA enforcement"
+  ],
+  "correct": [2],
+  "explanation": "Shadow IT introduces risks because it bypasses approved controls and monitoring."
+},
+{
+  "question": "After discovering a vulnerability, you block a port temporarily. This is what kind of control?",
+  "answers": [
+    "A. Preventive",
+    "B. Detective",
+    "C. Corrective",
+    "D. Compensating",
+    "E. Directive"
+  ],
+  "correct": [0],
+  "explanation": "Blocking access before exploitation is preventive in nature."
+},
+{
+  "question": "What term refers to assets like confidential plans, pricing, or business strategies?",
+  "answers": [
+    "A. Intellectual Property",
+    "B. Compliance data",
+    "C. System logs",
+    "D. Personal Identifiable Information",
+    "E. DR artifacts"
+  ],
+  "correct": [0],
+  "explanation": "Intellectual Property (IP) includes proprietary business info like strategies and R&D."
+},
+{
+  "question": "What’s the primary purpose of a compensating control?",
+  "answers": [
+    "A. To log alerts",
+    "B. To substitute when primary controls can’t be used",
+    "C. To replace governance policies",
+    "D. To ensure vendor compliance",
+    "E. To encrypt data"
+  ],
+  "correct": [1],
+  "explanation": "Compensating controls offer alternative protection when direct controls aren’t feasible."
+},
+{
+  "question": "What practice can help reduce the blast radius of compromised credentials?",
+  "answers": [
+    "A. Patch automation",
+    "B. Immutable logging",
+    "C. Least privilege access",
+    "D. Phishing drills",
+    "E. Alert enrichment"
+  ],
+  "correct": [2],
+  "explanation": "Least privilege ensures stolen credentials cause minimal damage."
+},
+{
+  "question": "What is the best way to determine whether backups can truly be relied on?",
+  "answers": [
+    "A. Monitor size",
+    "B. Monitor encryption",
+    "C. Conduct regular recovery tests",
+    "D. Use immutable storage",
+    "E. Automate snapshot frequency"
+  ],
+  "correct": [2],
+  "explanation": "Only regular recovery testing ensures backup reliability in real incidents."
+},
+{
+  "question": "Which term describes the actions taken to remove malware from infected systems?",
+  "answers": [
+    "A. Prevention",
+    "B. Containment",
+    "C. Remediation",
+    "D. Monitoring",
+    "E. Segregation"
+  ],
+  "correct": [2],
+  "explanation": "Remediation refers to removing and repairing after an infection."
+},
+{
+  "question": "Your IR team wants an easy way to track how long each alert takes to investigate. Which metric helps?",
+  "answers": [
+    "A. RPO",
+    "B. MTTD",
+    "C. MTTR",
+    "D. CVSS",
+    "E. SLA"
+  ],
+  "correct": [2],
+  "explanation": "MTTR (Mean Time to Respond) tracks resolution speed for alerts."
+},
+{
+  "question": "Which technology is most commonly used to isolate apps or systems to limit exposure?",
+  "answers": [
+    "A. Firewalls",
+    "B. VLANs",
+    "C. Containers and sandboxing",
+    "D. IDS sensors",
+    "E. DLP"
+  ],
+  "correct": [2],
+  "explanation": "Containers and sandboxing isolate processes to contain potential damage."
+}
+
+    ];
+
+let questions = [...fullQuestionBank];
+let currentIndex = 0;
+let userAnswers = Array(questions.length).fill().map(() => []);
+
+function loadQuestion() {
+  const q = questions[currentIndex];
+  document.getElementById('question-title').textContent = `${currentIndex + 1}. ${q.question}`;
+
+  const answersContainer = document.getElementById('answers');
+  answersContainer.innerHTML = '';
+
+  q.answers.forEach((answer, i) => {
+    const label = document.createElement('label');
+    label.innerHTML = `<input type="radio" name="answer" value="${i}"> ${answer}`;
+    answersContainer.appendChild(label);
+
+    const input = label.querySelector('input');
+    input.addEventListener('change', () => {
+      userAnswers[currentIndex] = [i];
+      const isCorrect = q.correct.includes(i);
+
+      const feedback = document.getElementById('feedback');
+      feedback.textContent = isCorrect ? '✅ Correct!' : '❌ Incorrect.';
+      feedback.style.color = isCorrect ? 'green' : 'red';
+
+      // Highlight correct answers
+      q.correct.forEach(idx => {
+        const correctLabel = answersContainer.querySelectorAll('label')[idx];
+        correctLabel.style.backgroundColor = '#28a745';
+        correctLabel.style.color = 'white';
+        correctLabel.style.padding = '5px';
+        correctLabel.style.borderRadius = '5px';
+      });
+
+      // Highlight selected wrong answer
+      if (!isCorrect) {
+        label.style.backgroundColor = '#dc3545';
+        label.style.color = 'white';
+      }
+
+      // Show explanation
+      const explanation = document.getElementById('explanation');
+      explanation.textContent = q.explanation || '';
+
+      updateGrid();
+    });
+  });
+
+  // Clear feedback/explanation when question loads
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('explanation').textContent = '';
+
+  updateGrid();
+}
+
+function updateGrid() {
+  const grid = document.getElementById('question-grid');
+  grid.innerHTML = '';
+
+  questions.forEach((q, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = i + 1;
+
+    const answered = userAnswers[i].length > 0;
+    const correct = answered && q.correct.includes(userAnswers[i][0]);
+
+    if (!answered) {
+      btn.classList.add('unanswered');
+    } else if (correct) {
+      btn.classList.add('correct');
+    } else {
+      btn.classList.add('incorrect');
+    }
+
+    btn.addEventListener('click', () => {
+      currentIndex = i;
+      loadQuestion();
+    });
+
+    grid.appendChild(btn);
+  });
+}
+
+function nextQuestion() {
+  if (currentIndex < questions.length - 1) {
+    currentIndex++;
+    loadQuestion();
+  }
+}
+
+function prevQuestion() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    loadQuestion();
+  }
+}
+
+function submitExam() {
+  let correct = 0;
+  let wrong = 0;
+
+  questions.forEach((q, i) => {
+    const userAns = userAnswers[i][0];
+    if (q.correct.includes(userAns)) correct++;
+    else wrong++;
+  });
+
+  document.getElementById('exam-section').classList.add('hidden');
+  document.getElementById('review-section').classList.remove('hidden');
+  document.getElementById('correct-count').textContent = correct;
+  document.getElementById('wrong-count').textContent = wrong;
+  document.getElementById('percentage').textContent = ((correct / questions.length) * 100).toFixed(2);
+}
+
+function retakeWrongOnly() {
+  const wrongQs = questions.filter((q, i) => {
+    const userAns = userAnswers[i][0];
+    return !q.correct.includes(userAns);
+  });
+
+  if (wrongQs.length === 0) {
+    alert('✅ No wrong answers to retake!');
+    return;
+  }
+
+  questions = wrongQs;
+  userAnswers = Array(questions.length).fill().map(() => []);
+  currentIndex = 0;
+
+  document.getElementById('review-section').classList.add('hidden');
+  document.getElementById('exam-section').classList.remove('hidden');
+
+  loadQuestion();
+}
+
+function resetExam() {
+  questions = [...fullQuestionBank];
+  userAnswers = Array(questions.length).fill().map(() => []);
+  currentIndex = 0;
+
+  document.getElementById('review-section').classList.add('hidden');
+  document.getElementById('exam-section').classList.remove('hidden');
+
+  loadQuestion();
+}
+// 🕒 Timer Logic: 2 hours countdown
+let totalSeconds = 60 * 60 * 2; // 2 hours
+
+function startTimer() {
+  const countdownEl = document.getElementById('countdown');
+  const timer = setInterval(() => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    countdownEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    totalSeconds--;
+
+    if (totalSeconds < 0) {
+      clearInterval(timer);
+      submitExam(); // auto-submit when time runs out
+    }
+  }, 1000);
+}
+
+window.onload = () => {
+  resetExam();
+  startTimer(); // 🔥 start ticking
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Networking Fundamentals Exam</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #0056b3, #87CEEB);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .question-container {
+            display: none;
+        }
+        .question-container.active {
+            display: block;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px 0 0;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        .btn-next, .btn-prev {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-submit, .btn-reset {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-next:hover, .btn-prev:hover, .btn-submit:hover, .btn-reset:hover {
+            opacity: 0.9;
+        }
+        .timer {
+            text-align: right;
+            font-size: 18px;
+            color: red;
+            margin-bottom: 20px;
+        }
+        .results {
+            text-align: center;
+            display: none;
+        }
+        .motivational {
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Networking Fundamentals Exam</h1>
+        <div class="timer" id="timer">Time Remaining: 100:00</div>
+        <form id="examForm">
+            <div id="questions"></div>
+            <div class="results" id="results">
+                <h2>Exam Results</h2>
+                <p>Total Questions: <span id="totalQuestions"></span></p>
+                <p>Correct Answers: <span id="correctAnswers"></span></p>
+                <p>Wrong Answers: <span id="wrongAnswers"></span></p>
+                <p>Unanswered: <span id="unansweredQuestions"></span></p>
+                <p>Percentage: <span id="percentage"></span>%</p>
+                <p>Your Name: <span id="userNameOutput"></span></p>
+                <button type="button" class="btn-reset" onclick="resetExam()">Restart Exam</button>
+            </div>
+            <button type="submit" class="btn-submit" id="submitButton" style="display: none;">Submit Exam</button>
+        </form>
+    </div>
+
+    <script>
+        const questionPool = [
+            {
+                id: 'q1',
+                question: 'Which of the following protocols are examples of TCP/IP transport layer protocols? (Choose 2 answers.)',
+                options: [
+                    'A. Ethernet',
+                    'B. HTTP',
+                    'C. IP',
+                    'D. UDP',
+                    'E. SMTP',
+                    'F. TCP'
+                ],
+                correctAnswer: ['D', 'F']
+            },
+            {
+                id: 'q2',
+                question: 'Which of the following protocols are examples of TCP/IP data-link layer protocols?',
+                options: [
+                    'A. Ethernet',
+                    'B. HTTP',
+                    'C. IP',
+                    'D. UDP',
+                    'E. SMTP',
+                    'F. TCP',
+                    'G. HDLC'
+                ],
+                correctAnswer: 'A'
+            },
+            {
+                id: 'q3',
+                question: 'The process of a web server adding a TCP header to the contents of a web page, followed by adding an IP header and then adding a data-link header and trailer, is an example of what?',
+                options: [
+                    'A. Data encapsulation',
+                    'B. Same-layer interaction',
+                    'C. OSI model',
+                    'D. All of these answers are correct.'
+                ],
+                correctAnswer: 'A'
+            },
+            {
+                id: 'q4',
+                question: 'Which of the following terms is used specifically to identify the entity created when encapsulating data inside data-link layer headers and trailers?',
+                options: [
+                    'A. Data',
+                    'B. Chunk',
+                    'C. Segment',
+                    'D. Frame',
+                    'E. Packet'
+                ],
+                correctAnswer: 'D'
+            },
+            {
+                id: 'q5',
+                question: 'The process of HTTP asking TCP to send some data and making sure that it is received correctly is an example of what?',
+                options: [
+                    'A. Same-layer interaction',
+                    'B. Adjacent-layer interaction',
+                    'C. OSI model',
+                    'D. All of these answers are correct.'
+                ],
+                correctAnswer: 'B'
+            },
+            {
+                id: 'q6',
+                question: 'In what modes can you type the command show mac address-table and expect to get a response with MAC table entries? (Choose two answers.)',
+                options: [
+                    'A. User mode',
+                    'B. Enable mode',
+                    'C. Global configuration mode',
+                    'D. Interface configuration mode'
+                ],
+                correctAnswer: ['A', 'B']
+            },
+            {
+                id: 'q7',
+                question: 'Which of the following is a difference between Telnet and SSH as supported by a Cisco switch?',
+                options: [
+                    'A. SSH encrypts the passwords used at login, but not other traffic; Telnet encrypts everything.',
+                    'B. SSH encrypts all data exchange, including login passwords; Telnet encrypts nothing.',
+                    'C. Telnet is used from Microsoft operating systems, and SSH is used from UNIX and Linux operating systems.',
+                    'D. Telnet encrypts only password exchanges; SSH encrypts all data exchanges.'
+                ],
+                correctAnswer: 'B'
+            },
+            {
+                id: 'q8',
+                question: 'What type of switch memory is used to store the configuration used by the switch when it is up and working?',
+                options: [
+                    'A. RAM',
+                    'B. ROM',
+                    'C. Flash',
+                    'D. NVRAM',
+                    'E. Bubble'
+                ],
+                correctAnswer: 'A'
+            },
+            {
+                id: 'q9',
+                question: 'What command copies the configuration from RAM into NVRAM?',
+                options: [
+                    'A. copy running-config tftp',
+                    'B. copy tftp running-config',
+                    'C. copy running-config start-up-config',
+                    'D. copy start-up-config running-config',
+                    'E. copy startup-config running-config',
+                    'F. copy running-config startup-config'
+                ],
+                correctAnswer: 'F'
+            },
+            {
+                id: 'q10',
+                question: 'Which of the following is true about the enable secret command?',
+                options: [
+                    'A. It forces you to enter a password when you want to get console access to the user exec mode in a switch/router',
+                    'B. It forces you to enter a password when you go from user exec mode to privileged exec mode.',
+                    'C. It forces you to enter a password when you go into config mode from privileged exec mode.',
+                    'D. The password can be seen in plain text when you do the show run command.'
+                ],
+                correctAnswer: 'B'
+            },
+            {
+                id: 'q11',
+                question: 'Which of the following is true in relation to configuring a switch or router? (Choose 2 answers)',
+                options: [
+                    'A. When you configure the Console password, it is not automatically encrypted.',
+                    'B. If you don’t add the command login after the password command, you will be prompted for a password when you try to connect.',
+                    'C. Using the services password-encryption will encrypt any unencrypted passwords.',
+                    'D. When to enter the Console password you are automatically in enable mode.'
+                ],
+                correctAnswer: ['A', 'C']
+            },
+            {
+                id: 'q12',
+                question: 'Which of the following statements are true? (Choose 2 answers)',
+                options: [
+                    'A. Full Duplex allows only one device at a time to transmit.',
+                    'B. Half Duplex allows only one device at a time to transmit.',
+                    'C. Half Duplex means that 2 devices communicating will transmit at different speeds.',
+                    'D. Hubs can only work in Half Duplex mode.',
+                    'E. Switches can only work in Half Duplex mode.'
+                ],
+                correctAnswer: ['B', 'D']
+            },
+    {
+        id: 'q13',
+        question: 'In relation to fiber, which of the following statements are true?',
+        options: [
+            'A. Multimode fiber signals travel further than Single mode fiber.',
+            'B. Single mode uses laser to transmit.',
+            'C. Fiber is subject to electrical interference.',
+            'D. Multimode fiber is more expensive than Single mode.'
+        ],
+        correctAnswer: ['B']
+    },
+    {
+        id: 'q14',
+        question: 'Which of the following Ethernet standards defines Gigabit Ethernet over UTP cabling?',
+        options: [
+            'A. 10GBASE-T',
+            'B. 100BASE-T',
+            'C. 1000BASE-T',
+            'D. None of the other answers is correct.'
+        ],
+        correctAnswer: ['C']
+    },
+    {
+        id: 'q15',
+        question: 'Which of the following is true about Ethernet crossover cables for Fast Ethernet?',
+        options: [
+            'A. Pins 1 and 2 are reversed on the other end of the cable.',
+            'B. Pins 1 and 2 on one end of the cable connect to pins 3 and 6 on the other end of the cable.',
+            'C. Pins 1 and 2 on one end of the cable connect to pins 3 and 4 on the other end of the cable.',
+            'D. The cable can be up to 1000 meters long to cross over between buildings.',
+            'E. None of the other answers is correct.'
+        ],
+        correctAnswer: ['B']
+    },
+    {
+        id: 'q16',
+        question: 'Each answer lists two types of devices used in a 100BASE-T network. If these devices were connected with UTP Ethernet cables, which pairs of devices would require a straight-through cable? (Choose 2 answers.)',
+        options: [
+            'A. PC and router',
+            'B. PC and switch',
+            'C. Hub and switch',
+            'D. Router and hub'
+        ],
+        correctAnswer: ['B', 'D']
+    },
+    {
+        id: 'q17',
+        question: 'Which of the following is true about the Ethernet FCS field?',
+        options: [
+            'A. Ethernet uses FCS for error detection.',
+            'B. It is 2 bytes long.',
+            'C. It resides in the Ethernet header, not the Ethernet trailer.',
+            'D. It is used for encryption.'
+        ],
+        correctAnswer: ['A']
+    },
+    {
+        id: 'q18',
+        question: 'Which of the following terms describe Ethernet addresses that can be used to send one frame that is delivered to multiple devices on the LAN? (Choose two answers.)',
+        options: [
+            'A. Burned-in address',
+            'B. Unicast address',
+            'C. Broadcast address',
+            'D. Multicast address'
+        ],
+        correctAnswer: ['C', 'D']
+    },
+    {
+    id: 'q19',
+    question: 'Which of the following statements best describes what a switch does with a frame destined for an unknown unicast address?',
+    options: [
+        'A. It forwards out all interfaces in the same VLAN except for the incoming interface.',
+        'B. It forwards the frame out the one interface identified by the matching entry in the MAC address table.',
+        'C. It compares the destination IP address to the destination MAC address.',
+        'D. It compares the frame’s incoming interface to the source MAC entry in the MAC address table.'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q20',
+    question: 'Consider the following output from a Cisco Catalyst switch:\n\nSW1# show mac address-table dynamic\nMac Address Table\nVlan Mac Address Type Ports\n1 02AA.AAAA.AAAA DYNAMIC Gi0/1\n1 02BB.BBBB.BBBB DYNAMIC Gi0/2\n1 02CC.CCCC.CCCC DYNAMIC Gi0/3\nTotal Mac Addresses for this criterion: 3\n\nWhich of the following answers is true about this switch?',
+    options: [
+        'A. The output proves that port Gi0/2 connects directly to a device that uses address 02BB.BBBB.BBBB.',
+        'B. The switch has learned three MAC addresses since the switch powered on.',
+        'C. The three listed MAC addresses were learned based on the destination MAC address of frames forwarded by the switch.',
+        'D. 02CC.CCCC.CCCC was learned from the source MAC address of a frame that entered port Gi0/3.'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q21',
+    question: 'In relation to switches, which of the following is true?',
+    options: [
+        'A. All ports on a switch are in the same collision domain.',
+        'B. All ports in a switch are in the same broadcast domain.',
+        'C. All switches can route IP packets.',
+        'D. All switches have a routing table.'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q22',
+    question: 'In relation to hubs, which of the following is true?',
+    options: [
+        'A. All devices connected to a hub are in the same collision domain.',
+        'B. All devices connected to a hub are in different broadcast domains.',
+        'C. Hubs use MAC address tables to keep track of connected devices.',
+        'D. Hubs are layer 2 devices.'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q23',
+    question: 'In relation to switches, which of the following is true?',
+    options: [
+        'A. MAC Address tables are stored in RAM.',
+        'B. MAC Address tables are stored in NVRAM.',
+        'C. MAC Address tables are stored in CAM.',
+        'D. MAC Address tables are stored in FLASH.'
+    ],
+    correctAnswer: ['C']
+},
+{
+    id: 'q24',
+    question: 'In relation to Switch port security, which of the following is true if Switchport security is enabled? (Choose 2 answers)',
+    options: [
+        'A. By default, a maximum of 2 devices can connect to that port.',
+        'B. By default, the violation action is shutdown.',
+        'C. The second device that connects to the port causes a violation.',
+        'D. By default, no action is taken when a violation occurs.'
+    ],
+    correctAnswer: ['B', 'C']
+},
+{
+    id: 'q25',
+    question: 'When you issue the following commands in a switch –\nSwitch(config)#switchport port-security mac-address sticky\n\nWhich of the following is true?',
+    options: [
+        'A. Sticky copies the first learned MAC address into RAM running-config.',
+        'B. Sticky copies the first learned MAC address into NVRAM startup-config.',
+        'C. Sticky copies the learned MAC address into FLASH.',
+        'D. Sticky copies the learned MAC address to a TFTP server.'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q26',
+    question: 'Which of the following is true about port security?',
+    options: [
+        'A. The default violation mode is Protect.',
+        'B. The default violation mode is Restrict.',
+        'C. The default violation mode is Shutdown.',
+        'D. The default violation mode is Hold-down.'
+    ],
+    correctAnswer: ['C']
+},
+{
+    id: 'q27',
+    question: 'A PC has auto-negotiation enabled and is connected to a port on a switch with auto-negotiation enabled. The PC has a maximum speed of 10Mbps and the port on the switch a maximum speed of 1000Mbps. Which of the following is true?',
+    options: [
+        'A. The PC will connect at 10Mbps and half duplex to the switch.',
+        'B. The PC will connect at 10Mbps and full duplex to the switch.',
+        'C. The PC will connect at 1000Mbps and half duplex to the switch.',
+        'D. The PC will connect at 1000Mbps and full duplex to the switch.'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q28',
+    question: 'In relation to a network with the Network ID 172.16.1.0/24, which of the following is true? (Choose 3 answers)',
+    options: [
+        'A. The first host on this network is 172.16.1.0.',
+        'B. The last host on this network is 172.16.1.255.',
+        'C. The first host is 172.16.1.1.',
+        'D. The last host is 172.16.1.254.',
+        'E. The broadcast is 172.16.1.255.'
+    ],
+    correctAnswer: ['C', 'D', 'E']
+},
+{
+    id: 'q29',
+    question: 'In relation to a network with the Network ID 192.168.1.32/27, which of the following is true? (Choose 2 answers)',
+    options: [
+        'A. The first host on this network is 192.168.1.33.',
+        'B. The last host on this network is 192.168.1.63.',
+        'C. The first host is 192.168.1.32.',
+        'D. The last host is 192.168.1.62.',
+        'E. The broadcast is 192.168.1.64.'
+    ],
+    correctAnswer: ['A', 'D']
+},
+{
+    id: 'q30',
+    question: 'In a PC, the default gateway is –',
+    options: [
+        'A. The address of the local DHCP server.',
+        'B. The address of the local switch.',
+        'C. The address of the DNS server.',
+        'D. The address of the router connected to the PC’s LAN.',
+        'E. The address of the local ISP.'
+    ],
+    correctAnswer: ['D']
+},
+    {
+        id: 'q31',
+        question: 'In relation to an ARP table, which of the following is true?',
+        options: [
+            'A. It is used in a switch to store MAC addresses and what ports they are connected to.',
+            'B. It is used in a PC to map IP addresses to MAC addresses.',
+            'C. It is used in a PC to map URLs to IP addresses.',
+            'D. It is used in a PC to map URLs to MAC addresses.'
+        ],
+        correctAnswer: ['B']
+    },
+    {
+        id: 'q32',
+        question: 'Which of the following are true about a LAN-connected TCP/IP host and its IP routing (forwarding) choices?',
+        options: [
+            'A. The host always sends packets to its default gateway.',
+            'B. The host never sends packets to its default gateway.',
+            'C. The host sends packets to its default gateway if the destination IP address is in a different subnet than the host.',
+            'D. The host sends packets to its default gateway if the destination IP address is in the same subnet as the host.'
+        ],
+        correctAnswer: ['C']
+    },
+    {
+        id: 'q33',
+        question: 'In relation to Classful IP addressing, which of the following is true? (Choose 2 answers)',
+        options: [
+            'A. 126.1.1.1 is a Class A address.',
+            'B. 126.1.1.1 belongs to a Classful network with a prefix of /16.',
+            'C. 126.1.1.1 belongs to a Classful network with a network mask of 255.0.0.0.',
+            'D. 126.1.1.1 is a Class B address.',
+            'E. None of the above.'
+        ],
+        correctAnswer: ['A', 'C']
+    },
+    {
+        id: 'q34',
+        question: 'In relation to Classful IP addressing, which of the following is true? (Choose 2 answers)',
+        options: [
+            'A. 191.1.1.1 is a Class A address.',
+            'B. 191.1.1.1 belongs to a Classful network with a prefix of /16.',
+            'C. 191.1.1.1 belongs to a Classful network with a network mask of 255.0.0.0.',
+            'D. 191.1.1.1 is a Class B address.',
+            'E. None of the above.'
+        ],
+        correctAnswer: ['B', 'D']
+    },
+    {
+        id: 'q35',
+        question: 'In relation to Unicasts, Multicasts and Broadcasts, which of the following are true? (Choose 3 answers)',
+        options: [
+            'A. A Multicast IP address is destined for every device on the network.',
+            'B. A Multicast IP packet must use a MAC Multicast MAC address in the frame containing the IP Multicast packet.',
+            'C. A Multicast MAC destination address always begins with ff:ff:ff:.',
+            'D. A Multicast MAC destination address always begins with 01:00:5e:.',
+            'E. An IP broadcast packet must always use a Destination MAC address of ff:ff:ff:ff:ff:ff.'
+        ],
+        correctAnswer: ['B', 'D', 'E']
+    },
+    {
+        id: 'q36',
+        question: 'To find the Network ID of a network when you know the IP address and subnet mask of a device on that network, which of the following is true?',
+        options: [
+            'A. From the subnet mask, count the number of host bits there are and set them all to 0.',
+            'B. From the subnet mask, count the number of host bits there are and set them all to 1.',
+            'C. Calculate the first available host address and that will be the Network ID.',
+            'D. Calculate the last available host address and that will be the Network ID.'
+        ],
+        correctAnswer: ['A']
+    },
+    {
+        id: 'q37',
+        question: 'A device has an IP address of 192.168.10.40/28. Which of the following is true? (Choose 3 answers)',
+        options: [
+            'A. The Network ID is 192.168.10.32.',
+            'B. The first host is 192.168.10.32.',
+            'C. The last host is 192.168.10.62.',
+            'D. The last host is 192.168.10.46.',
+            'E. The broadcast for this network is 192.168.10.47.',
+            'F. The broadcast for this network is 192.168.10.63.'
+        ],
+        correctAnswer: ['A', 'E', 'F']
+    },
+    {
+        id: 'q38',
+        question: 'A device has an IP address 192.168.10.40 and a subnet mask 255.255.255.240. Which of the following is true? (Choose 2 answers)',
+        options: [
+            'A. There are a maximum of 30 hosts on this network.',
+            'B. There are a maximum of 16 hosts on this network.',
+            'C. There are a maximum of 14 hosts on this network.',
+            'D. The prefix for this network is /27.',
+            'E. The prefix for this network is /28.'
+        ],
+        correctAnswer: ['C', 'E']
+    },
+    {
+        id: 'q39',
+        question: 'A network with a Network ID 192.168.10.0/24 is to be subdivided into 6 equal subnets. Which of the following is true? (Choose 3 answers)',
+        options: [
+            'A. The new subnet mask must be 255.255.255.224.',
+            'B. The new subnet mask must be 255.255.255.240.',
+            'C. Each subnet will have a maximum of 30 hosts.',
+            'D. Each subnet will have a maximum of 30 hosts.',
+            'E. The Subnet ID of subnet 2 is 192.168.10.32.',
+            'F. The Subnet ID of subnet 2 is 192.168.10.64.'
+        ],
+        correctAnswer: ['A', 'C', 'E']
+    },
+    {
+        id: 'q40',
+        question: 'Which of the following are true in relation to Private IP addresses? (Choose 2 answers)',
+        options: [
+            'A. 10.255.255.1 is a Private IP address.',
+            'B. The same Private IP addresses cannot be reused in different private networks.',
+            'C. Private IP addresses are allowed on public networks such as the Internet.',
+            'D. Private IP addresses were created because Public IP addresses were getting scarcer.',
+            'E. Private IP addresses were created for security reasons only.'
+        ],
+        correctAnswer: ['A', 'D']
+    },
+	{
+    'id': 'q41',
+    'question': 'Which of the following does a router normally use when making a decision about routing IP packets?',
+    'options': [
+        'A. Destination MAC address',
+        'B. Source MAC address',
+        'C. Destination IP address',
+        'D. Source IP address',
+        'E. Destination MAC and IP addresses'
+    ],
+    'correctAnswer': ['C']
+},
+{
+    'id': 'q42',
+    'question': 'When a router receives a packet, which of the following are true?',
+    'options': [
+        'A. The router does not check the incoming frame for errors.',
+        'B. The router extracts the incoming packet from the frame to check where it goes and puts it back into the same frame to forward to the destination.',
+        'C. The router checks the frame for errors and only if it is good, it extracts the packet and forwards it in a new frame to the destination.',
+        'D. The router routes an IP packet based on its ARP table.'
+    ],
+    'correctAnswer': ['C']
+},
+{
+    'id': 'q43',
+    'question': 'When a router routes a packet, which of the following is true?',
+    'options': [
+        'A. If a router finds more than one route match in a routing table, it picks the route with the longest match.',
+        'B. If a router finds more than one route match in a routing table, it picks the route with the shortest match.',
+        'C. A router will route a packet on the first route it finds that matches the destination IP address.',
+        'D. If a router does not find a route that matches the Destination IP address, it sends the packet on the first available route.'
+    ],
+    'correctAnswer': ['A']
+},
+{
+    'id': 'q44',
+    'question': 'When a router routes a packet, which of the following is true? (Choose 2 answers)',
+    'options': [
+        'A. The router uses cost metrics to choose the cheapest route to use.',
+        'B. The router uses cost metrics to choose the best route to use.',
+        'C. RIP uses bandwidth as the cost metric.',
+        'D. OSPF uses bandwidth as the cost metric.'
+    ],
+    'correctAnswer': ['B', 'D']
+},
+{
+    'id': 'q45',
+    'question': 'Which of the following is true of Administrative Distance in a router?',
+    'options': [
+        'A. It is used with RIP to pick the best route to the destination.',
+        'B. It is used with OSPF to pick the best route to the destination.',
+        'C. When a router learns a particular route from more than 1 routing protocol, Administrative Distance is used to determine which protocol to accept the route from.',
+        'D. It is used to determine who can access the router.'
+    ],
+    'correctAnswer': ['C']
+},
+{
+    'id': 'q46',
+    'question': 'In relation to Administrative Distance in routers, which of the following is true?',
+    'options': [
+        'A. Administrative Distance ranks RIP better than OSPF.',
+        'B. Administrative Distance ranks OSPF better than RIP.',
+        'C. Administrative Distance ranks Static routes worse than OSPF.',
+        'D. OSPF has an Administrative Distance of 1.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q47',
+    'question': 'In relation to Static Routing, which of the following is true?',
+    'options': [
+        'A. Static routing is used to tell a router about its own directly connected networks.',
+        'B. With Static routing, the router automatically updates its neighbours about all its own directly connected networks.',
+        'C. Static routing is used to tell a router about any networks not directly connected to that router.',
+        'D. Static routing is ideal for large complex networks.'
+    ],
+    'correctAnswer': ['A']
+},
+{
+    'id': 'q48',
+    'question': 'A default static route does which of the following?',
+    'options': [
+        'A. Tells the router about its neighbour router.',
+        'B. Tells the router how to get to unknown networks that are not already in the routing table.',
+        'C. The default static route is used by the router to discard packets that it does not have a route for in the routing table.',
+        'D. The default static route will always be chosen as the best route for a destination network even when there are other routes available.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q49',
+    'question': 'The following command is issued in a router R1: R1(config)#ip route 0.0.0.0 0.0.0.0 192.168.1.2. Which of the following is true? (Choose 2 answers)',
+    'options': [
+        'A. The route is the default static route for the router or gateway of last resort.',
+        'B. 192.168.1.2 is the IP address of this router R1.',
+        'C. This route will cause a recursive lookup.',
+        'D. This is telling the router with the IP address 192.168.1.2 to route packets destined for the internet to this router R1.'
+    ],
+    'correctAnswer': ['A', 'C']
+},
+{
+    'id': 'q50',
+    'question': 'The following commands are issued in a router R1: R1(config)#ip route 0.0.0.0 0.0.0.0 g0/0/0 and R1(config)#ip route 0.0.0.0 0.0.0.0 g0/0/1 5. Which of the following is true? (Choose 2 answers)',
+    'options': [
+        'A. A default static route to 2 different interfaces has been created and packets are forwarded equally over both routes – load balancing.',
+        'B. A default static route to 2 different interfaces has been created and the second route on g0/0/1 will be the preferred route.',
+        'C. A default static route to 2 different interfaces has been created and the second route, known as a floating static route on g0/0/1, will only be used if the first route to g0/0/0 goes down.',
+        'D. A default static route to 2 different interfaces has been created. The first route to g0/0/0 will appear in the routing table and the second route to g0/0/1 will not appear in the routing table unless g0/0/0 fails.'
+    ],
+    'correctAnswer': ['C', 'D']
+},
+{
+    'id': 'q51',
+    'question': 'In relation to Static Routing, which of the following are true? (Choose 2 answers)',
+    'options': [
+        'A. You should only use next hop address when configuring static routes that use Gigabit Ethernet interfaces.',
+        'B. You should only use exit interface when configuring static routes that use Gigabit Ethernet interfaces.',
+        'C. When a router needs to route packets to the next hop address router, it does not need the MAC address of the next hop address router.',
+        'D. A router will use the next hop address as the target IP address when it needs the MAC address of the next hop address router when connected using Gigabit Ethernet.'
+    ],
+    'correctAnswer': ['C', 'D']
+},
+{
+    'id': 'q52',
+    'question': 'Which of the following are functions of a routing protocol? (Choose two answers.)',
+    'options': [
+        'A. Advertising known routes to neighboring routers',
+        'B. Learning routes for subnets directly connected to the router',
+        'C. Learning routes and putting those routes into the routing table for routes advertised to the router by its neighboring routers',
+        'D. Forwarding IP packets based on a packet’s destination IP address'
+    ],
+    'correctAnswer': ['A', 'C']
+},
+{
+    'id': 'q53',
+    'question': 'In relation to Distance Vector protocols, which of the following is true?',
+    'options': [
+        'A. Distance Vector routing protocol uses Dijkstra’s algorithm to calculate the best path to other networks.',
+        'B. OSPF is a Distance Vector routing protocol.',
+        'C. Distance Vector routing protocols involve a router telling all other neighbor routers directly about its own directly connected networks.',
+        'D. Distance Vector routing protocols involve a router telling all its neighbor routers about its own directly connected networks and they tell their neighbors.'
+    ],
+    'correctAnswer': ['C']
+},
+{
+    'id': 'q54',
+    'question': 'Which of the following is true in relation to OSPF and RIP?',
+    'options': [
+        'A. RIP uses bandwidth as a cost metric.',
+        'B. OSPF uses hop count as a cost metric.',
+        'C. RIP is better than OSPF for large networks.',
+        'D. RIP always picks the fastest route to a destination network.',
+        'E. RIP uses hop count as a cost metric.'
+    ],
+    'correctAnswer': ['E']
+},
+{
+    'id': 'q55',
+    'question': 'In relation to RIP, which are true about the command R1(config-router)#network 10.0.0.0? (Choose 2 answers)',
+    'options': [
+        'A. Any interface with an IP address belonging to that network will be used for RIP updates.',
+        'B. Any subnet belonging to the 10.0.0.0/8 network will be advertised to neighbors.',
+        'C. The statement tells R1 how to route to the network 10.0.0.0.',
+        'D. The statement is not complete as it must include the subnet mask.',
+        'E. 10.0.0.0 is an unknown network to R1.'
+    ],
+    'correctAnswer': ['A', 'B']
+},
+{
+    'id': 'q56',
+    'question': 'R1 has a static default route defined to connect to the ISP on interface g0/0/0. Which of the following statements in RIP will allow RIP to propagate this route to the other routers?',
+    'options': [
+        'A. Passive-interface g0/0/0',
+        'B. Default-information originate',
+        'C. No auto-summary',
+        'D. Ip route 0.0.0.0 0.0.0.0 g0/0/0'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q57',
+    'question': 'Which of the following is true in relation to the command in RIP: R1(config-router)passive-interface g0/0/2?',
+    'options': [
+        'A. This tells the router to propagate the default static route to the other routers using RIP.',
+        'B. This tells the router not to forward RIP updates on this interface as it is a LAN.',
+        'C. This tells the router to use RIP to advertise the subnet that g0/0/2 belongs to.',
+        'D. It tells the router not to send broadcasts on g0/0/2.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q58',
+    'question': 'In OSPF, when the following commands are issued: R1(config)#interface fa0/0 and R1(config-if)#ip ospf 1 area 0, which of the following are true?',
+    'options': [
+        'A. The subnet associated with interface fa0/0 will be advertised in OSPF.',
+        'B. This interface fa0/0 will not belong to any area.',
+        'C. The router will advertise a cost of 1 for this interface.',
+        'D. The interface will not advertise OSPF routes.'
+    ],
+    'correctAnswer': ['A']
+},
+{
+    'id': 'q59',
+    'question': 'In relation to VLANs, which of the following are true?',
+    'options': [
+        'A. All devices in one VLAN receive broadcasts from all other VLANs.',
+        'B. All devices on the same VLAN are always in the same Collision domain.',
+        'C. All devices on the same VLAN are always in the same Broadcast domain.',
+        'D. Two devices on two different VLANs can communicate with each other directly through a layer 2 switch.'
+    ],
+    'correctAnswer': ['C']
+},
+{
+    'id': 'q60',
+    'question': 'In relation to the IEEE 802.1Q protocol, which of the following are true? (Choose 2 answers)',
+    'options': [
+        'A. Tags are used in frames to prioritize important traffic.',
+        'B. It is a protocol that allows a switch to carry traffic from multiple VLANs on one single connection to another switch, inserting tags in the frames to identify each VLAN.',
+        'C. The switch inserts special tags to identify frames from the Native VLAN.',
+        'D. The Native VLAN is the only VLAN whose frames do not need a tag.',
+        'E. It is a protocol to guarantee Quality of Service.'
+    ],
+    'correctAnswer': ['B', 'D']
+},
+{
+    'id': 'q61',
+    'question': 'In relation to the Router-on-a-stick configuration, which of the following are true?',
+    'options': [
+        'A. The router uses separate physical interfaces to connect to a switch for each VLAN required.',
+        'B. The router uses one physical interface to a switch and separate sub-interfaces on that interface for each VLAN required.',
+        'C. The configuration is used to connect 2 routers to carry frames from multiple VLANs.',
+        'D. The Native VLAN is not used by the router.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q62',
+    'question': 'A router is configured as follows: R1(config-if)#interface fastethernet 0/0.99, R1(config-subif)#encapsulation dot1q 99 native, R1(config-subif)#ip address 172.17.99.1 255.255.255.0. Which of the following is true?',
+    'options': [
+        'A. This configuration assigns VLAN 99 as the native VLAN to sub-interface fa0/0.99.',
+        'B. The first available host IP address on this VLAN will be 172.17.99.1.',
+        'C. The encapsulation is not specified.',
+        'D. Any device on this VLAN will use a default gateway of 172.16.99.0.'
+    ],
+    'correctAnswer': ['A']
+},
+{
+    'id': 'q63',
+    'question': 'Which of the following is true in relation to Inter VLAN routing?',
+    'options': [
+        'A. A router can be replaced by a layer 2 switch.',
+        'B. A router can be replaced by a layer 3 switch.',
+        'C. A router can be replaced by a hub.',
+        'D. A router can be replaced by a DHCP server.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q64',
+    'question': 'In relation to STP, which of the following are true? (Choose 2 answers)',
+    'options': [
+        'A. STP is used to eliminate routing loops.',
+        'B. STP is used to eliminate switching/bridging loops.',
+        'C. The Bridge/switch with the highest STP ID is elected the Root bridge.',
+        'D. The Bridge/switch with the lowest STP ID is elected the Root bridge.',
+        'E. If the Root bridge fails, the network cannot recover.'
+    ],
+    'correctAnswer': ['B', 'D']
+},
+{
+    'id': 'q65',
+    'question': 'In relation to the role of Root Ports in STP, which of the following is true? (Choose 2 answers)',
+    'options': [
+        'A. All switches/bridges have only 1 Root Port.',
+        'B. The Root Port is used to forward the STP BPDU frame.',
+        'C. The Root Port receives the BPDU.',
+        'D. The Root Port cannot forward data frames.',
+        'E. All switches/bridges have 1 Root Port except the Root bridge/switch which has none.'
+    ],
+    'correctAnswer': ['A', 'E']
+},
+{
+    'id': 'q66',
+    'question': 'In relation to the role of Designated Ports in STP, which of the following is true? (Choose 2 answers)',
+    'options': [
+        'A. All switches/bridges have only 1 Designated Port.',
+        'B. The Designated Port is used to forward the STP BPDU frame.',
+        'C. All the ports on the Root bridge/switch are Designated Ports.',
+        'D. The Designated Port cannot forward data frames.',
+        'E. Designated Ports are used to receive the BPDU.'
+    ],
+    'correctAnswer': ['B', 'C']
+},
+{
+    'id': 'q67',
+    'question': 'In relation to wireless networks, which of the following is true? (Choose 2 answers)',
+    'options': [
+        'A. All frames in Ad-Hoc networks must pass through an Access Point.',
+        'B. All frames in Infrastructure networks must pass through an Access Point.',
+        'C. All devices using the same SSID are in the same VLAN.',
+        'D. The SSID uses the same format as a MAC address.',
+        'E. An Access Point can only allow a maximum of one SSID.'
+    ],
+    'correctAnswer': ['B', 'C']
+},
+{
+    'id': 'q68',
+    'question': 'In relation to frequency bands used in WLANs, which of the following is true? (Choose 2 answers)',
+    'options': [
+        'A. The 2.4GHz band has more channels than the 5GHz band.',
+        'B. The 5 GHz band is less prone to interference from overlapping channels.',
+        'C. The 5 GHz band signal range travels further than the 2.4GHz range.',
+        'D. There is no overlap in Channels 1, 5, 10 in the 2.4GHz band.',
+        'E. There is no overlap in Channels 1, 6, 11 in the 2.4GHz band.'
+    ],
+    'correctAnswer': ['B', 'E']
+},
+{
+    'id': 'q69',
+    'question': 'In relation to Wireless security, which of the following is true?',
+    'options': [
+        'A. WPA2 Personal uses a pre-shared key.',
+        'B. WEP is more secure than WPA2.',
+        'C. The pre-shared key is the key used to encrypt all frames used by all devices in the same WLAN.',
+        'D. WPA2 Enterprise uses a pre-shared key.'
+    ],
+    'correctAnswer': ['A']
+},
+{
+    'id': 'q70',
+    'question': 'When using IEEE 802.1X for authentication, which of the following are true? (Choose 3 answers)',
+    'options': [
+        'A. It is used in WPA2 Personal authentication.',
+        'B. It is used in WPA2 Enterprise authentication.',
+        'C. A pre-shared key is used.',
+        'D. The client is the Authenticator.',
+        'E. The client is the Supplicant.',
+        'F. There is a centrally located Authentication Server.'
+    ],
+    'correctAnswer': ['B', 'E', 'F']
+},
+{
+    'id': 'q71',
+    'question': 'When using IEEE 802.1X for authentication, which of the following is true?',
+    'options': [
+        'A. The client can send data frames before being authenticated.',
+        'B. The client can only send EAP frames until authenticated.',
+        'C. The Authenticator has the list of authorised usernames and associated passwords.',
+        'D. The Authenticator has the list of authorised usernames but does not have the passwords associated with them.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q72',
+    'question': 'In relation to TCP, which of the following is true?',
+    'options': [
+        'A. TCP does not use error correction.',
+        'B. In TCP, there is always a connection set-up before data is sent, known as the 3-way handshake.',
+        'C. In TCP, there is always a connection set-up before data is sent, known as the 4-way handshake.',
+        'D. When a client or server initiates a connection, the SYN and ACK flags are set to 1.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q73',
+    'question': 'In relation to the use of Ports, which of the following are true? (Choose 3 answers)',
+    'options': [
+        'A. Clients always use well known ports as Source Ports.',
+        'B. Servers mostly use well known ports as Source Ports.',
+        'C. Clients generally use dynamic ports as Source Ports.',
+        'D. A Socket consists of the device MAC address and IP address.',
+        'E. A Socket consists of the device IP address, whether it is using TCP or UDP and the Port number.',
+        'F. Port number 45192 is a well known Port.'
+    ],
+    'correctAnswer': ['C', 'E']
+},
+{
+    'id': 'q74',
+    'question': 'In a TCP connection, the client sends 3 segments, each 1000 bytes long. The Sequence Number of the first segment is 1. Which of the following are true? (Choose 2 answers)',
+    'options': [
+        'A. The Sequence Number in the second segment sent by the client is 2001.',
+        'B. The Sequence number in the third segment sent by the client is 2001.',
+        'C. The Acknowledgment Number sent by the server to acknowledge that all 3 segments were received correctly is 2001.',
+        'D. The Acknowledgment Number sent by the server to acknowledge that all 3 segments were received correctly is 3001.',
+        'E. The Acknowledgment Number sent by the server to acknowledge that all 3 segments were received correctly is 4001.'
+    ],
+    'correctAnswer': ['A', 'D']
+},
+{
+    'id': 'q75',
+    'question': 'In relation to UDP, which of the following is true?',
+    'options': [
+        'A. UDP always uses error correction.',
+        'B. In UDP, there is always a connection set-up before data is sent, known as the 3-way handshake.',
+        'C. UDP is used when transmitting real time voice or video.',
+        'D. UDP is a reliable Transport Layer Protocol.'
+    ],
+    'correctAnswer': ['C']
+},
+{
+    'id': 'q76',
+    'question': 'In relation to DNS, which of the following is true?',
+    'options': [
+        'A. DNS matches IP addresses to MAC addresses.',
+        'B. DNS matches MAC addresses to Fully Qualified Domain Names.',
+        'C. DNS matches IP addresses to Fully Qualified Domain Names.',
+        'D. DNS is used to dynamically assign IP addresses to Clients.'
+    ],
+    'correctAnswer': ['C']
+},
+{
+    'id': 'q77',
+    'question': 'In relation to DHCP, which of the following are true? (Choose 2 answers)',
+    'options': [
+        'A. DHCP is used to dynamically assign MAC addresses to Clients.',
+        'B. DHCP is used to match IP addresses to Fully Qualified Domain Names.',
+        'C. DHCP uses UDP as its Transport Protocol.',
+        'D. DHCP is used to assign an IP address and subnet mask to a Client.',
+        'E. DHCP is used to give a Client its default gateway IP address and the DNS Server IP address.'
+    ],
+    'correctAnswer': ['C', 'D']
+},
+{
+    'id': 'q78',
+    'question': 'In relation to DHCP, which of the following is true?',
+    'options': [
+        'A. DHCP relay is used on a router where the DHCP server is in the same LAN as the clients connected to the router.',
+        'B. DHCP relay is used on a router where the DHCP server is in a different LAN to the clients connected to the router.',
+        'C. DHCP relay is used by a switch where the DHCP server is in a different LAN to the clients connected to the switch.',
+        'D. DHCP relay is used by a switch where the DHCP server is in the same LAN as the clients connected to the switch.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q79',
+    'question': 'Which of the following is the correct sequence of events when a client looks for an IP address from a DHCP Server?',
+    'options': [
+        'A. Client Discover, Server Offer, Client Request, Server Acknowledge.',
+        'B. Client Request, Server Acknowledge, Client Discover, Server Offer.',
+        'C. Client Request, Server Offer, Client Discover, Server Acknowledge.',
+        'D. Client Discover, Server Acknowledge, Client Request, Server Offer.'
+    ],
+    'correctAnswer': ['A']
+},
+{
+    'id': 'q80',
+    'question': 'In relation to NAT which of the following are true? (Choose 3 answers)',
+    'options': [
+        'A. NAT is used purely for security reasons.',
+        'B. NAT translates Fully Qualified Domain Names into IP addresses.',
+        'C. NAT translates Private IP addresses into Public IP addresses to use in Public networks.',
+        'D. NAT was created to address the scarcity of Public IP addresses.',
+        'E. When someone is using NAT over a Public network, they can be easily identified.',
+        'F. NAT increases processing time of an IP packet.'
+    ],
+    'correctAnswer': ['C', 'D', 'F']
+},
+{
+    'id': 'q81',
+    'question': 'In relation to NAT overload/PAT, which of the following is true?',
+    'options': [
+        'A. PAT is a one-to-one translation of Private to Public IP addresses.',
+        'B. PAT translates many Private IP addresses to less Public IP addresses using Port numbers.',
+        'C. PAT translates internal Private Port numbers into Public Port numbers.',
+        'D. PAT translates a single Private IP address into several Public IP addresses.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q82',
+    'question': 'In relation to Network security, which of the following is true?',
+    'options': [
+        'A. Integrity means that a conversation between two users is private.',
+        'B. Confidentiality means that a message sent from one user to the other has not been tampered with.',
+        'C. Authentication means that the person sending the data is who they say they are.',
+        'D. Non-repudiation means a user cannot refuse a connection request from another user.'
+    ],
+    'correctAnswer': ['C']
+},
+{
+    'id': 'q83',
+    'question': 'In relation to Symmetric Key encryption, which of the following is true?',
+    'options': [
+        'A. Symmetric Key encryption uses one key for encryption and a different key for decryption.',
+        'B. Symmetric Key encryption uses the same key for encryption and decryption.',
+        'C. Symmetric Key encryption requires a lot of computer processing time.',
+        'D. RSA is an example of Symmetric Key encryption.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q84',
+    'question': 'In relation to Asymmetric Key encryption, which of the following is true?',
+    'options': [
+        'A. There is one single key used for encryption.',
+        'B. There are 2 keys, one private and the other public and when one of the keys is used to encrypt, the other is used for decryption.',
+        'C. Asymmetric Key encryption does not require a lot of computer processing time.',
+        'D. Asymmetric Key encryption is used to encrypt data when there is a greater flow of data towards one user than the other.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q85',
+    'question': 'In a conversation between user A and user B, where KUA is A’s Public key and KRA is A’s Private key, KUB is B’s Public key and KRB is B’s Private key, the following message M is sent from A to B: A B EKUB[M] => Which of the following is true?',
+    'options': [
+        'A. The message authenticates A.',
+        'B. The message is confidential/private.',
+        'C. The Integrity of the message is verified.',
+        'D. B will use A’s public key to decrypt the message.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q86',
+    'question': 'In a conversation between user A and user B, where KUA is A’s Public key and KRA is A’s Private key, KUB is B’s Public key and KRB is B’s Private key, the following message M is sent from A to B: A B EKRA[M] => Which of the following are true? (Choose 2 answers)',
+    'options': [
+        'A. The message authenticates A.',
+        'B. The message is confidential/private.',
+        'C. The Integrity of the message is verified.',
+        'D. B will use A’s public key to decrypt the message.',
+        'E. B will use his own public key to decrypt the message.'
+    ],
+    'correctAnswer': ['A', 'C']
+},
+{
+    'id': 'q87',
+    'question': 'In relation to Hash functions, which of the following are true? (Choose 2 answers)',
+    'options': [
+        'A. A Hash function encrypts data.',
+        'B. Hash functions generate an almost unique fixed message digest D from a variable length message M.',
+        'C. Hash functions are used to verify Integrity of a message.',
+        'D. If you know the message digest D, it is easy to recover the original message M.',
+        'E. Hash functions are used in Digital Signatures.'
+    ],
+    'correctAnswer': ['B', 'C']
+},
+{
+    'id': 'q88',
+    'question': 'In relation to Digital Certificates, which of the following is true?',
+    'options': [
+        'A. They are verified with a Digital Signature of the owner of the Certificate.',
+        'B. They are verified with a Digital Signature of the Certifying Authority.',
+        'C. They verify the financial standing of the owner of the Digital Certificate.',
+        'D. They protect the owner of the Digital Certificate from unwanted access.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q89',
+    'question': 'In relation to security devices in networks, which of the following is true?',
+    'options': [
+        'A. A Firewall can detect attacks from Viruses and Worms using a Signatures Database.',
+        'B. An Intrusion Prevention System can detect attacks from Viruses and Worms using a Signatures Database.',
+        'C. A DMZ is used to host untrusted devices.',
+        'D. A Firewall can block traffic with certain key words and phrases contained in the data.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q90',
+    'question': 'In relation to IPv6, which of the following are true? (Choose 2 answers)',
+    'options': [
+        'A. IPv6 was created to make the Internet more secure.',
+        'B. IPv6 uses Multicasts instead of Broadcasts.',
+        'C. IPv6 uses 128-bit addresses in Hexadecimal.',
+        'D. IPv6 uses 128-bit addresses in Decimal.'
+    ],
+    'correctAnswer': ['B', 'C']
+},
+{
+    'id': 'q91',
+    'question': 'In relation to IPv6 addresses, which of the following is true?',
+    'options': [
+        'A. All IPv6 addresses will be assigned to companies as /32 networks.',
+        'B. All IPv6 addresses will be assigned to companies as /48 networks.',
+        'C. All IPv6 addresses will be assigned to companies as /64 networks.',
+        'D. None of the above are true.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q92',
+    'question': 'An IPv6 address is shown abbreviated as follows – 2001:1:1::1. Which of the following is the full version of that IPv6 address?',
+    'options': [
+        'A. 2001:1000:1000:0000:0000:0000:0000:1000',
+        'B. 2001:0001:0001:0000:0000:0000:0000:0001',
+        'C. 2001:1000:1000:0000:0000:0000:0000:0001',
+        'D. 2001:0001:0001:0000:0000:0000:0000:1000'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q93',
+    'question': 'In relation to IPv6 Unique Local Addresses, which of the following is true?',
+    'options': [
+        'A. They are the equivalent to IPv4 Public IP addresses.',
+        'B. They are the equivalent to IPv4 IP Multicast addresses.',
+        'C. They are the equivalent to IPv4 Private IP addresses.',
+        'D. They are the equivalent to IPv4 Link Local IP addresses.'
+    ],
+    'correctAnswer': ['C']
+},
+{
+    'id': 'q94',
+    'question': 'Which of the following is true about IPv6 address types?',
+    'options': [
+        'A. An IPv6 Global Unicast Address is similar to a public IPv4 address.',
+        'B. An IPv6 Link-Local Address is routable over the Internet.',
+        'C. An IPv6 Multicast Address is used for one-to-one communication.',
+        'D. An IPv6 Anycast Address is used to send data to all nodes in the network.'
+    ],
+    'correctAnswer': ['A']
+},
+{
+    'id': 'q95',
+    'question': 'Which of the following is true about the IPv6 address notation?',
+    'options': [
+        'A. IPv6 addresses are written in binary form and separated by dots.',
+        'B. IPv6 addresses are written in hexadecimal form and separated by colons.',
+        'C. IPv6 addresses are written in decimal form and separated by commas.',
+        'D. IPv6 addresses are written in octal form and separated by slashes.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q96',
+    'question': 'Which of the following is NOT a benefit of IPv6 over IPv4?',
+    'options': [
+        'A. Larger address space.',
+        'B. Built-in security features.',
+        'C. Improved routing efficiency.',
+        'D. Lower cost of hardware.'
+    ],
+    'correctAnswer': ['D']
+},
+{
+    'id': 'q97',
+    'question': 'In IPv6, what is the purpose of the Neighbor Discovery Protocol (NDP)?',
+    'options': [
+        'A. It is used to configure IP addresses dynamically.',
+        'B. It is used to discover other devices on the local network.',
+        'C. It is used to assign default gateways to hosts.',
+        'D. It is used to encrypt IPv6 traffic for privacy.'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q98',
+    'question': 'Which of the following IPv6 address types are considered private? (Choose 2 answers)',
+    'options': [
+        'A. Unique Local Addresses (ULA)',
+        'B. Global Unicast Addresses (GUA)',
+        'C. Link-Local Addresses (LLA)',
+        'D. Multicast Addresses (MA)'
+    ],
+    'correctAnswer': ['A', 'C']
+},
+{
+    'id': 'q99',
+    'question': 'In IPv6, the address fe80::/10 is used for which type of address?',
+    'options': [
+        'A. Global Unicast Address',
+        'B. Link-Local Address',
+        'C. Unique Local Address',
+        'D. Multicast Address'
+    ],
+    'correctAnswer': ['B']
+},
+{
+    'id': 'q100',
+    'question': 'In IPv6, how is address autoconfiguration achieved?',
+    'options': [
+        'A. Through DHCPv6, which provides both IPv6 address and other configuration information.',
+        'B. Through manual configuration by the administrator.',
+        'C. Through stateless address autoconfiguration (SLAAC), where the device generates its own address.',
+        'D. Through dynamic DNS, which automatically assigns addresses.'
+    ],
+    'correctAnswer': ['C']
+}
+        
+        ];
+
+        let selectedQuestions = [];
+        const totalQuestions = 100; // Adjust as necessary
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let unansweredCount = 0;
+        let attempts = JSON.parse(localStorage.getItem('examAttempts')) || [];
+
+        let timerInterval;
+        let timeRemaining = totalQuestions * 60; // 100 minutes in seconds
+
+        const timerElement = document.getElementById('timer');
+        const questionsElement = document.getElementById('questions');
+        const resultsElement = document.getElementById('results');
+        const submitButton = document.getElementById('submitButton');
+        const userNameOutput = document.getElementById('userNameOutput');
+
+        const userName = prompt("Please enter your name:");
+        userNameOutput.textContent = userName + ", GO ON MY SON, YOU CAN DO IT :)";
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startExam() {
+            selectedQuestions = shuffle(questionPool).slice(0, totalQuestions);
+            displayQuestions();
+            startTimer();
+        }
+
+        function displayQuestions() {
+    questionsElement.innerHTML = '';
+    selectedQuestions.forEach((q, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-container';
+        if (index === 0) questionDiv.classList.add('active');
+
+        // Determine input type (radio for single answer, checkbox for multiple answers)
+        const inputType = Array.isArray(q.correctAnswer) ? 'checkbox' : 'radio';
+
+        questionDiv.innerHTML = `
+            <h3>Question ${index + 1}: ${q.question}</h3>
+            ${q.options.map((opt, i) => `
+                <label>
+                    <input type="${inputType}" name="q${index}${inputType === 'checkbox' ? '[]' : ''}" value="${String.fromCharCode(65 + i)}">
+                    ${opt}
+                </label><br>
+            `).join('')}
+            <div>
+                ${index > 0 ? '<button type="button" class="btn-prev" onclick="showQuestion(' + (index - 1) + ')">Previous</button>' : ''}
+                ${index < totalQuestions - 1 ? '<button type="button" class="btn-next" onclick="showQuestion(' + (index + 1) + ')">Next</button>' : ''}
+            </div>
+        `;
+
+        questionsElement.appendChild(questionDiv);
+    });
+
+    submitButton.style.display = 'block';
+}
+
+        function showQuestion(index) {
+            const activeQuestion = document.querySelector('.question-container.active');
+            if (activeQuestion) activeQuestion.classList.remove('active');
+            document.querySelectorAll('.question-container')[index].classList.add('active');
+            currentQuestionIndex = index;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    submitExam();
+                } else {
+                    timeRemaining--;
+                    const minutes = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+                    const seconds = (timeRemaining % 60).toString().padStart(2, '0');
+                    timerElement.textContent = `Time Remaining: ${minutes}:${seconds}`;
+                }
+            }, 1000);
+        }
+
+        function submitExam() {
+    clearInterval(timerInterval);
+    const formData = new FormData(document.getElementById('examForm'));
+    selectedQuestions.forEach((q, index) => {
+        const userAnswers = formData.getAll(`q${index}[]`); // Use getAll() for checkboxes
+        const correctAnswers = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
+
+        if (userAnswers.length === 0) {
+            unansweredCount++;
+        } else if (JSON.stringify(userAnswers.sort()) === JSON.stringify(correctAnswers.sort())) {
+            correctCount++;
+        } else {
+            wrongCount++;
+        }
+    });
+
+    saveAttempt();
+    displayResults();
+}
+
+        function saveAttempt() {
+            const attempt = {
+                name: userName,
+                date: new Date().toLocaleString(),
+                percentage: ((correctCount / totalQuestions) * 100).toFixed(2)
+            };
+            attempts.push(attempt);
+            if (attempts.length > 20) attempts.shift(); // Keep only the last 20 attempts
+            localStorage.setItem('examAttempts', JSON.stringify(attempts));
+        }
+
+        function displayResults() {
+            questionsElement.style.display = 'none';
+            submitButton.style.display = 'none';
+            resultsElement.style.display = 'block';
+
+            document.getElementById('totalQuestions').textContent = totalQuestions;
+            document.getElementById('correctAnswers').textContent = correctCount;
+            document.getElementById('wrongAnswers').textContent = wrongCount;
+            document.getElementById('unansweredQuestions').textContent = unansweredCount;
+            document.getElementById('percentage').textContent = ((correctCount / totalQuestions) * 100).toFixed(2);
+
+            // Display last attempts
+            const attemptsList = document.createElement('ul');
+            attempts.forEach(attempt => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${attempt.name}: ${attempt.percentage}% on ${attempt.date}`;
+                attemptsList.appendChild(listItem);
+            });
+            resultsElement.appendChild(attemptsList);
+        }
+
+        function resetExam() {
+            location.reload();
+        }
+
+        document.getElementById('examForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitExam();
+        });
+
+        startExam();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SOM Mock Exam</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #3c3b3f, #605c3c);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .sidebar, .grid {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .sidebar {
+      width: 250px;
+    }
+
+    .grid {
+  display: grid;
+  grid-template-columns: repeat(8, 15px);
+  grid-auto-rows: 5px;
+  grid-gap: 30px;
+}
+
+    .grid button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      height: 75%;
+    }
+
+    #main {
+      background: #2a2a2a;
+      margin-top: 30px;
+      padding: 30px;
+      border-radius: 10px;
+      width: 600px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    #question-title {
+      margin-bottom: 15px;
+    }
+
+    #answers label {
+      display: block;
+      margin: 8px 0;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #timer {
+      color: red;
+      font-weight: bold;
+      float: right;
+    }
+
+    .hidden {
+      display: none;
+    }
+	
+	.results li.correct label::before {
+  content: "✔";
+  display: inline-block;
+  color: green;
+  font-weight: bold;
+  width: 1em;
+  margin-right: 0.5em;
+  text-align: center;
+}
+
+.results li.incorrect label::before {
+  content: "✖";
+  display: inline-block;
+  color: red;
+  font-weight: bold;
+  width: 1em;
+  margin-right: 0.5em;
+  text-align: center;
+}
+
+/* optionally hide the native radio dot so only your icon shows */
+.results li.correct input,
+.results li.incorrect input {
+  visibility: hidden;
+}
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h3>Diploma In Cybersecurity<br>NFQ Level 7</h3>
+    <p><strong>Disclaimer:</strong><br>
+      This is an unofficial mock examination.<br><br>
+      It was created solely for personal learning purposes.<br><br>
+      It is based on the knowledge acquired during the second semester.<br><br>
+      It is not endorsed by any academic institution.<br><br>
+      It is not formal exam preparation material.<br><br>
+      It is neither an official exam.</p>
+  </div>
+
+  <div id="main">
+    <div id="timer">Time Remaining: <span id="countdown">00:00</span></div>
+    <h2 style="text-align:center;">SOM Mock Exam</h2>
+    
+    <div id="exam-section">
+      <h3 id="question-title">Loading question...</h3>
+      <div id="answers"></div>
+
+      <div class="controls">
+        <button onclick="flagQuestion()">🔖 Flag This Question</button>
+        <button onclick="prevQuestion()">⬅️ Previous</button>
+        <button onclick="submitExam()">✅ Submit Exam</button>
+        <button onclick="nextQuestion()">➡️ Next</button>
+      </div>
+    </div>
+
+    <div id="review-section" class="hidden">
+      <h2>Exam Results</h2>
+      <p>Correct Answers: <span id="correct-count"></span></p>
+      <p>Wrong Answers: <span id="wrong-count"></span></p>
+      <p>Score: <span id="percentage"></span>%</p>
+      <div>
+        <button onclick="retakeWrongOnly()">🔁 Retake Wrong Only</button>
+        <button onclick="resetExam()">🔄 Restart Full Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="grid" id="question-grid">
+      <!-- Dynamically filled -->
+    </div>
+    <button style="margin-top: 10px;" onclick="showFlagged()">📑 Show Flagged Questions</button>
+  </div>
+
+  <script>
+    const fullQuestionBank = [
+      {
+"question": "Your organization sends critical configuration files between data centers. Recent network logs show intermittent packet loss but no file corruption alerts. Which CIA triad component are you most concerned about ensuring stays intact?",
+"answers": [
+"A. Confidentiality",
+"B. Integrity",
+"C. Availability",
+"D. Authenticity",
+"E. Non-repudiation"
+],
+"correct": [1]
+},
+{
+"question": "During a scheduled maintenance window, users report they cannot access payroll systems. Which CIA component governs your requirement that they regain access quickly?",
+"answers": [
+"A. Integrity",
+"B. Confidentiality",
+"C. Availability",
+"D. Accountability",
+"E. Authenticity"
+],
+"correct": [2]
+},
+{
+"question": "Your CISO asks you to outline the next steps after you’ve identified and documented all system assets. Which sequence correctly reflects what you do next?",
+"answers": [
+"A. Identify → Assess → Treat → Monitor",
+"B. Identify → Treat → Assess → Monitor",
+"C. Treat → Identify → Monitor → Assess",
+"D. Assess → Monitor → Treat → Identify",
+"E. Monitor → Assess → Treat → Identify"
+],
+"correct": [0]
+},
+{
+"question": "At an executive workshop, the board wants clarity on who sets policies, allocates budget, and oversees security strategy. Which GRC pillar covers that?",
+"answers": [
+"A. Risk",
+"B. Compliance",
+"C. Governance",
+"D. Architecture",
+"E. Assurance"
+],
+"correct": [2]
+},
+{
+"question": "You’ve been tasked to draft a document that links the company’s growth goals, risk appetite, and proposed network security zones. What deliverable are you creating?",
+"answers": [
+"A. Incident Playbook",
+"B. Vulnerability Report",
+"C. Security Strategy & Roadmap",
+"D. Alert Triage Guide",
+"E. Risk Register"
+],
+"correct": [2]
+},
+{
+"question": "During an architecture review, stakeholders ask which layer you secure first—firewalls at the internet edge, host-based controls on servers, or application WAFs. You explain the normal order starts at the:",
+"answers": [
+"A. Host",
+"B. Application",
+"C. Perimeter",
+"D. Data",
+"E. User"
+],
+"correct": [2]
+},
+{
+"question": "Your risk team has set a “moderate” appetite for financial application outages. In which phase do you map that appetite into network segmentation and redundancy plans?",
+"answers": [
+"A. Incident Response",
+"B. Vulnerability Scanning",
+"C. Architecture Design and Review",
+"D. SIEM Tuning",
+"E. Risk Assessment"
+],
+"correct": [2]
+},
+{
+"question": "A new regulator asks you for evidence of your “Identify” controls under NIST CSF. Which two activities demonstrate you’ve met that requirement?",
+"answers": [
+"A. Incident containment",
+"B. Security monitoring",
+"C. Asset management and risk assessment",
+"D. Disaster recovery",
+"E. Change management"
+],
+"correct": [2]
+},
+{
+"question": "During BCP tabletop you debate how much data loss is tolerable before business impact is unacceptable. Which metric captures that?",
+"answers": [
+"A. RTO",
+"B. RPO",
+"C. MTTR",
+"D. MTTD",
+"E. MTBF"
+],
+"correct": [1]
+},
+{
+"question": "Your DR plan specifies systems must be back online within a target window after a major outage. Which metric is that?",
+"answers": [
+"A. Maximum tolerable data loss",
+"B. Maximum acceptable outage duration (RTO)",
+"C. Frequency of backups",
+"D. Time between snapshots",
+"E. MTTD"
+],
+"correct": [1]
+},
+{
+"question": "The CIO wants a framework that ties your audit, metrics, and dashboard reviews into a single continuous-monitoring process. Which do you propose?",
+"answers": [
+"A. ISO 27001 Annex A",
+"B. CIS Controls v8",
+"C. COBIT MEA (Monitoring, Evaluation & Assessment)",
+"D. NIST SP 800-37",
+"E. NIST CSF"
+],
+"correct": [2]
+},
+{
+"question": "A developer requested a hot-fix deployment outside standard windows. Which process ensures only approved changes go live?",
+"answers": [
+"A. Incident Management",
+"B. Change Management",
+"C. Vulnerability Assessment",
+"D. Business Continuity Planning",
+"E. Release Management"
+],
+"correct": [1]
+},
+{
+"question": "Your SOC analyst asks what a runbook should include for a ransomware play-through. You tell them it must have:",
+"answers": [
+"A. Broad security objectives",
+"B. Step-by-step technical actions",
+"C. Vendor SLAs only",
+"D. Annual review dates",
+"E. Contact lists"
+],
+"correct": [1]
+},
+{
+"question": "The board wants to know how quickly your team resolves incidents. Which metric do you report?",
+"answers": [
+"A. Mean Time to Detect (MTTD)",
+"B. Number of open tickets",
+"C. Mean Time to Respond (MTTR)",
+"D. Annual audit findings",
+"E. Mean Time to Contain"
+],
+"correct": [2]
+},
+{
+"question": "A peer organization asks why you ran a maturity assessment. You explain the top goal was to:",
+"answers": [
+"A. Benchmark against peers",
+"B. Generate compliance reports",
+"C. Identify gaps and improvement opportunities",
+"D. Satisfy regulators",
+"E. Train staff"
+],
+"correct": [2]
+},
+{
+"question": "A new Windows OS version is rolling out. Your security engineer asks if the baseline standard needs revision. You say it must be updated because:",
+"answers": [
+"A. The CISO changed",
+"B. The legal department requested it",
+"C. New technology or OS version is adopted",
+"D. The security budget increased",
+"E. Vendor recommendations"
+],
+"correct": [2]
+},
+{
+"question": "Your team debates whether to add a control that stops bad actors before they launch exploits. Which control type fits?",
+"answers": [
+"A. Detective",
+"B. Corrective",
+"C. Preventive",
+"D. Compensating",
+"E. Directive"
+],
+"correct": [2]
+},
+{
+"question": "After a malware outbreak, you implement a measure to roll back affected systems to pre-infected snapshots. Which control category is this?",
+"answers": [
+"A. Detective",
+"B. Preventive",
+"C. Corrective",
+"D. Compensating",
+"E. Recovery"
+],
+"correct": [2]
+},
+{
+"question": "Your SIEM project charter states it must collect logs from all servers and correlate them in real time. What’s the SIEM’s primary function?",
+"answers": [
+"A. Patch endpoints",
+"B. Manage user provisioning",
+"C. Aggregate and correlate logs for real-time analysis",
+"D. Conduct penetration tests",
+"E. Generate reports"
+],
+"correct": [2]
+},
+{
+"question": "After deployment, your SOC floods you with noise. Your priority tuning task is to:",
+"answers": [
+"A. Archive logs",
+"B. Reduce false positives",
+"C. Increase alert volume",
+"D. Encrypt data",
+"E. Update signatures"
+],
+"correct": [1]
+},
+{
+"question": "The CISO asks: “What portion of incidents do we detect internally vs. from external reports?” Which metric answers that?",
+"answers": [
+"A. False Positive Rate",
+"B. Patch Compliance Rate",
+"C. Internal/External Detection Ratio",
+"D. MTTA",
+"E. MTTD"
+],
+"correct": [2]
+},
+{
+"question": "You’re documenting how alerts become tickets, who escalates and when, and how closures are validated. What process are you mapping?",
+"answers": [
+"A. Change Management",
+"B. Risk Assessment",
+"C. Incident Management",
+"D. Configuration Management",
+"E. Service Management"
+],
+"correct": [2]
+},
+{
+"question": "Before going live, your new payroll system must receive formal approval. Which document grants that?",
+"answers": [
+"A. Security Policy",
+"B. System Security Plan",
+"C. Incident Report",
+"D. Change Request",
+"E. Architecture Review Board Approval"
+],
+"correct": [3]
+},
+{
+"question": "You plan a tabletop drill for a simulated DDoS attack. The goal is to confirm that decision-makers know their roles. What are you validating?",
+"answers": [
+"A. Recovering data",
+"B. Installing new tools",
+"C. Roles and decision-making",
+"D. Auditing firewall rules",
+"E. Communication plans"
+],
+"correct": [2]
+},
+{
+"question": "When a critical patch is released, which team typically coordinates testing and roll-out?",
+"answers": [
+"A. Security Architecture",
+"B. IT Operations",
+"C. SOC Analysts",
+"D. Risk & Compliance",
+"E. Incident Response Team"
+],
+"correct": [1]
+},
+{
+"question": "After a major breach, you run post-mortem reviews and feed lessons back into playbooks. Which practice is this?",
+"answers": [
+"A. One-off risk assessments",
+"B. Static policy docs",
+"C. Regular post-incident reviews and lessons learned",
+"D. Annual budgeting",
+"E. Quarterly audits"
+],
+"correct": [2]
+},
+{
+"question": "Your vulnerability report lists dozens of findings. You start fixing based on business impact, criticality, and exploitability. What approach is this?",
+"answers": [
+"A. Exploit availability only",
+"B. Asset value only",
+"C. Business impact, asset criticality, exploitability",
+"D. Number of findings",
+"E. Vendor recommendations"
+],
+"correct": [2]
+},
+{
+"question": "The CIO wants a simple framework to guide detection, response, and recovery stage-gates in your SOC. Which do you choose?",
+"answers": [
+"A. COBIT 5",
+"B. NIST CSF",
+"C. HIPAA",
+"D. SOX",
+"E. ISO 27001"
+],
+"correct": [1]
+},
+{
+"question": "You brief the board on new ransomware variants, supply-chain risks, and geopolitical tensions. You tell them this is part of the overall:",
+"answers": [
+"A. Baseline Risk",
+"B. Regression",
+"C. Threat Landscape",
+"D. Residual Risk",
+"E. Control Effectiveness"
+],
+"correct": [2]
+},
+{
+"question": "In your quarterly architecture review, you validate that you have perimeter firewalls, network segmentation, host-based controls, and application WAFs. What workshop are you running?",
+"answers": [
+"A. SIEM tuning",
+"B. Phishing simulations",
+"C. Defense-in-Depth review workshops",
+"D. Single-factor authentication deployment",
+"E. Network hardening session"
+],
+"correct": [2]
+},
+{
+    "question": "Your team adopts a SOAR platform to automatically triage phishing alerts. What does SOAR stand for?",
+    "answers": [
+      "A. Security Orchestration, Automation, and Response",
+      "B. Security Operations & Analytics Reporting",
+      "C. System Operations Audit Review",
+      "D. Secure Online Access Regulation",
+      "E. Security Orchestration and Reporting"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "After moving from reactive ticket handling, your next goal is defining standard procedures and playbooks. Which maturity stage is that?",
+    "answers": [
+      "A. Optimized",
+      "B. Defined",
+      "C. Automated",
+      "D. Proactive",
+      "E. Initial"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "New Tier 1 analysts struggle to know which alerts to escalate. Which factor is most critical for consistent triage?",
+    "answers": [
+      "A. Unlimited budget",
+      "B. Outsourcing all alerts",
+      "C. Clear playbooks and triage criteria",
+      "D. High staffing levels",
+      "E. Vendor SLAs"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your SOC, inundated with noise, needs a metric to focus on reducing wasted effort. Which metric helps?",
+    "answers": [
+      "A. Number of analysts",
+      "B. Total alerts per day",
+      "C. False-positive rate",
+      "D. Vendor SLAs",
+      "E. Alert throughput"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "A network engineer submits a new access rule. Which team usually approves these changes for policy alignment?",
+    "answers": [
+      "A. Security Monitoring",
+      "B. Risk Team",
+      "C. Security Architecture",
+      "D. Security Engineering",
+      "E. IT Operations"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your SOC reports feeling overwhelmed by alerts and missing real threats. What term describes this condition?",
+    "answers": [
+      "A. Alert saturation",
+      "B. No alerts at all",
+      "C. Alerts that never fire",
+      "D. Alert fatigue",
+      "E. Alert overload syndrome"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "To spot insider threats, you implement a system that profiles user behavior. Which tool type is this?",
+    "answers": [
+      "A. Firewall",
+      "B. IDS",
+      "C. Antivirus",
+      "D. UEBA (User and Entity Behavior Analytics)",
+      "E. DLP"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "In adopting lean principles, you map SOC workflows to identify waste. What do you do with non-value-adding tasks?",
+    "answers": [
+      "A. Audited more",
+      "B. Documented extensively",
+      "C. Eliminated or automated",
+      "D. Delegated",
+      "E. Outsourced"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your SOC ingests external IOC feeds to enrich alerts with context. What primary purpose does this serve?",
+    "answers": [
+      "A. Generate compliance reports",
+      "B. Automate patching",
+      "C. Enrich detections with contextual threat data",
+      "D. Replace firewalls",
+      "E. Improve endpoint performance"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your red team presents their findings structured by reconnaissance, weaponization, delivery, exploitation, and more. What model are they following?",
+    "answers": [
+      "A. The Kill Chain",
+      "B. Attack Spectrum",
+      "C. Diamond Model",
+      "D. Cyber Pyramid",
+      "E. MITRE ATT&CK"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Your developers ask how to block insecure code from reaching production. You explain this is done with:",
+    "answers": [
+      "A. Manual sign-offs",
+      "B. Log scanning",
+      "C. Gating controls (automated pipeline checks)",
+      "D. Quarterly audits",
+      "E. Executive approvals"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your DevOps manager wants security integrated earlier in the SDLC. What phrase describes this approach?",
+    "answers": [
+      "A. Separate security in a different unit",
+      "B. Delay testing until after release",
+      "C. Assign security solely to operations",
+      "D. Shift-left security",
+      "E. Right-size security"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "During a security review, your team distinguishes between testing source code and testing running applications. Which statement is correct?",
+    "answers": [
+      "A. DAST analyses code; SAST runs on live apps.",
+      "B. SAST analyses source code at rest; DAST tests running apps.",
+      "C. Both SAST and DAST analyse source code.",
+      "D. SAST is manual only; DAST is always automated.",
+      "E. SAST is always cheaper."
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Your CI/CD pipeline runs source-code scans and vulnerability tests without human intervention. Which characteristic best describes these tasks?",
+    "answers": [
+      "A. Ad-hoc testing",
+      "B. Manual code review",
+      "C. Executive sign-off",
+      "D. Highly repetitive and rule-based",
+      "E. Project-based"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your organization wants clarity on who maintains incident playbooks. Which role typically owns them?",
+    "answers": [
+      "A. CFO",
+      "B. HR Manager",
+      "C. Incident Response Team Lead",
+      "D. Procurement Officer",
+      "E. SOC Analyst"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "In a breach, your immediate priority is to stop further spread of malicious code. Which incident response phase are you executing?",
+    "answers": [
+      "A. Identification",
+      "B. Containment",
+      "C. Recovery",
+      "D. Lessons Learned",
+      "E. Eradication"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "To ensure security-impacting modifications are vetted, your Change Advisory Board must review each request. What does this process enforce?",
+    "answers": [
+      "A. Threat modeling",
+      "B. Authorized and controlled deployments",
+      "C. Daily backups",
+      "D. Penetration testing",
+      "E. Code reviews"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "After a major outage, you run a business impact analysis to decide which systems to restore first. What does this activity inform?",
+    "answers": [
+      "A. Procurement strategy",
+      "B. Firewall rules",
+      "C. Encryption algorithms",
+      "D. Incident response and recovery prioritization",
+      "E. Network design"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your manager asks for a weekly report showing the number of incidents handled each day. What insight does this run-rate report provide?",
+    "answers": [
+      "A. Marketing performance",
+      "B. Device uptime",
+      "C. Workload trends and staffing needs",
+      "D. Firewall config",
+      "E. SLA compliance"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your CIO asks which plan specifically addresses recovering IT systems after disaster. What plan do you reference?",
+    "answers": [
+      "A. Incident Response Plan",
+      "B. Business Continuity Plan",
+      "C. Access Control Policy",
+      "D. Disaster Recovery Plan",
+      "E. Disaster Notification Plan"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Which metric would you use to report on how often your critical monitoring servers fail?",
+    "answers": [
+      "A. RPO",
+      "B. MTTR",
+      "C. MTTD",
+      "D. MTBF",
+      "E. Uptime percentage"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your SOC reviews audit logs daily to spot unauthorized changes. Which control category best describes audit logging?",
+    "answers": [
+      "A. Preventive",
+      "B. Compensating",
+      "C. Corrective",
+      "D. Detective",
+      "E. Directive"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "A helpdesk engineer asks why they can’t create firewall rules in the IAM portal. Which function is outside IAM’s scope?",
+    "answers": [
+      "A. Authentication",
+      "B. Authorization",
+      "C. Credential management",
+      "D. Firewall rule creation",
+      "E. Single sign-on"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your DevOps team requests application access for contractors. Which principle ensures they get only the permissions they need?",
+    "answers": [
+      "A. Shared accounts",
+      "B. Least privilege",
+      "C. Admin rights by default",
+      "D. Weekly password rotation",
+      "E. Role hierarchy"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "To improve security, you add fingerprint scanners. Which factor category does this represent?",
+    "answers": [
+      "A. Something you are (biometric)",
+      "B. Password",
+      "C. Token",
+      "D. Smart card",
+      "E. Knowledge-based"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Your organization integrates with partner SSO providers so employees can use one set of credentials. Which IAM model is this?",
+    "answers": [
+      "A. Role-Based Access Control",
+      "B. Federated Identity Management",
+      "C. Decentralized IAM",
+      "D. Local accounts",
+      "E. Attribute-Based Access Control"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Your new vulnerability tool has discovered servers and applications across your network. What’s the next step in the vulnerability management lifecycle?",
+    "answers": [
+      "A. Prioritization",
+      "B. Discovery and inventory",
+      "C. Remediation",
+      "D. Verification",
+      "E. Monitoring"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "In your CVSS report, one vulnerability scores higher due to requiring complex chaining. Which metric does this reflect?",
+    "answers": [
+      "A. Scope",
+      "B. Attack Complexity (AC)",
+      "C. User Interaction",
+      "D. Impact",
+      "E. Privileges Required"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Your quarterly security report shows how many vulnerabilities have been fixed over the past three months. What is this called?",
+    "answers": [
+      "A. Asset Inventory",
+      "B. Playbook",
+      "C. Patch Report",
+      "D. Vulnerability Trend Report",
+      "E. Compliance Report"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "A junior analyst suggests fixing only the easiest flaws first. You advise them to instead assess impact and likelihood. What approach are you advocating?",
+    "answers": [
+      "A. Blind escalation",
+      "B. Fix easiest first",
+      "C. Risk-based guidance",
+      "D. Fix all critical in 30 days",
+      "E. Vendor-driven fixes"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your vendor risk program requires periodic security questionnaires. Which activity is at the heart of third-party risk management?",
+    "answers": [
+      "A. Annual team offsites",
+      "B. Ongoing vendor security assessments",
+      "C. Outsourcing all monitoring",
+      "D. Limiting vendor communication",
+      "E. Vendor training"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "A new hire joins as a Tier 1 analyst. Which team handles their daily alert triage and initial investigation?",
+    "answers": [
+      "A. Security Architects",
+      "B. Incident Response Team",
+      "C. Tier 1 SOC Analysts",
+      "D. Tier 3 Analysts",
+      "E. Threat Hunting Team"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your CI/CD pipeline fails builds when security tests do not pass. What mechanism enforces this block?",
+    "answers": [
+      "A. SOC dashboards",
+      "B. Manual sign-offs",
+      "C. Gating controls (automated pipeline checks)",
+      "D. Quarterly audits",
+      "E. Executive reviews"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your board requests metrics that show operational success and emerging threats. How do these differ?",
+    "answers": [
+      "A. KPI measures performance; KTI signals emerging threats",
+      "B. KPI tracks revenue; KTI tracks costs",
+      "C. KPI for marketing; KTI for sales",
+      "D. They’re the same",
+      "E. KPI measures compliance; KTI measures risk"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Your project kick-off includes a review of functional requirements and security controls before dev starts. What best practice is this?",
+    "answers": [
+      "A. SOC-only feedback",
+      "B. Annual Audit",
+      "C. Secure by Design",
+      "D. Security Operations Review",
+      "E. Post-implementation review"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your threat modeling session maps out how an attacker could move from initial compromise to data exfiltration. What’s the key output?",
+    "answers": [
+      "A. Incident tickets",
+      "B. Compliance checklists",
+      "C. Network diagrams only",
+      "D. Identification of attack paths and mitigations",
+      "E. Test plans"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "After discovering phishing emails, your team mulls over the next adversary steps before exploitation. Which next Kill Chain stage follows reconnaissance?",
+    "answers": [
+      "A. Delivery",
+      "B. Exploitation",
+      "C. Installation",
+      "D. Weaponization",
+      "E. Command and Control"
+    ],
+    "correct": [3]
+  },  
+  {
+    "question": "Your CTO asks which NIST document outlines a Zero Trust model. Which do you reference?",
+    "answers": [
+      "A. NIST SP 800-30",
+      "B. NIST SP 800-207",
+      "C. NIST SP 800-37",
+      "D. NIST SP 800-53",
+      "E. NIST SP 800-61"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "In a Zero Trust network, which statement holds true?",
+    "answers": [
+      "A. Trust all internal traffic",
+      "B. Only external traffic is inspected",
+      "C. Consent not needed for data access",
+      "D. No user or device is trusted by default, even inside",
+      "E. Encryption not needed"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your team experiments with GenAI; you worry about malicious prompts altering outputs. Which defense is most appropriate?",
+    "answers": [
+      "A. MFA",
+      "B. Input/output sanitization",
+      "C. Disabling logging",
+      "D. Allow open API",
+      "E. Network segmentation"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "The board asks what the Data Protection Office (DPO) does daily. What’s its core function?",
+    "answers": [
+      "A. SOC operations",
+      "B. Firewall rule management",
+      "C. Data privacy compliance & governance",
+      "D. Incident handling",
+      "E. Vendor management"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your DPO needs to demonstrate expertise in which primary regulation?",
+    "answers": [
+      "A. HIPAA",
+      "B. PCI DSS",
+      "C. GDPR",
+      "D. SOX",
+      "E. CCPA"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your facility upgrade includes installing a vestibule with two doors. Which physical security control is that?",
+    "answers": [
+      "A. Mantrap requiring two successive authentications",
+      "B. Encrypts data",
+      "C. Monitors logs",
+      "D. Automates patching",
+      "E. Surveillance system"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "During a site survey, you evaluate barriers, cameras, and HVAC systems but exclude password policies. Which element is rightly omitted?",
+    "answers": [
+      "A. Environmental controls",
+      "B. Perimeter defense",
+      "C. Surveillance systems",
+      "D. User password complexity",
+      "E. Access control"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "After a flood scenario, your team must keep customer service running. Which planning practice addresses this?",
+    "answers": [
+      "A. Threat feed monitoring",
+      "B. Phishing simulations",
+      "C. SIEM tuning",
+      "D. Business Resilience Planning",
+      "E. Incident Response"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your DR team drills failover to a secondary data center. Which plan are they testing?",
+    "answers": [
+      "A. BCP",
+      "B. Access Policy",
+      "C. Incident Response Plan",
+      "D. Disaster Recovery Plan (DRP)",
+      "E. Encryption Policy"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your policy review cycle ends with a governance meeting. Who signs off policy changes before release?",
+    "answers": [
+      "A. Security Architect",
+      "B. Board Executive responsible for Cybersecurity",
+      "C. Security Operations Manager",
+      "D. HR Head",
+      "E. CISO"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Under NIST CSF, which activities belong to the “Recover” function?",
+    "answers": [
+      "A. Asset Management",
+      "B. Detecting anomalies",
+      "C. Protecting data",
+      "D. Recovery planning and improvements",
+      "E. Risk Assessment"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your SOC schedules weekly proactive hunts through logs and endpoints, looking for stealthy adversaries. What’s the goal?",
+    "answers": [
+      "A. Proactively find hidden threats",
+      "B. Replace SIEM",
+      "C. Reduce staffing",
+      "D. Limit log retention",
+      "E. Automate patching"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "To improve detection rules, your red and blue teams work together, sharing insights in real time. Which exercise is this?",
+    "answers": [
+      "A. Blue teaming only",
+      "B. Purple teaming",
+      "C. Red teaming only",
+      "D. Compliance audit",
+      "E. Tactical drills"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Your team uses Terraform modules checked into Git. What security advantage does this offer?",
+    "answers": [
+      "A. Eliminates all vulnerabilities",
+      "B. More manual gatekeeping",
+      "C. Slower deployments",
+      "D. Repeatable, version-controlled configurations",
+      "E. Real-time scanning"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your audit department needs a policy on how long logs must be kept. Which policy covers this?",
+    "answers": [
+      "A. Encryption Policy",
+      "B. Access Policy",
+      "C. Logging & Monitoring Policy",
+      "D. Data Classification Policy",
+      "E. Retention Policy"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Encrypting database disks to prevent data leakage is what type of control?",
+    "answers": [
+      "A. Detective",
+      "B. Corrective",
+      "C. Preventive",
+      "D. Compensating",
+      "E. Directive"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your infrastructure deploys new microservices weekly. Which practice ensures controls adapt as you go?",
+    "answers": [
+      "A. Continuous compliance orchestration",
+      "B. Static baselining",
+      "C. Quarterly budgeting",
+      "D. Ad-hoc reviews",
+      "E. Annual audits"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Your monitoring system tracks average uptime between failures. Which metric is this?",
+    "answers": [
+      "A. Compliance deadlines",
+      "B. Alert volume",
+      "C. MTBF (Mean Time Between Failures)",
+      "D. Incident playbook quality",
+      "E. MTTR"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "After launching training, you measure the drop in employees clicking test phishing links. Which metric reflects that?",
+    "answers": [
+      "A. Click-through rate reduction",
+      "B. Training hours delivered",
+      "C. Number invited",
+      "D. Number of simulations",
+      "E. Reporting rate"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Your BCP outlines how customer support keeps operating during a regional outage. What does this plan cover?",
+    "answers": [
+      "A. Maintaining critical business functions",
+      "B. Software licensing",
+      "C. Firewall rules",
+      "D. User role definitions",
+      "E. Data encryption"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Your IT team drafts rules on which internal sites employees may access. Which policy outlines permitted and prohibited behaviors?",
+    "answers": [
+      "A. Acceptable Use Policy (AUP)",
+      "B. Encryption standards",
+      "C. Vendor contracts",
+      "D. Disaster recovery",
+      "E. Data classification policy"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "During annual planning, your board sets a “low” appetite for data breaches. Which document formalizes this?",
+    "answers": [
+      "A. Change Management Policy",
+      "B. Vulnerability Report",
+      "C. Risk Management Framework",
+      "D. Incident Response Plan",
+      "E. Security Architecture Blueprint"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your audit lead asks which part of your GRC framework handles ongoing reviews and dashboards. Which area is this?",
+    "answers": [
+      "A. NIST SP 800-30",
+      "B. ISO 27001 Annex A",
+      "C. CIS Controls v8",
+      "D. COBIT MEA (Monitoring, Evaluation & Assessment)",
+      "E. Data Privacy Framework"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your OS upgrade team asks where to find the minimum required controls before deployment. Where do you point them?",
+    "answers": [
+      "A. Previous OS baseline",
+      "B. Vendor documentation",
+      "C. Company policy",
+      "D. SANS library",
+      "E. Security blog"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Your security team rolls out a tightened password rotation process. Which group feels the day-to-day impact most?",
+    "answers": [
+      "A. Regulator",
+      "B. Board members",
+      "C. Security team",
+      "D. Customers",
+      "E. IT operations"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "A contractor requests opening port 22 for external SSH. Which team signs off to ensure alignment with your security posture?",
+    "answers": [
+      "A. Security Engineering",
+      "B. Risk Team",
+      "C. Security Monitoring",
+      "D. Security Architecture",
+      "E. Incident Response"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your cloud team claims, 'the provider handles all security.' What’s the flawed assumption?",
+    "answers": [
+      "A. Threat landscape evolves",
+      "B. Regulatory changes need assessment",
+      "C. Cloud vendor will handle all security responsibilities",
+      "D. New tools can enhance posture",
+      "E. In-house staff expertise"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "After deploying a new detection rule, your SOC sees a flood of alerts. What’s your next move?",
+    "answers": [
+      "A. Leave it; alerts settle",
+      "B. Disable the rule",
+      "C. Escalate to IR team",
+      "D. Analyze the rule and tune thresholds",
+      "E. Archive logs"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "A vulnerability scan shows mixed severities and a few low-hanging fixes. What’s your recommended approach?",
+    "answers": [
+      "A. Fix easiest first",
+      "B. Blindly propose fixes",
+      "C. Perform risk-based analysis and guidance",
+      "D. Fix all critical in 30 days",
+      "E. Seek vendor input"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your board wants a framework that covers strategy, roles, processes, and metrics. Which do you recommend?",
+    "answers": [
+      "A. ISO 27001",
+      "B. COBIT",
+      "C. ITIL",
+      "D. NIST SP 800-53",
+      "E. PCI DSS"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "When asked who ensures security policies map to business goals, you respond:",
+    "answers": [
+      "A. CISO",
+      "B. Security Architect",
+      "C. SOC Lead",
+      "D. IT Ops Manager",
+      "E. Board of Directors"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Your SIEM team needs to onboard a new detection scenario. What’s the first deliverable?",
+    "answers": [
+      "A. Deploy to production",
+      "B. Define detection criteria and acceptance tests",
+      "C. Escalate all alerts",
+      "D. Write user documentation",
+      "E. Conduct a tabletop exercise"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Your R&D team uses GenAI for code summaries but worries about leaking proprietary snippets. Which control helps mitigate this?",
+    "answers": [
+      "A. Allow open API",
+      "B. Output filtering and data sanitization",
+      "C. Disable MFA",
+      "D. Increase logging",
+      "E. Use public models only"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Your AI governance group warns of attacks that manipulate model behavior via crafted inputs. What term describes this?",
+    "answers": [
+      "A. SQL injection",
+      "B. Cross-site scripting",
+      "C. Network spoofing",
+      "D. Prompt injection",
+      "E. Man-in-the-middle"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Before rolling out a large language model internally, your governance board mandates:",
+    "answers": [
+      "A. Disabling logs for speed",
+      "B. Granting broad admin rights",
+      "C. Ignoring data classifications",
+      "D. Conducting a model risk assessment and formal approval",
+      "E. Open access for all teams"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your cloud security team detects drift from hardened images. What term best describes this phenomenon?",
+    "answers": [
+      "A. Data drift",
+      "B. Role drift",
+      "C. Misconfiguration drift",
+      "D. Pricing drift",
+      "E. Workflow drift"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your business continuity plan defines keeping call centers open, while IT focuses on server recovery. Which plan corresponds to each?",
+    "answers": [
+      "A. Both cover only IT",
+      "B. BCP covers business functions; DRP covers IT systems",
+      "C. DRP covers call centers; BCP covers servers",
+      "D. Both cover only business functions",
+      "E. Neither covers these"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "After a breach, you schedule a review to identify root causes and update playbooks. Which incident response phase is this?",
+    "answers": [
+      "A. Identification",
+      "B. Containment",
+      "C. Recovery",
+      "D. Lessons Learned",
+      "E. Remediation"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your organization wants a controls catalogue that aligns with shared responsibility models. Which is most appropriate?",
+    "answers": [
+      "A. ISO 27001",
+      "B. PCI DSS",
+      "C. CSA Cloud Controls Matrix",
+      "D. NIST SP 800-37",
+      "E. HIPAA"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your patched systems still show alerts for old episodes. Which activity falls outside the vulnerability management lifecycle?",
+    "answers": [
+      "A. Discovery",
+      "B. Prioritization",
+      "C. Incident containment",
+      "D. Remediation",
+      "E. Verification"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your compliance team asks where log retention durations and disposal procedures are documented. Which policy covers this?",
+    "answers": [
+      "A. Data Classification",
+      "B. Encryption",
+      "C. Logging & Monitoring",
+      "D. Access Control",
+      "E. Incident Response"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your environment can’t support full-disk encryption due to legacy systems. What control do you deploy instead?",
+    "answers": [
+      "A. Detective control",
+      "B. Corrective control",
+      "C. Compensating control",
+      "D. Preventive control",
+      "E. Directive control"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your CISO wants a metric showing how thoroughly incidents are analysed. Which do you use?",
+    "answers": [
+      "A. Number of tools",
+      "B. Device uptime",
+      "C. Number of alerts",
+      "D. Root Cause Analysis (RCA) completion rate",
+      "E. MTTR"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your quarterly board report includes stats on how many devices are up-to-date. Which report name fits?",
+    "answers": [
+      "A. Asset Inventory",
+      "B. Incident Trend Report",
+      "C. Playbook",
+      "D. Patch Compliance Report",
+      "E. Vulnerability Trend Report"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your DevOps team requires security scans within their CI/CD pipelines. Which practice best describes this?",
+    "answers": [
+      "A. Integrate security tools into CI/CD",
+      "B. Quarterly audits",
+      "C. Manual gating",
+      "D. Separate security team",
+      "E. Ad-hoc testing"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "A service account request asks for wide-ranging permissions. How do you respond to adhere to least privilege?",
+    "answers": [
+      "A. Grant all by default",
+      "B. Create a shared account",
+      "C. Deny admins",
+      "D. Grant only the minimum necessary permissions",
+      "E. Escalate to management"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your threat intel team convenes monthly to adjust detection rules based on new research. What meeting is this?",
+    "answers": [
+      "A. Annual budget review",
+      "B. Threat Intelligence Review Board",
+      "C. Sales review",
+      "D. HR performance review",
+      "E. Technology Steering Committee"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Your digital forensics team collects logs and images following strict documentation. Which process ensures admissibility?",
+    "answers": [
+      "A. Chain of custody",
+      "B. Log archiving",
+      "C. Daily backups",
+      "D. Post-incident report",
+      "E. Encryption of evidence"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Your SOC allocates time weekly for unstructured hunts across endpoints. What best describes this activity?",  
+    "answers": [
+      "A. Auditing after incidents",
+      "B. Threat hunting based on intelligence",
+      "C. Waiting for alerts",
+      "D. Manual log review only",
+      "E. Compliance monitoring"
+    ],
+    "correct": [1]
+  },
+  {
+    "question": "Your security leadership team drafts a timeline of projects to elevate SOC maturity over two years. What deliverable is this?",
+    "answers": [
+      "A. Asset Inventory",
+      "B. Vulnerability Trend Report",
+      "C. Incident Playbook",
+      "D. Security Operations Maturity Roadmap",
+      "E. Risk Register"
+    ],
+    "correct": [3]
+  },
+  {
+    "question": "Your digital forensics team collects logs and images following strict documentation. Which process ensures admissibility?",
+    "answers": [
+      "A. Daily backups",
+      "B. Post-incident report",
+      "C. Chain of custody",
+      "D. Log archiving"
+    ],
+    "correct": [2]
+  },
+  {
+    "question": "Your SOC allocates time weekly for unstructured hunts across endpoints. What best describes this activity?",
+    "answers": [
+      "A. Threat hunting based on intelligence",
+      "B. Auditing after incidents",
+      "C. Waiting for alerts",
+      "D. Manual log review only"
+    ],
+    "correct": [0]
+  },
+  {
+    "question": "Your security leadership team drafts a timeline of projects to elevate SOC maturity over two years. What deliverable is this?",
+    "answers": [
+      "A. Asset Inventory",
+      "B. Security Operations Maturity Roadmap",
+      "C. Vulnerability Trend Report",
+      "D. Incident Playbook"
+    ],
+    "correct": [1]
+  }
+    ];
+
+    let questions = [...fullQuestionBank];
+    let currentIndex = 0;
+    let userAnswers = Array(questions.length).fill().map(() => []);
+    let flagged = new Set();
+    let timerId;
+    const totalTime = questions.length * 60;
+
+    function loadQuestion() {
+  const q = questions[currentIndex];
+  document.getElementById('question-title').textContent = `Question ${currentIndex + 1}: ${q.question}`;
+  const answersDiv = document.getElementById('answers');
+  answersDiv.innerHTML = '';
+
+  const isMultiAnswer = q.correct.length > 1;
+  q.answers.forEach((ans, i) => {
+    const input = document.createElement('input');
+    input.type = isMultiAnswer ? 'checkbox' : 'radio';
+    input.name = 'answer';
+    input.value = i;
+    input.checked = userAnswers[currentIndex].includes(i);
+    input.addEventListener('change', () => {
+      const checked = Array.from(document.querySelectorAll('#answers input:checked')).map(cb => +cb.value);
+      userAnswers[currentIndex] = checked;
+    });
+
+    const label = document.createElement('label');
+    label.appendChild(input);
+    label.append(" " + ans);
+    answersDiv.appendChild(label);
+  });
+}
+
+    function updateGrid() {
+      const grid = document.getElementById('question-grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < questions.length; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i + 1;
+        btn.onclick = () => {
+          currentIndex = i;
+          loadQuestion();
+        };
+        grid.appendChild(btn);
+      }
+    }
+
+    function flagQuestion() {
+      if (flagged.has(currentIndex)) {
+        flagged.delete(currentIndex);
+      } else {
+        flagged.add(currentIndex);
+      }
+      alert(`Question ${currentIndex + 1} ${flagged.has(currentIndex) ? 'flagged' : 'unflagged'}`);
+    }
+
+    function showFlagged() {
+      if (!flagged.size) return alert("No flagged questions.");
+      alert("Flagged questions: " + Array.from(flagged).map(i => i + 1).join(', '));
+    }
+
+    function nextQuestion() {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        loadQuestion();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        loadQuestion();
+      }
+    }
+
+    function submitExam() {
+      clearInterval(timerId);
+      let correct = [], wrong = [];
+      questions.forEach((q, i) => {
+        const sortedUser = [...(userAnswers[i] || [])].sort().join(',');
+        const sortedCorrect = q.correct.slice().sort().join(',');
+        if (sortedUser === sortedCorrect) correct.push(i);
+        else wrong.push(i);
+      });
+
+      document.getElementById('exam-section').classList.add('hidden');
+      document.getElementById('review-section').classList.remove('hidden');
+      document.getElementById('correct-count').textContent = correct.length;
+      document.getElementById('wrong-count').textContent = wrong.length;
+      document.getElementById('percentage').textContent = ((correct.length / questions.length) * 100).toFixed(2);
+
+      sessionStorage.setItem('wrongIndexes', JSON.stringify(wrong));
+    }
+
+    function retakeWrongOnly() {
+      const wrong = JSON.parse(sessionStorage.getItem('wrongIndexes') || '[]');
+      if (!wrong.length) return alert("No wrong answers to retake!");
+      questions = wrong.map(i => fullQuestionBank[i]);
+      resetExam();
+    }
+
+    function resetExam() {
+      userAnswers = Array(questions.length).fill().map(() => []);
+      currentIndex = 0;
+      flagged = new Set();
+      document.getElementById('review-section').classList.add('hidden');
+      document.getElementById('exam-section').classList.remove('hidden');
+      updateGrid();
+      loadQuestion();
+      startTimer(questions.length * 60);
+    }
+
+    function startTimer(duration) {
+      let timer = duration;
+      const countdown = document.getElementById('countdown');
+      const update = () => {
+        const m = String(Math.floor(timer / 60)).padStart(2, '0');
+        const s = String(timer % 60).padStart(2, '0');
+        countdown.textContent = `${m}:${s}`;
+        if (--timer < 0) {
+          clearInterval(timerId);
+          submitExam();
+        }
+      };
+      update();
+      timerId = setInterval(update, 1000);
+    }
+
+    window.onload = () => {
+      updateGrid();
+      loadQuestion();
+      startTimer(totalTime);
+    };
+  </script>
+</body>
+</html>

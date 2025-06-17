@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SOM Mock Exam</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #3c3b3f, #605c3c);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .sidebar, .grid {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .sidebar {
+      width: 250px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(8, 15px);
+      grid-auto-rows: 5px;
+      grid-gap: 30px;
+    }
+
+    .grid button {
+      background: grey;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      height: 30px;
+      width: 30px;
+      font-size: 10px;
+      line-height: 30px;
+      padding: 0;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    #main {
+      background: #2a2a2a;
+      margin-top: 30px;
+      padding: 30px;
+      border-radius: 10px;
+      width: 600px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    #question-title {
+      margin-bottom: 15px;
+    }
+
+    #answers label {
+      display: block;
+      margin: 8px 0;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #timer {
+      color: red;
+      font-weight: bold;
+      float: right;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .results li.correct label::before {
+      content: "✔";
+      display: inline-block;
+      color: green;
+      font-weight: bold;
+      width: 1em;
+      margin-right: 0.5em;
+      text-align: center;
+    }
+
+    .results li.incorrect label::before {
+      content: "✖";
+      display: inline-block;
+      color: red;
+      font-weight: bold;
+      width: 1em;
+      margin-right: 0.5em;
+      text-align: center;
+    }
+
+    .results li.correct input,
+    .results li.incorrect input {
+      visibility: hidden;
+    }
+
+    .grid button.correct {
+      background-color: green !important;
+      color: white !important;
+    }
+
+    .grid button.incorrect {
+      background-color: red !important;
+      color: white !important;
+    }
+
+    .grid button.unanswered {
+      background-color: grey !important;
+      color: white !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h3>Diploma In Cybersecurity<br>NFQ Level 7</h3>
+    <p><strong>Disclaimer:</strong><br>
+      This is an unofficial mock examination.<br><br>
+      It was created solely for personal learning purposes.<br><br>
+      It is based on the knowledge acquired during the second semester.<br><br>
+      It is not endorsed by any academic institution.<br><br>
+      It is not formal exam preparation material.<br><br>
+      It is neither an official exam.</p>
+  </div>
+
+  <div id="main">
+    <div id="timer">Time Remaining: <span id="countdown">00:00</span></div>
+    <h2 style="text-align:center;">SOM Mock Exam</h2>
+    
+    <div id="exam-section">
+      <h3 id="question-title">Loading question...</h3>
+      <div id="answers"></div>
+      <div id="feedback" class="mt-2 mb-2"></div>
+      <div id="explanation" style="margin-top: 10px; color: #aaa; font-style: italic;"></div>
+
+      <div class="controls">
+        <button onclick="nextQuestion()">➡️ Next</button>
+        <button onclick="prevQuestion()">⬅️ Previous</button>
+        <button onclick="submitExam()">✅ Submit Exam</button>
+      </div>
+    </div>
+
+    <div id="review-section" class="hidden">
+      <h2>Exam Results</h2>
+      <p>Correct Answers: <span id="correct-count"></span></p>
+      <p>Wrong Answers: <span id="wrong-count"></span></p>
+      <p>Score: <span id="percentage"></span>%</p>
+      <div>
+        <button onclick="retakeWrongOnly()">🔁 Retake Wrong Only</button>
+        <button onclick="resetExam()">🔄 Reset Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="grid" id="question-grid">
+      <!-- Dynamically filled -->
+    </div>
+  </div>
+
+  <script>
+    const fullQuestionBank = [
+      {
+    "question": "What is 3LD?",
+    "answers": [
+      "A. The Second Line of Defense—risk and compliance functions.",
+      "B. The First Line of Defense—operational management.",
+      "C. The Fourth Line of Defense—external regulators and auditors.",
+      "D. The Third Line of Defense—typically internal audit—providing independent assurance on the effectiveness of governance, risk management, and internal controls."
+    ],
+    "correct": [3],
+    "explanation": "The Third Line of Defense (3LD) is typically the internal audit function, which provides independent assurance on governance, risk management, and control processes."
+  },
+  {
+    "question": "Which of the following best describes the purpose of a business impact analysis (BIA)?",
+    "answers": [
+      "A. To determine how many users are affected by a software bug.",
+      "B. To assess potential impacts of business disruptions and prioritize recovery.",
+      "C. To schedule system maintenance.",
+      "D. To calculate monthly recurring revenue."
+    ],
+    "correct": [1],
+    "explanation": "A Business Impact Analysis identifies critical business functions and the impact of disruptions, helping to prioritize recovery efforts and continuity planning."
+  },
+  {
+    "question": "What does the term 'defense in depth' refer to?",
+    "answers": [
+      "A. Using a single powerful firewall.",
+      "B. Layered security controls to protect assets.",
+      "C. Outsourcing incident response.",
+      "D. Having multiple IT administrators."
+    ],
+    "correct": [1],
+    "explanation": "Defense in depth is a strategy that uses multiple, layered security controls to provide redundancy and mitigate risks if one control fails."
+  },
+  {
+    "question": "What is the main objective of the NIST Cybersecurity Framework (CSF)?",
+    "answers": [
+      "A. To manage internet service providers.",
+      "B. To develop antivirus software.",
+      "C. To guide organizations in managing and reducing cybersecurity risk.",
+      "D. To provide legal penalties for breaches."
+    ],
+    "correct": [2],
+    "explanation": "The NIST CSF provides guidelines to help organizations identify, protect, detect, respond to, and recover from cybersecurity threats."
+  },
+  {
+    "question": "Which of the following is a key benefit of implementing security awareness training?",
+    "answers": [
+      "A. It ensures regulatory audits are unnecessary.",
+      "B. It reduces the likelihood of human error-related breaches.",
+      "C. It replaces the need for firewalls.",
+      "D. It improves network speed."
+    ],
+    "correct": [1],
+    "explanation": "Security awareness training helps reduce risk from phishing, social engineering, and other human factors by educating users on secure behaviors."
+  },
+  {
+    "question": "Which protocol is used to securely access a remote computer?",
+    "answers": [
+      "A. FTP",
+      "B. SSH",
+      "C. Telnet",
+      "D. SMTP"
+    ],
+    "correct": [1],
+    "explanation": "SSH (Secure Shell) provides encrypted communication for securely accessing remote computers, unlike Telnet which transmits in plaintext."
+  },
+  {
+    "question": "In risk management, what does the term 'residual risk' refer to?",
+    "answers": [
+      "A. All identified risks.",
+      "B. Risk left over after mitigation.",
+      "C. Unimportant threats.",
+      "D. Future risks that haven’t materialized yet."
+    ],
+    "correct": [1],
+    "explanation": "Residual risk is the risk that remains after mitigation measures have been implemented."
+  },
+  {
+    "question": "Which of the following best represents a physical control?",
+    "answers": [
+      "A. Firewalls",
+      "B. Password policy",
+      "C. Security guards",
+      "D. Encryption"
+    ],
+    "correct": [2],
+    "explanation": "Physical controls are tangible measures like guards, locks, or fences that restrict physical access to systems and data."
+  },
+  {
+    "question": "What does MFA stand for and what does it do?",
+    "answers": [
+      "A. Multi-Factor Authentication; uses multiple forms of verification.",
+      "B. Mobile Firewall Application; blocks malware.",
+      "C. Major Firewall Access; filters email.",
+      "D. Managed File Archiving; stores files securely."
+    ],
+    "correct": [0],
+    "explanation": "MFA (Multi-Factor Authentication) enhances security by requiring users to provide two or more types of credentials to verify identity."
+  },
+  {
+    "question": "Which of these is considered a form of social engineering?",
+    "answers": [
+      "A. SQL Injection",
+      "B. Phishing",
+      "C. Man-in-the-middle attack",
+      "D. Cross-site scripting"
+    ],
+    "correct": [1],
+    "explanation": "Phishing is a social engineering tactic that manipulates people into revealing sensitive information, often via fake emails or websites."
+  },
+  {
+    "question": "What is the function of a firewall?",
+    "answers": [
+      "A. To store backup data.",
+      "B. To cool data centers.",
+      "C. To block unauthorized access.",
+      "D. To encrypt sensitive files."
+    ],
+    "correct": [2],
+    "explanation": "A firewall filters incoming and outgoing network traffic to prevent unauthorized access to or from a private network."
+  },
+  {
+    "question": "What is the principle of least privilege?",
+    "answers": [
+      "A. Users can access all systems if needed.",
+      "B. Users are only given access to what they need to perform their job.",
+      "C. All administrators have global access.",
+      "D. Users must log in at least once per day."
+    ],
+    "correct": [1],
+    "explanation": "The principle of least privilege restricts user access rights to the bare minimum necessary for their duties, reducing potential damage."
+  },
+  {
+    "question": "Which of the following is an example of a technical control?",
+    "answers": [
+      "A. Security policy",
+      "B. Security training",
+      "C. Intrusion Detection System (IDS)",
+      "D. Hiring practices"
+    ],
+    "correct": [2],
+    "explanation": "Technical controls include software or hardware solutions like IDS, firewalls, and antivirus tools that enforce security rules."
+  },
+  {
+    "question": "Which standard is commonly associated with information security management systems (ISMS)?",
+    "answers": [
+      "A. ISO/IEC 27001",
+      "B. NIST SP 800-171",
+      "C. PCI DSS",
+      "D. HIPAA"
+    ],
+    "correct": [0],
+    "explanation": "ISO/IEC 27001 is an international standard for establishing, implementing, maintaining, and continually improving an ISMS."
+  },
+  {
+    "question": "What is the primary goal of incident response?",
+    "answers": [
+      "A. To punish attackers.",
+      "B. To restore normal operations quickly and limit impact.",
+      "C. To alert regulators.",
+      "D. To blame an internal user."
+    ],
+    "correct": [1],
+    "explanation": "The main objective of incident response is to quickly contain, mitigate, and recover from incidents while minimizing damage."
+  },
+  {
+    "question": "What is spear phishing?",
+    "answers": [
+      "A. Randomized phishing.",
+      "B. Malware-laced USB drops.",
+      "C. Targeted phishing at a specific individual or organization.",
+      "D. Fake firewall rules."
+    ],
+    "correct": [2],
+    "explanation": "Spear phishing is a highly targeted phishing attack directed at a specific person or group, often using personal details to increase credibility."
+  },
+  {
+    "question": "Which concept ensures that only authorized parties can access information?",
+    "answers": [
+      "A. Confidentiality",
+      "B. Availability",
+      "C. Integrity",
+      "D. Auditability"
+    ],
+    "correct": [0],
+    "explanation": "Confidentiality protects data from unauthorized access or disclosure, often enforced through encryption and access controls."
+  },
+  {
+    "question": "What is a honeypot?",
+    "answers": [
+      "A. A type of firewall.",
+      "B. A fake system used to attract attackers.",
+      "C. A virus scanner.",
+      "D. A secure USB stick."
+    ],
+    "correct": [1],
+    "explanation": "A honeypot is a decoy system designed to attract attackers and log their behavior for analysis without risking real systems."
+  },
+  {
+    "question": "Why is patch management important?",
+    "answers": [
+      "A. It speeds up servers.",
+      "B. It prevents data duplication.",
+      "C. It fixes known vulnerabilities to reduce exploitation risk.",
+      "D. It backs up data to the cloud."
+    ],
+    "correct": [2],
+    "explanation": "Patch management closes security holes by fixing known vulnerabilities in software, helping prevent exploits and breaches."
+  },
+  {
+    "question": "Which of the following is NOT part of the CIA triad?",
+    "answers": [
+      "A. Confidentiality",
+      "B. Integrity",
+      "C. Authentication",
+      "D. Availability"
+    ],
+    "correct": [2],
+    "explanation": "Authentication is important in security but is not part of the CIA triad, which includes Confidentiality, Integrity, and Availability."
+  },
+  {
+    "question": "What is the main difference between symmetric and asymmetric encryption?",
+    "answers": [
+      "A. Symmetric uses passwords, asymmetric does not.",
+      "B. Asymmetric uses a public-private key pair, symmetric uses a single key.",
+      "C. Symmetric is faster but less secure than asymmetric.",
+      "D. Asymmetric encrypts only metadata."
+    ],
+    "correct": [1],
+    "explanation": "Symmetric encryption uses one shared key for both encryption and decryption. Asymmetric encryption uses a key pair: public for encryption, private for decryption."
+  },
+  {
+    "question": "What is the role of an intrusion detection system (IDS)?",
+    "answers": [
+      "A. Encrypting network traffic.",
+      "B. Blocking suspicious users.",
+      "C. Monitoring and alerting on malicious activity.",
+      "D. Issuing firewall rules."
+    ],
+    "correct": [2],
+    "explanation": "An IDS monitors network or system activity for malicious behavior and generates alerts, but it does not block traffic (like an IPS)."
+  },
+  {
+    "question": "What does the term 'zero trust' mean in cybersecurity?",
+    "answers": [
+      "A. Trust all traffic inside the network.",
+      "B. Verify only external users.",
+      "C. Never trust, always verify—every user/device must be authenticated and authorized.",
+      "D. Use static credentials only."
+    ],
+    "correct": [2],
+    "explanation": "Zero Trust is a security model that assumes no device or user is trusted by default, requiring continuous verification of all access requests."
+  },
+  {
+    "question": "What is the purpose of log monitoring?",
+    "answers": [
+      "A. To reduce data storage costs.",
+      "B. To comply with GDPR.",
+      "C. To detect anomalies, breaches, or unauthorized activity through system logs.",
+      "D. To delete old records."
+    ],
+    "correct": [2],
+    "explanation": "Log monitoring involves analyzing system and network logs to identify suspicious behavior, detect incidents, and support audits."
+  },
+  {
+    "question": "Which of the following attacks involves redirecting users to a malicious website by corrupting DNS data?",
+    "answers": [
+      "A. Phishing",
+      "B. DNS spoofing",
+      "C. SQL injection",
+      "D. Brute force attack"
+    ],
+    "correct": [1],
+    "explanation": "DNS spoofing (or DNS poisoning) alters DNS records to redirect users to malicious sites without their knowledge."
+  },
+  {
+    "question": "Which of these would best help defend against SQL injection?",
+    "answers": [
+      "A. User education",
+      "B. Firewalls",
+      "C. Parameterized queries",
+      "D. Antivirus software"
+    ],
+    "correct": [2],
+    "explanation": "Parameterized queries prevent attackers from injecting malicious SQL by separating code from user input in database queries."
+  },
+  {
+    "question": "What is the primary function of a vulnerability scanner?",
+    "answers": [
+      "A. To prevent malware infections.",
+      "B. To detect open ports only.",
+      "C. To identify known weaknesses in systems.",
+      "D. To enforce policies."
+    ],
+    "correct": [2],
+    "explanation": "A vulnerability scanner helps detect known security issues in systems, such as unpatched software and misconfigurations."
+  },
+  {
+    "question": "What is the main reason for implementing network segmentation?",
+    "answers": [
+      "A. To increase the number of routers.",
+      "B. To isolate critical systems and limit lateral movement.",
+      "C. To reduce user logins.",
+      "D. To encrypt all traffic."
+    ],
+    "correct": [1],
+    "explanation": "Network segmentation restricts access between subnets, minimizing attacker mobility after a breach and protecting sensitive areas."
+  },
+  {
+    "question": "What does DLP stand for in cybersecurity?",
+    "answers": [
+      "A. Data Loss Prevention",
+      "B. Digital Layer Protection",
+      "C. Device Lock Policy",
+      "D. Domain Level Privacy"
+    ],
+    "correct": [0],
+    "explanation": "Data Loss Prevention (DLP) refers to strategies and tools that prevent the unauthorized transmission of sensitive data."
+  },
+  {
+    "question": "What is the function of hashing in cybersecurity?",
+    "answers": [
+      "A. To encrypt data.",
+      "B. To authenticate users.",
+      "C. To ensure data integrity.",
+      "D. To increase bandwidth."
+    ],
+    "correct": [2],
+    "explanation": "Hashing produces a fixed output from data, used to verify integrity by checking if data has been altered."
+  },
+  {
+    "question": "What is an example of a strong password?",
+    "answers": [
+      "A. password123",
+      "B. JohnSmith",
+      "C. qwerty",
+      "D. G7!uP@9z#3"
+    ],
+    "correct": [3],
+    "explanation": "Strong passwords combine uppercase, lowercase, numbers, and special characters to resist brute-force attacks."
+  },
+  {
+    "question": "Which of the following best defines 'phishing'?",
+    "answers": [
+      "A. Attempting to guess passwords by trying many combinations.",
+      "B. Sending fraudulent emails to trick users into revealing information.",
+      "C. Scanning ports to find open services.",
+      "D. Creating fake user accounts."
+    ],
+    "correct": [1],
+    "explanation": "Phishing uses deceptive communication to trick users into revealing sensitive data such as credentials or payment info."
+  },
+  {
+    "question": "Which of the following is a common cloud security risk?",
+    "answers": [
+      "A. Low internet speeds.",
+      "B. Data breach due to misconfigured storage.",
+      "C. Outdated hardware.",
+      "D. No access to admin accounts."
+    ],
+    "correct": [1],
+    "explanation": "Misconfigured cloud storage, like open S3 buckets, is a major cause of data leaks in cloud environments."
+  },
+  {
+    "question": "What is the goal of penetration testing?",
+    "answers": [
+      "A. To replace vulnerability scans.",
+      "B. To install antivirus software.",
+      "C. To exploit vulnerabilities in a controlled environment.",
+      "D. To review company policies."
+    ],
+    "correct": [2],
+    "explanation": "Penetration testing simulates real attacks on systems to find and safely exploit vulnerabilities before real attackers do."
+  },
+  {
+    "question": "What is the main difference between a virus and a worm?",
+    "answers": [
+      "A. A virus spreads via email, worms do not.",
+      "B. A worm can replicate without user action.",
+      "C. Viruses are harmless; worms are malicious.",
+      "D. Worms need user interaction."
+    ],
+    "correct": [1],
+    "explanation": "Worms are self-replicating and spread automatically, unlike viruses which typically require user action to propagate."
+  },
+  {
+    "question": "What is the primary purpose of encryption?",
+    "answers": [
+      "A. To ensure data availability.",
+      "B. To prevent account creation.",
+      "C. To protect confidentiality of data.",
+      "D. To create backups."
+    ],
+    "correct": [2],
+    "explanation": "Encryption secures data by transforming it into unreadable form, viewable only with the correct decryption key."
+  },
+  {
+    "question": "Which of these is an example of a security policy?",
+    "answers": [
+      "A. Antivirus software settings.",
+      "B. Statement requiring users to use complex passwords.",
+      "C. User clicking on a phishing link.",
+      "D. Using HTTPS websites."
+    ],
+    "correct": [1],
+    "explanation": "A security policy outlines organizational rules and expectations, such as requirements for password strength."
+  },
+  {
+    "question": "What is the purpose of access control lists (ACLs)?",
+    "answers": [
+      "A. To manage user complaints.",
+      "B. To limit and control access to resources.",
+      "C. To disable all firewall ports.",
+      "D. To control software licenses."
+    ],
+    "correct": [1],
+    "explanation": "ACLs define rules that grant or deny access to resources like files or network devices based on user or system identity."
+  },
+  {
+    "question": "Which security concept involves ensuring that data has not been altered?",
+    "answers": [
+      "A. Confidentiality",
+      "B. Availability",
+      "C. Integrity",
+      "D. Authentication"
+    ],
+    "correct": [2],
+    "explanation": "Integrity ensures that data is accurate, complete, and unmodified except by authorized parties or processes."
+  },
+  {
+    "question": "What does a digital signature provide?",
+    "answers": [
+      "A. A unique password.",
+      "B. A company slogan.",
+      "C. Authentication and data integrity.",
+      "D. Encrypted disk space."
+    ],
+    "correct": [2],
+    "explanation": "Digital signatures use asymmetric cryptography to validate identity and verify that data hasn’t been tampered with."
+  },
+  {
+    "question": "What is the purpose of a demilitarized zone (DMZ) in network security?",
+    "answers": [
+      "A. It stores logs.",
+      "B. It serves as a secure backup zone.",
+      "C. It separates public-facing services from the internal network.",
+      "D. It allows internal users to access the internet anonymously."
+    ],
+    "correct": [2],
+    "explanation": "A DMZ isolates internet-facing servers from internal systems, limiting attacker access in case of compromise."
+  },
+  {
+    "question": "Which of the following best describes the CIA triad principle of availability?",
+    "answers": [
+      "A. Ensuring that data is protected from unauthorized access.",
+      "B. Ensuring that data is not altered by unauthorized users.",
+      "C. Ensuring that systems and data are accessible when needed.",
+      "D. Ensuring that logs are deleted after 90 days."
+    ],
+    "correct": [2],
+    "explanation": "Availability ensures systems and data are reliably accessible to authorized users when needed, minimizing downtime."
+  },
+  {
+    "question": "Which type of malware is designed to demand payment from the victim?",
+    "answers": [
+      "A. Virus",
+      "B. Ransomware",
+      "C. Worm",
+      "D. Spyware"
+    ],
+    "correct": [1],
+    "explanation": "Ransomware encrypts files or locks systems and demands payment to restore access, often in cryptocurrency."
+  },
+  {
+    "question": "Which of the following is a primary goal of cybersecurity metrics?",
+    "answers": [
+      "A. Track employee attendance.",
+      "B. Quantify security performance and risk exposure.",
+      "C. Replace incident response teams.",
+      "D. Predict hardware failures."
+    ],
+    "correct": [1],
+    "explanation": "Cybersecurity metrics help evaluate performance of controls, detect trends, and justify security investments."
+  },
+  {
+    "question": "Mean time to detection is a KPI for which metrics area?",
+    "answers": [
+      "A. System uptime.",
+      "B. Employee productivity.",
+      "C. Financial reporting accuracy.",
+      "D. Incident detection and response performance."
+    ],
+    "correct": [3],
+    "explanation": "Mean Time to Detection (MTTD) measures how long it takes an organization to identify a security incident after it occurs."
+  }
+    ];
+
+let questions = [...fullQuestionBank];
+let currentIndex = 0;
+let userAnswers = Array(questions.length).fill().map(() => []);
+
+function loadQuestion() {
+  const q = questions[currentIndex];
+  document.getElementById('question-title').textContent = `${currentIndex + 1}. ${q.question}`;
+
+  const answersContainer = document.getElementById('answers');
+  answersContainer.innerHTML = '';
+
+  q.answers.forEach((answer, i) => {
+    const label = document.createElement('label');
+    label.innerHTML = `<input type="radio" name="answer" value="${i}"> ${answer}`;
+    answersContainer.appendChild(label);
+
+    const input = label.querySelector('input');
+    input.addEventListener('change', () => {
+      userAnswers[currentIndex] = [i];
+      const isCorrect = q.correct.includes(i);
+
+      const feedback = document.getElementById('feedback');
+      feedback.textContent = isCorrect ? '✅ Correct!' : '❌ Incorrect.';
+      feedback.style.color = isCorrect ? 'green' : 'red';
+
+      // Highlight correct answers
+      q.correct.forEach(idx => {
+        const correctLabel = answersContainer.querySelectorAll('label')[idx];
+        correctLabel.style.backgroundColor = '#28a745';
+        correctLabel.style.color = 'white';
+        correctLabel.style.padding = '5px';
+        correctLabel.style.borderRadius = '5px';
+      });
+
+      // Highlight selected wrong answer
+      if (!isCorrect) {
+        label.style.backgroundColor = '#dc3545';
+        label.style.color = 'white';
+      }
+
+      // Show explanation
+      const explanation = document.getElementById('explanation');
+      explanation.textContent = q.explanation || '';
+
+      updateGrid();
+    });
+  });
+
+  // Clear feedback/explanation when question loads
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('explanation').textContent = '';
+
+  updateGrid();
+}
+
+function updateGrid() {
+  const grid = document.getElementById('question-grid');
+  grid.innerHTML = '';
+
+  questions.forEach((q, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = i + 1;
+
+    const answered = userAnswers[i].length > 0;
+    const correct = answered && q.correct.includes(userAnswers[i][0]);
+
+    if (!answered) {
+      btn.classList.add('unanswered');
+    } else if (correct) {
+      btn.classList.add('correct');
+    } else {
+      btn.classList.add('incorrect');
+    }
+
+    btn.addEventListener('click', () => {
+      currentIndex = i;
+      loadQuestion();
+    });
+
+    grid.appendChild(btn);
+  });
+}
+
+function nextQuestion() {
+  if (currentIndex < questions.length - 1) {
+    currentIndex++;
+    loadQuestion();
+  }
+}
+
+function prevQuestion() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    loadQuestion();
+  }
+}
+
+function submitExam() {
+  let correct = 0;
+  let wrong = 0;
+
+  questions.forEach((q, i) => {
+    const userAns = userAnswers[i][0];
+    if (q.correct.includes(userAns)) correct++;
+    else wrong++;
+  });
+
+  document.getElementById('exam-section').classList.add('hidden');
+  document.getElementById('review-section').classList.remove('hidden');
+  document.getElementById('correct-count').textContent = correct;
+  document.getElementById('wrong-count').textContent = wrong;
+  document.getElementById('percentage').textContent = ((correct / questions.length) * 100).toFixed(2);
+}
+
+function retakeWrongOnly() {
+  const wrongQs = questions.filter((q, i) => {
+    const userAns = userAnswers[i][0];
+    return !q.correct.includes(userAns);
+  });
+
+  if (wrongQs.length === 0) {
+    alert('✅ No wrong answers to retake!');
+    return;
+  }
+
+  questions = wrongQs;
+  userAnswers = Array(questions.length).fill().map(() => []);
+  currentIndex = 0;
+
+  document.getElementById('review-section').classList.add('hidden');
+  document.getElementById('exam-section').classList.remove('hidden');
+
+  loadQuestion();
+}
+
+function resetExam() {
+  questions = [...fullQuestionBank];
+  userAnswers = Array(questions.length).fill().map(() => []);
+  currentIndex = 0;
+
+  document.getElementById('review-section').classList.add('hidden');
+  document.getElementById('exam-section').classList.remove('hidden');
+
+  loadQuestion();
+}
+// 🕒 Timer Logic: 2 hours countdown
+let totalSeconds = fullQuestionBank.length * 60; // ⏱ 1 minute per question
+
+function startTimer() {
+  const countdownEl = document.getElementById('countdown');
+  const timer = setInterval(() => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    countdownEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    totalSeconds--;
+
+    if (totalSeconds < 0) {
+      clearInterval(timer);
+      submitExam(); // auto-submit when time runs out
+    }
+  }, 1000);
+}
+
+window.onload = () => {
+  resetExam();
+  startTimer(); // 🔥 start ticking
+};
+</script>
+</body>
+</html>

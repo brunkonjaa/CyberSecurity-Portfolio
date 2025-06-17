@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CISS Mock Exam</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #3c3b3f, #605c3c);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+
+    .sidebar, .grid {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .sidebar {
+      width: 250px;
+    }
+
+    .grid {
+  display: grid;
+  grid-template-columns: repeat(8, 15px);
+  grid-auto-rows: 5px;
+  grid-gap: 30px;
+}
+
+    .grid button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      height: 75%;
+    }
+
+    #main {
+      background: #2a2a2a;
+      margin-top: 30px;
+      padding: 30px;
+      border-radius: 10px;
+      width: 600px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    #question-title {
+      margin-bottom: 15px;
+    }
+
+    #answers label {
+      display: block;
+      margin: 8px 0;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #timer {
+      color: red;
+      font-weight: bold;
+      float: right;
+    }
+
+    .hidden {
+      display: none;
+    }
+	
+	.results li.correct label::before {
+  content: "✔";
+  display: inline-block;
+  color: green;
+  font-weight: bold;
+  width: 1em;
+  margin-right: 0.5em;
+  text-align: center;
+}
+
+.results li.incorrect label::before {
+  content: "✖";
+  display: inline-block;
+  color: red;
+  font-weight: bold;
+  width: 1em;
+  margin-right: 0.5em;
+  text-align: center;
+}
+
+/* optionally hide the native radio dot so only your icon shows */
+.results li.correct input,
+.results li.incorrect input {
+  visibility: hidden;
+}
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h3>Diploma In Cybersecurity<br>NFQ Level 7</h3>
+    <p><strong>Disclaimer:</strong><br>
+      This is an unofficial mock examination.<br><br>
+      It was created solely for personal learning purposes.<br><br>
+      It is based on the knowledge acquired during the second semester.<br><br>
+      It is not endorsed by any academic institution.<br><br>
+      It is not formal exam preparation material.<br><br>
+      It is neither an official exam.</p>
+  </div>
+
+  <div id="main">
+    <div id="timer">Time Remaining: <span id="countdown">00:00</span></div>
+    <h2 style="text-align:center;">CISS Mock Exam</h2>
+    
+    <div id="exam-section">
+      <h3 id="question-title">Loading question...</h3>
+      <div id="answers"></div>
+
+      <div class="controls">
+        <button onclick="flagQuestion()">🔖 Flag This Question</button>
+        <button onclick="prevQuestion()">⬅️ Previous</button>
+        <button onclick="submitExam()">✅ Submit Exam</button>
+        <button onclick="nextQuestion()">➡️ Next</button>
+      </div>
+    </div>
+
+    <div id="review-section" class="hidden">
+      <h2>Exam Results</h2>
+      <p>Correct Answers: <span id="correct-count"></span></p>
+      <p>Wrong Answers: <span id="wrong-count"></span></p>
+      <p>Score: <span id="percentage"></span>%</p>
+      <div>
+        <button onclick="retakeWrongOnly()">🔁 Retake Wrong Only</button>
+        <button onclick="resetExam()">🔄 Restart Full Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="grid" id="question-grid">
+      <!-- Dynamically filled -->
+    </div>
+    <button style="margin-top: 10px;" onclick="showFlagged()">📑 Show Flagged Questions</button>
+  </div>
+
+  <script>
+    const fullQuestionBank = [
+      {
+    question: "Which of the following describes an Antivirus storm?",
+    answers: [
+      "A. An Antivirus storm occurs when the antivirus software attacks the operating system when a file is infected.",
+      "B. An Antivirus storm is when all VMs on a device attempt to download antivirus data files at the same time.",
+      "C. An Antivirus storm is when there is more than one antivirus package enabled at the same time on the same device.",
+      "D. An Antivirus storm is occurs when the antivirus is updated having missed several previous updates.",
+      "E. An Antivirus storm is when the antivirus software update file has been corrupted."
+    ],
+    correct: [1]
+  },
+  {
+    question: "Which of the following is TRUE about an Attack Vector?",
+    answers: [
+      "A. An attack vector only originates from outside the network.",
+      "B. An attack vector is a tool used to defend against an attack.",
+      "C. An attack vector is a path by which a threat actor can gain access to a server, host, or network",
+      "D. An attack vector specifically installs a trojan horse virus.",
+      "E. An attack vector is used in the RIP routing protocol."
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is not a safeguard measure against devices that are BYODs?",
+    answers: [
+      "A. Encrypt the data on the device.",
+      "B. Keep Antivirus software up to date",
+      "C. Back up stored data",
+      "D. The user must be authorised to bring their own device.",
+      "E. The device must have Jailbreak/Root protection."
+    ],
+    correct: [2]
+  },
+  {
+    question: "What type of attack is Hyperjacking?",
+    answers: [
+      "A. An attack on an operating system.",
+      "B. An attack on a file system.",
+      "C. An attack on multiple devices at the same time.",
+      "D. An attack on virtual machine controller software.",
+      "E. An attack on the hardware on a device."
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following is not true?",
+    answers: [
+      "A. A virus is a type of malware that spreads by inserting a copy of itself into another program.",
+      "B. Worms do not need human intervention to spread.",
+      "C. Trojan horse malware contains malicious code which exploits the privileges of the user who runs it.",
+      "D. Ransomware is where the target device is either encrypted or made unavailable to the user until a sum of money is paid.",
+      "E. Bot malware is used only to steal your data"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is not a policy of the Security Onion security model?",
+    answers: [
+      "A. Hardening Devices",
+      "B. Content Filtering",
+      "C. Use of AAA servers",
+      "D. Ethical Hacking",
+      "E. Firewall/IPS"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Corporate Networks are considered to have become Borderless. Which of the following statements is the MAIN REASON for this?",
+    answers: [
+      "A. Remote working",
+      "B. BYOD policy",
+      "C. Using Cloud Services",
+      "D. Using contract staff",
+      "E. Using tunnel VPNs between sites"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is true?",
+    answers: [
+      "A. The console password is automatically encrypted",
+      "B. The command (config)#enable password class stores the password in hidden form in the device.",
+      "C. The command (config)#username john secret sexton stores the password sexton in hidden form in the device.",
+      "D. The command (config)#service password-encryption encrypts console passwords only",
+      "E. The command (config)#username john password sexton stores the password sexton in hidden form in the device."
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is TRUE?",
+    answers: [
+      "A. config)#enable secret class encrypts the password class using 3-DES",
+      "B. (config)#enable secret class hashes the password class using a form of MD5",
+      "C. (config)#enable secret class hashes the password class using SHA-256",
+      "D. (config)#enable secret class hashes the password class using Scrypt",
+      "E. (config)#enable secret class encrypts the password class using MD5"
+    ],
+    correct: [1]
+  },
+  {
+    question: "A switch has a configuration as follows:\nusername john password sexton - line con 0 - password cisco - login local - line vty 0 15 - password ccna - login\nWhich of the following is TRUE?",
+    answers: [
+      "A. When logging in from the Console, you are prompted straight away for a password which is cisco",
+      "B. When logging in from the Console, you are prompted straight away for a username (john) and then password (sexton)",
+      "C. When logging in through Telnet, you are prompted straight away for a username (john) and then password (sexton)",
+      "D. When logging in from the Console, you are prompted straight away for a password which is ccna",
+      "E. When logging in through Console, the enable password is cisco"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is true with regards to device passwords?",
+    answers: [
+      "A. Console passwords must be set when logging in through Telnet remotely",
+      "B. Telnet is encrypted",
+      "C. For Telnet access to user exec mode, the enable password has to be set",
+      "D. SSH access needs the console password to be set",
+      "E. The Console password is only used for local access in user exec mode."
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is not part of a policy to secure administrative access?",
+    answers: [
+      "A. Restrict device accessibility",
+      "B. Log and account for all access",
+      "C. Authenticate access",
+      "D. Ensure the confidentiality of data",
+      "E. Have a strict vetting policy when recruiting staff"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following commands is NOT ABSOLUTELY NECESSARY when setting up SSH in the switch S1 with username john and password sexton, domain name cisco.com?",
+    answers: [
+      "A. S1(config)#crypto key generate rsa general-keys modulus 1024",
+      "B. S1(config)#username john password sexton",
+      "C. S1(config)#ip domain name cisco.com",
+      "D. S1(config)#hostname S1",
+      "E. S1(config)#line vty 0 15"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following does this command do:\n(config)#logging buffered 2?",
+    answers: [
+      "A. This sends alarms of severity 2 to 0 to the running-config file in RAM",
+      "B. This sends alarms of severity 2 to 0 to flash storage on the device",
+      "C. This buffers alarms of severity 2 to 0 to a separate console terminal",
+      "D. This buffers alarms of severity 2 to 0 to a remote syslog server",
+      "E. This sends alarms of severity 2 to 0 to the startup-config file in NVRAM"
+    ],
+    correct: [2]
+  },
+  {
+    question: "What do the following commands do:\n(config)#logging host 172.16.3.2\n(config)#logging trap 1?",
+    answers: [
+      "A. Sends alarms from level 1 to 7 to a server with IP address 172.16.3.2",
+      "B. Sends alarms from level 1 to 4 to a server with IP address 172.16.3.2",
+      "C. Sends alarms for only all alert and emergency levels to a server with IP address 172.16.3.2",
+      "D. Sends alarms for only all emergency alarms to a server with IP address 172.16.3.2",
+      "E. Sends alarms for levels 1 and 0 to a server from the device with IP address 172.16.3.2"
+    ],
+    correct: [4]
+  },
+  {
+    question: "In relation to CDP, which of the following is TRUE?",
+    answers: [
+      "A. CDP is an open standard routing protocol",
+      "B. CDP is a Cisco proprietary routing protocol",
+      "C. CDP is a Cisco proprietary neighbour discovery protocol where the devices share certain details",
+      "D. CDP is an open standard neighbour discovery protocol where the devices share certain details",
+      "E. CDP is used to send alarms to a central server"
+    ],
+    correct: [2]
+  },
+  {
+    question: "When the #show version command is entered in a router, the following is displayed at the end of the output:\n'configure register is 0x2102'.\n\nWhich of the following accurately describes what this means?",
+    answers: [
+      "A. The router will boot up and be in rommon mode",
+      "B. On reboot, the startup-config file will not be loaded into RAM",
+      "C. You will be asked for a password on reboot",
+      "D. On reboot, the startup-config file will be loaded into RAM",
+      "E. On reboot, the startup-config file will be loaded into NVRAM"
+    ],
+    correct: [3]
+  },
+  {
+    question: "A router is configured with the following command:\n(config)#logging console 3\n\nWhich of the following does this do?",
+    answers: [
+      "A. Stores only error, critical, alert and emergency alarms in the device.",
+      "B. Display only error, critical, alert and emergency alarms on the device connected to the console port",
+      "C. Stores only error, critical, alert and emergency alarms",
+      "D. Displays only critical, alert and emergency alarms on the device connected to the console",
+      "E. Displays only warning, error, critical, alert and emergency alarms on the device connected to the console"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is the most secure way to upload and download Cisco IOS files?",
+    answers: [
+      "A. FTP",
+      "B. TFTP",
+      "C. SCP",
+      "D. TCP",
+      "E. UDP"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is true in relation to NTP when a device is configured with this command:\n(config)#ntp master 2?",
+    answers: [
+      "A. The device will act as a master clock source for the other devices getting its clock from an external source.",
+      "B. The device will act as a master clock source for the other devices getting its clock from internally in the device",
+      "C. This device records alarms from level 2 to 0",
+      "D. The device will act as a backup master clock source if the master 1 fails",
+      "E. The device will get its clock from a master 2 device"
+    ],
+    correct: [1]
+  },
+  {
+    question: "The following command is configured in a router:\nR1(config)#no service password-recovery\n\nAfter this command is executed which of the following is true?",
+    answers: [
+      "A. The startup-config file is erased when you enter rommon mode",
+      "B. The router will load the startup-config file into RAM on bootup",
+      "C. The router will reboot into rommon mode automatically",
+      "D. The IOS will not be loaded into RAM",
+      "E. It will make the passwords invisible when you use the #show running-config command"
+    ],
+    correct: [0]
+  },
+  {
+    question: "Which of the following is TRUE in relation privilege levels in routers and switches?",
+    answers: [
+      "A. The user exec mode default is level 0",
+      "B. The privilege exec mode default is level 10",
+      "C. The user exec mode default is level 14",
+      "D. The privilege exec mode default is level 15",
+      "E. The privilege exec mode default is level 14"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following protects against OSPF Routing Protocol Spoofing?",
+    answers: [
+      "A. Enabling SSH between the routers that use OSPF",
+      "B. Use MD5 to protect the OSPF exchanges between routers",
+      "C. Use encryption on the links between the routers.",
+      "D. Use VPN tunnels between the routers.",
+      "E. Use password protection in OSPF exchanges."
+    ],
+    correct: [1]
+  },
+  {
+    question: "Which of the following is TRUE in relation to SNMP?",
+    answers: [
+      "A. SNMP is an open standard routing protocol",
+      "B. SNMP is a Cisco proprietary routing protocol",
+      "C. SNMP is an open standard protocol for sending emails",
+      "D. SNMP is an open standard protocol that organises the organisation and sharing of database information.",
+      "E. SNMP is a protocol used for DHCP snooping"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following is TRUE?",
+    answers: [
+      "A. 802.1x is used in WPA2 Personal networks",
+      "B. 802.1x is used in 802.1x Enterprise networks",
+      "C. 802.1x is used in wireless networks only",
+      "D. 802.1x is used in wired networks only",
+      "E. 802.1x inserts tags in frames to identify VLANS"
+    ],
+    correct: [1]
+  },
+  {
+    question: "A router is configured as follows:\n(config)#aaa new-model\n(config)#aaa authentication login default local\n\nWhich of the following will this configuration do?",
+    answers: [
+      "A. The router is configured to pass all logins to a default AAA server",
+      "B. The router will use the local database for usernames and passwords for login attempts to the router for console users only",
+      "C. The router will use the local database for usernames and passwords for login attempts to the router for telnet users only",
+      "D. The router will use the local database for usernames and passwords for login attempts to the router for SSH users only",
+      "E. The router will use the local database for usernames and passwords for login attempts to the router for SSH, Telnet and Console users"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is NOT A ROLE of AAA?",
+    answers: [
+      "A. AAA is responsible for authenticating users",
+      "B. AAA is used for tracking what people do when logged in",
+      "C. AAA is used to allocate levels of authorisation for each user",
+      "D. AAA ensures the integrity of each message sent by the user",
+      "E. AAA keeps a list of valid usernames and passwords"
+    ],
+    correct: [3]
+  },
+  {
+    question: "A router is configured as below:\n(config)#aaa new-model\n(config)#radius-server host 10.0.0.2 key c1sc0\n(config)#aaa authentication login default group radius\n\nWhich of the following is TRUE of this configuration?",
+    answers: [
+      "A. The configured router IP address is 10.0.0.2 so that the AAA server knows its address",
+      "B. The AAA server is a radius server to be used for 802.1x logins",
+      "C. The AAA server is a radius server IP address 10.0.0.2 for logins for console, telnet and SSH users.",
+      "D. A Radius server is used for all logins to the router CLI and if it fails, use usernames in the local database",
+      "E. A Radius server is used for SSH logins only to the router CLI"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following DOES NOT PROTECT against Spoofing attacks from the Internet?",
+    answers: [
+      "A. Block all incoming zeros addresses",
+      "B. Block all inbound Broadcast addresses",
+      "C. Block all APIPA addresses",
+      "D. Block all Public IP addresses",
+      "E. Block all Multicast addresses"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following is not true of Extended numbered ACLs?",
+    answers: [
+      "A. They start at number 1",
+      "B. They permit or deny traffic based on Destination IP address only",
+      "C. They permit or deny traffic based on Source IP address only",
+      "D. They should be placed as close to the destination as possible.",
+      "E. They can permit or deny traffic based on port numbers"
+    ],
+    correct: [0]
+  },
+  {
+    question: "Which of the following is TRUE of named ACLs?",
+    answers: [
+      "A. Named ACLs are used for extended ACLs only",
+      "B. Named ACLs are used for standard ACLs only",
+      "C. Named ACLs are used so that it is easy to know what the ACL does but they are hard to edit",
+      "D. When configuring named standard ACLs you start off with the command – (config)#access-list named standard",
+      "E. When configuring named standard ACLs you start off with the command – (config)#ip access-list standard"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is not true of Standard numbered ACLs?",
+    answers: [
+      "A. They start at number 100",
+      "B. They permit or deny traffic based on Destination IP address only",
+      "C. They permit or deny traffic based on Source IP address only",
+      "D. They should be placed as close to the source as possible.",
+      "E. They can permit or deny traffic based on port numbers"
+    ],
+    correct: [0]
+  },
+  {
+    question: "Which of the following MOST ACCURATELY describes Next Generation (NG) Stateful Firewalls?",
+    answers: [
+      "A. NG firewalls operate at layers 1, 2, 3 of the OSI model",
+      "B. NG firewalls operate at layers 2, 3 and 4 of the OSI model",
+      "C. NG firewalls operate at layers 3, 4 and 5 of the OSI model",
+      "D. NG Stateful firewalls operate at layers 4, 5 and 7 of the OSI model",
+      "E. NG firewalls operate at layers 3, 4, 5 and 7 of the OSI model"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following MOST ACCURATELY describes Stateful Firewalls?",
+    answers: [
+      "A. Stateful firewalls operate at layers 1 and 2 of the OSI model",
+      "B. Stateful firewalls operate at layers 2, 3 and 4 of the OSI model",
+      "C. Stateful firewalls operate at layers 3, 4 and 5 of the OSI model",
+      "D. Stateful firewalls operate at layers 4, 5 and 7 of the OSI model",
+      "E. Stateful firewalls operate at layers 5 and 7 of the OSI model"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is NOT TRUE IN RELATION TO LIMITATIONS in Stateful Firewalls?",
+    answers: [
+      "A. Weak packet filtering",
+      "B. No Application Layer inspection",
+      "C. Limited tracking of stateless protocols that use UDP",
+      "D. Difficult to defend against dynamic port negotiation",
+      "E. Does not support Authentication"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following MOST ACCURATELY describes Stateless Firewalls?",
+    answers: [
+      "A. Stateless firewalls operate at layer 1 and 2 of the OSI model",
+      "B. Stateless firewalls operate at layer 2 and 3 of the OSI model",
+      "C. Stateless firewalls operate at layer 3 and 4 of the OSI model",
+      "D. Stateless firewalls operate at layer 4 and 5 of the OSI model",
+      "E. Stateless firewalls operate at layer 5 and 7 of the OSI model"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Three possible actions can be configured to process traffic by protocol, source and destination zones (zone pairs) - inspect, drop, pass.\n\nWhich ONE of the following is NOT TRUE about these actions?",
+    answers: [
+      "A. Inspect performs stateful packet inspection.",
+      "B. Drop - Analogous to a deny statement in an ACL",
+      "C. Pass - Analogous to a permit statement in an ACL",
+      "D. Pass does not track the state of connections or sessions within the traffic",
+      "E. Pass tracks the state of connections or sessions within the traffic."
+    ],
+    correct: [4]
+  },
+  {
+    question: "When configuring a ZPF, the first step is to define the zones.\n\nWhich of the following IS NOT A VALID STEP in creating a ZPF?",
+    answers: [
+      "A. Assign zones to the relevant interfaces",
+      "B. Define an action with a Policy-Map which defines what actions to take on the traffic in a particular Class-Map",
+      "C. Identify traffic you want to monitor/permit/deny with a Class-Map.",
+      "D. Identify a zone pair which defines traffic between a Source Zone and a Destination Zone and match it to a policy-map",
+      "E. Identify a zone pair which defines traffic between a Source Zone and a Destination Zone and match it to a class-map"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is FALSE?",
+    answers: [
+      "A. Class maps indicate the type of traffic to look for",
+      "B. Policy maps define what actions to perform on traffic of interest defined in a particular class map",
+      "C. Traffic between zones is blocked by default unless otherwise specified",
+      "D. Zone pairs define the allowed direction of flow between a pair of zones for a particular policy map.",
+      "E. Interfaces must be associated with a particular zone pair"
+    ],
+    correct: [4]
+  },
+  {
+    question: "The following is a copy of a ZPF configuration in a router.\nzone security Private - zone security Public - class-map type inspect match-any Web-Traffic - match protocol http - match protocol https - match protocol dns - policy-map type inspect PRIV-PUB-POLICY__class type inspect Web-Traffic - inspect - zone-pair security Private-to-Public-Traffic source Private destination Public - service-policy type inspect PRIV-PUB-POLICY - interface GigabitEthernet0/0/0 - zone-member security Private - interface GigabitEthernet0/0/1 - zone-member security Public\n   Which of the following is NOT TRUE about what this Firewall will do?",
+    answers: [
+      "A. It will allow HTTP connections to be made from Private to Public",
+      "B. It will allow HTTPS connections to be made from Private to Public",
+      "C. It will allow DNS requests from Public to Private",
+      "D. It will block Public from setting up HTTP connections to Private",
+      "E. It will block Public from setting up HTTPS connections to Private"
+    ],
+    correct: [2]
+  },
+  {
+    question: "The following is a copy of a ZPF configuration in a router.\nzone security Private - zone security Public - class-map type inspect match-any Web-Traffic - match protocol http - match protocol https - match protocol dns - policy-map type inspect PRIV-PUB-POLICY class type inspect Web-Traffic - inspect - zone-pair security Private-to-Public-Traffic source Private destination Public - service-policy type inspect PRIV-PUB-POLICY - interface GigabitEthernet0/0/0 - zone-member security Private - interface GigabitEthernet0/0/1 - zone-member security\n   Which of the following is NOT TRUE about what this Firewall will do?",
+    answers: [
+      "A. It will allow DNS connections to be made from Private to Public",
+      "B. It will not allow ICMP messages from Private to Public",
+      "C. It will not allow DNS requests from Public to Private",
+      "D. It will block Public from setting up HTTP connections to Private",
+      "E. It will allow Public to ping to Private"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is NOT TRUE in relation to ZPF firewalls?",
+    answers: [
+      "A. ZPF firewalls are not dependent on ACLs.",
+      "B. Automatically blocks all traffic between zones unless explicitly allowed",
+      "C. Virtual and physical interfaces can be grouped into zones.",
+      "D. ZPF firewalls are dependent on ZPFs",
+      "E. Policies are applied to unidirectional traffic between zones"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following is NOT TRUE about Intrusion Detection Systems?",
+    answers: [
+      "A. An IDS monitors the traffic only",
+      "B. An IDS will trigger an alarm if an event occurs",
+      "C. An IDS will not block traffic that causes an event",
+      "D. An IDS slows down performance of the network",
+      "E. An IDS is more vulnerable to network security evasion than an IPS"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following is NOT TRUE about Intrusion Protection Systems?",
+    answers: [
+      "A. An IPS monitors network traffic for certain trigger events",
+      "B. An IDS uses a database of Signatures that contain well known traffic patterns that indicate trigger events",
+      "C. An IPS will not block traffic that causes an event",
+      "D. An IPS does have a slight effect on network performance",
+      "E. An IPS is less vulnerable to network security evasion than an IDS"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is TRUE in comparing an IPS to a Stateful Firewall?",
+    answers: [
+      "A. If you have an IPS you don't need a firewall",
+      "B. An IPS filters data based on layers 3, 4 and 5 of the OSI model, like a Stateful Firewall",
+      "C. If you have a firewall you don't need an IPS",
+      "D. You should use both a firewall and an IPS in your network",
+      "E. A firewall should be placed behind an IPS when connecting to the Internet"
+    ],
+    correct: [3]
+  },
+  {
+    question: "The following commands are implemented in a switch:\n(config)#monitor session 1 source interface fa0/1\n(config)#monitor session 1 destination interface g0/2\n\nWhich of the following will these commands do?",
+    answers: [
+      "A. Only inbound traffic on fa0/1 will be sent to g0/2",
+      "B. Only outbound traffic on fa0/1 will be sent to g0/2",
+      "C. Both inbound and outbound traffic on fa0/1 will be sent to g0/2",
+      "D. Both inbound and outbound traffic on g0/2 will be sent to fa0/1",
+      "E. Only inbound traffic on g0/2 is forwarded to fa0/1"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is NOT TRUE in relation to SwitchPort Analyzer - SPAN?",
+    answers: [
+      "A. SPAN can be used to connect an IDS to the destination port",
+      "B. SPAN is used to connect an IPS to the destination port",
+      "C. SPAN is used to connect a device running Wireshark to the destination port",
+      "D. SPAN can monitor more than one source port at the same time",
+      "E. All traffic on the source ports including unicasts are forwarded to the destination port"
+    ],
+    correct: [1]
+  },
+  {
+    question: "Which of the following is TRUE of Switch port analyzer - SPAN?",
+    answers: [
+      "A. SPAN is used on a port to block certain types of packets",
+      "B. SPAN automatically records traffic on a certain port and stores it in switch RAM",
+      "C. SPAN forwards all data from certain source ports to a destination port",
+      "D. SPAN runs wireshark automatically on a port",
+      "E. SPAN is used for DHCP snooping on ports"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is NOT TRUE of IEEE 802.1X?",
+    answers: [
+      "A. 802.1X is for wireless networks only",
+      "B. 802.1X forces users to authenticate before they can access devices on the network",
+      "C. 802.1X uses Authentication servers to verify user authentication",
+      "D. The authorisation request from the client is passed on by the network device to an Authentication server",
+      "E. The client device can only send EAP frames to the network until authenticated"
+    ],
+    correct: [0]
+  },
+  {
+    question: "The following command is issued in a switch:\naaa authentication dot1x default group radius\n\nWhich of the following is TRUE?",
+    answers: [
+      "A. The switch is now configured to be an 802.1X authenticator",
+      "B. The switch will act exclusively as an authenticating server and ignore the radius server for 802.1x authentication",
+      "C. 802.1X is enabled for SSH access only",
+      "D. A radius server is defined as the means to use for 802.1X authentication",
+      "E. The switch is configured to act as a Supplicant"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following is NOT TRUE in relation to the 802.1X framework?",
+    answers: [
+      "A. The client is the Supplicant who requests authentication",
+      "B. The network device the client is connected to acts as the Authenticator",
+      "C. There is an Authentication Server who receives requests from the Authenticator on behalf of the Client",
+      "D. The authenticating server is usually a Radius or TACACS+ server",
+      "E. 802.1X is used only for authenticating SSH access to network devices"
+    ],
+    correct: [4]
+  },
+  {
+    question: "When configuring 802.1X on a switch which of the following is NOT TRUE?",
+    answers: [
+      "A. The command (config)#DOT1X SYSTEM AUTH-CONTROL makes the switch an Authenticator",
+      "B. The command (config-if)#AUTHENTICATION PORT-CONTROL AUTO forces a port to use 802.1X authentication",
+      "C. The command (config-if)#DOT1X PAE AUTHENTICATOR forces a port to use 802.1X authentication",
+      "D. The command (config)# AAA AUTHENTICATION DOT1X DEFAULT GROUP RADIUS tells the switch to use a radius server to authenticate",
+      "E. The PC has to have a password and username set up for 802.1X"
+    ],
+    correct: [4]
+  },
+  {
+    question: "When configuring 802.1X on a switch which of the following is TRUE?",
+    answers: [
+      "A. The command (config)# DOT1X SYSTEM AUTH-CONTROL makes the switch an Authentication server",
+      "B. The command (config-if)#AUTHENTICATION PORT-CONTROL AUTO forces a port to use 802.1X authentication",
+      "C. The command (config-if)#DOT1X PAE AUTHENTICATOR forces a port to use 802.1X authentication",
+      "D. The command (config)# AAA AUTHENTICATION DOT1X DEFAULT GROUP RADIUS makes the switch an Authenticator",
+      "E. The command (config)# AAA AUTHENTICATION DOT1X DEFAULT GROUP RADIUS makes the switch a Supplicant"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is NOT USED in Hash functions?",
+    answers: [
+      "A. MD5",
+      "B. SHA-1",
+      "C. SHA-2",
+      "D. SHA-3",
+      "E. AES"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is NOT TRUE about HMAC?",
+    answers: [
+      "A. HMAC provides authentication of sender",
+      "B. HMAC provides integrity of the message sent",
+      "C. HMAC uses MD-5, SSH",
+      "D. HMAC is not used to verify MAC addresses",
+      "E. HMAC is used for Confidentiality"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is not an essential element in relation to the principles of secure communications?",
+    answers: [
+      "A. Authentication",
+      "B. Confidentiality",
+      "C. Non-repudiation of Data",
+      "D. Integrity",
+      "E. Authorisation"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Alice → Bob\nEKUB[M] = C, H[M] = D, EKRA[D]=X\nC|X =>\n\nWhich of the following does this achieve?",
+    answers: [
+      "A. Ensures integrity and authentication but not confidentiality",
+      "B. Ensures authentication and confidentiality but not integrity",
+      "C. Ensures confidentiality and integrity but not authentication",
+      "D. Ensures authentication, confidentiality and integrity",
+      "E. Does not ensure any authentication, integrity or confidentiality"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following is NOT TRUE about single key encryption?",
+    answers: [
+      "A. A single key encryption algorithm uses operations on prime numbers to encrypt data",
+      "B. A single key encryption scheme uses one key for encryption and decryption",
+      "C. DES is an example of single key encryption",
+      "D. AES is a single key encryption scheme that uses block cipher",
+      "E. Stream cipher is used in single key encryption to encrypt data bit by bit"
+    ],
+    correct: [0]
+  },
+  {
+    question: "In relation to IPSec, which of the following IS NOT a security function?",
+    answers: [
+      "A. Confidentiality using ESP",
+      "B. Origin Authentication using IKE",
+      "C. Integrity and non-repudiation",
+      "D. Diffie-Hellman to generate a secure symmetric key for communications",
+      "E. Confidentiality using AH"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is NOT correct in IKE phase 1 of creating an encrypted IPSec tunnel?",
+    answers: [
+      "A. Hash function to use for Integrity – MD5 or SHA version",
+      "B. Choosing whether to use ESP or AH",
+      "C. Choose which Diffie-Hellman method to use to exchange the symmetric encryption key",
+      "D. Choosing what Hash algorithm to use for Integrity - MD5, SHA etc",
+      "E. Choosing which Authentication method to use - RSA or PSK"
+    ],
+    correct: [1]
+  },
+  {
+    question: "Which of the following is NOT TRUE in relation to IPSec IKE phase 2?",
+    answers: [
+      "A. Whether to use ESP or AH",
+      "B. Peer IP address or subnet address for the IPsec tunnel",
+      "C. An ID for the SA called a Security Parameter Index",
+      "D. Length of time the encryption key should be valid",
+      "E. None of the above"
+    ],
+    correct: [1]
+  },
+  {
+    question: "When configuring an IPSec Policy for phase 2, which of the following are NOT steps in the process?",
+    answers: [
+      "A. Create ACL to trap interesting traffic",
+      "B. Create an IPsec Transform Set which defines the Hashing and Encryption algorithms to be used",
+      "C. Create a Crypto map that links the ACL, the Transform Set, the IP address of the peer, the Diffie-Hellman Group key for generating the session key and the lifetime of the key.",
+      "D. Associate the Crypto map with an interface",
+      "E. Choose a Hash Algorithm"
+    ],
+    correct: [5]
+  },
+  {
+    question: "Which of the following is TRUE about VPNs?",
+    answers: [
+      "A. IPSec provides encrypted VPNs when using the AH",
+      "B. In VPN tunnel mode, only the data inside the original packet is encrypted",
+      "C. In VPN Transport mode the original packet and data is encrypted and inserted into a new unencrypted packet",
+      "D. IPSec ensures integrity and confidentiality using ESP",
+      "E. In tunnel mode, the original packet and the packet it is encapsulated in is all encrypted"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is TRUE about digital certificates?",
+    answers: [
+      "A. They are always self-signed",
+      "B. They use the recipient's private key to sign",
+      "C. They guarantee absolute security",
+      "D. They are digitally signed by a certificate authority using its private key",
+      "E. They can be created without any verification process"
+    ],
+    correct: [3]
+  },
+  {
+    question: "In VPN tunnel mode, which of the following is TRUE?",
+    answers: [
+      "A. Only the data inside the original packet is encrypted",
+      "B. Only the new IP header is encrypted",
+      "C. Both the original packet and the new IP header are encrypted",
+      "D. The original packet and its data are encrypted and encapsulated within a new packet",
+      "E. Only the original packet is encrypted, not the encapsulated packet"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following is NOT TRUE about hashing?",
+    answers: [
+      "A. Hashing ensures integrity of data",
+      "B. Hashing is a one-way function",
+      "C. Hashing is reversible",
+      "D. Hashing algorithms include SHA-2 and SHA-3",
+      "E. MD5 is an older hashing algorithm"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is a symmetric encryption algorithm?",
+    answers: [
+      "A. RSA",
+      "B. ECC",
+      "C. AES",
+      "D. DH",
+      "E. DSA"
+    ],
+    correct: [2]
+  },
+  {
+    question: "What does a digital signature provide?",
+    answers: [
+      "A. Integrity and confidentiality",
+      "B. Confidentiality and availability",
+      "C. Authentication and non-repudiation",
+      "D. Encryption and hashing",
+      "E. Key exchange and certificate validation"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is NOT A LAYER 2 protection strategy?",
+    answers: [
+      "A. Port security",
+      "B. DHCP Snooping",
+      "C. Dynamic ARP Inspection",
+      "D. BPDU Guard",
+      "E. ACLs"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is NOT a layer 2 security threat?",
+    answers: [
+      "A. MAC table attack",
+      "B. VLAN attacks",
+      "C. TCP SYN flood attack",
+      "D. DHCP attack",
+      "E. ARP attack"
+    ],
+    correct: [2]
+  },
+  {
+    question: "The following is configured in a switch:\n(config-if)#switchport mode access\n(config-if)#switchport port-security\n\nWhich of the following does this configuration NOT DO?",
+    answers: [
+      "A. The MAC of the first device to connect to this port will be stored in RAM",
+      "B. By default if more than 1 device connects to this port there will be a security violation",
+      "C. When a violation occurs, the port will be shut down by default",
+      "D. The MAC of the first device to connect to this port will be stored in the MAC address table",
+      "E. If the switch reboots, it will not remember the MAC address that was registered in the MAC address Table for this port."
+    ],
+    correct: [4]
+  },
+  {
+    question: "The following is configured in a switch:\n(config-if)#switchport mode access\n(config-if)#switchport port-security\n(config-if)#switchport port-security mac-address sticky\n\nWhich of the following does this configuration NOT DO?",
+    answers: [
+      "A. The MAC of the first device to connect to this port will be stored in RAM",
+      "B. By default if more than 1 device connects to this port there will be a security violation",
+      "C. When a violation occurs, the port violation will be restrict by default",
+      "D. The MAC of the first device to connect to this port will be stored in the MAC address table",
+      "E. If the switch reboots, it will remember the MAC address that was registered in the MAC address Table for this port if the running-config file is copied to startup-config."
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is NOT TRUE about STP attacks?",
+    answers: [
+      "A. Port Fast is enabled to protect against STP attacks",
+      "B. BPDU Guard is set on access ports to protect against rogue switches sending BPDUs",
+      "C. Root guard is best deployed on ports that connect to switches that should not be the root bridge",
+      "D. Loop Guard is enabled on all ports connected to switches that are not Root Guard ports",
+      "E. Enable BPDU Guard on any port configured in Port Fast mode"
+    ],
+    correct: [0]
+  },
+  {
+    question: "Which of the following is TRUE about violation modes in port security?",
+    answers: [
+      "A. The default violation is restrict",
+      "B. The default mode is protect",
+      "C. The default mode is shutdown",
+      "D. Violation mode protect causes the violated port to generate alarms",
+      "E. Violation mode restrict causes the violated port to generate alarms but allows the frames to pass at a limited rate"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is NOT TRUE of VLAN attacks?",
+    answers: [
+      "A. A VLAN double tagging attack is where the client inserts 2 tags, the first tag being the tag of the VLAN he belongs to which is also the native VLAN and a second tag for the target VLAN",
+      "B. A VLAN hopping attack is where the threat actor configures a host to act like a switch to take advantage of the automatic trunking port feature enabled by default on most switch ports.",
+      "C. Disabling DTP will protect against VLAN hopping",
+      "D. Disabling DTP will protect against VLAN double tagging",
+      "E. Forcing ports into trunk mode protects against VLAN hopping"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following is TRUE of Asymmetric encryption?",
+    answers: [
+      "A. Assymetric key uses permutations and combinations to encrypt",
+      "B. A single assymetric key is used to encrypt and decrypt the data",
+      "C. Assymetric key is used because it requires less processing than symmetric key",
+      "D. Assymetric key uses 2 keys- one to encrypt and the other to decrypt",
+      "E. AES is an example scheme of Assymetric key"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following is Diffie Hellman used for?",
+    answers: [
+      "A. It is a symmetric encryption scheme",
+      "B. It is an assymetric key encryption scheme",
+      "C. It is used as a hash function generator",
+      "D. It is used by clients who want to communicate using a pair of keys",
+      "E. It is used between 2 clients to share a temporary encryption key for secure symmetric key encryption communications"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is TRUE about Digital Certificates?",
+    answers: [
+      "A. A Digital Certificate is digitally signed on behalf of a certified client by a CA using the CA's Private key",
+      "B. A Digital Certificate is digitally signed on behalf of a certified client by a CA using the CA's Public key",
+      "C. A Digital Certificate is digitally signed by the certified client using the client’s Private key",
+      "D. A Digital Certificate is digitally signed by the certified client using the client’s Public key",
+      "E. None of the above"
+    ],
+    correct: [0]
+  },
+  {
+    question: "Bob → Alice\nOrder O ⇒ H[O] = X\nEKRB[X] = D\nO|D ⇒\n\nBob is confirming an order O with Alice.\nWhich of the following is TRUE about the transaction?",
+    answers: [
+      "A. The Digital signature in this transaction is D",
+      "B. The Digital signature in this transaction is X",
+      "C. The order O is encrypted.",
+      "D. No-one else but Alice can decrypt what Bob sends",
+      "E. Bob used his public key to encrypt the hash digest of the order."
+    ],
+    correct: [0]
+  },
+  {
+    question: "Which of the following IS NOT a requirement of Digital Signatures?",
+    answers: [
+      "A. Authentic – signature cannot be forged",
+      "B. Unalterable – signature cannot be changed",
+      "C. Not reusable – The document signature cannot be transferred to another document.",
+      "D. Non-repudiated – The signed document is considered to be the same as a physical document.",
+      "E. Authorisation – the sender is authorised to access the receiver’s data"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is NOT USED in Hash functions?",
+    answers: [
+      "A. MD5",
+      "B. SHA-1",
+      "C. SHA-2",
+      "D. SHA-3",
+      "E. AES"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is NOT TRUE about HMAC?",
+    answers: [
+      "A. HMAC provides authentication of sender",
+      "B. HMAC provides integrity of the message sent",
+      "C. HMAC uses MD-5, SSH",
+      "D. HMAC is not used to verify MAC addresses",
+      "E. HMAC is used for Confidentiality"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is not an essential element in relation to the principles of secure communications?",
+    answers: [
+      "A. Authentication",
+      "B. Confidentiality",
+      "C. Non-repudiation of Data",
+      "D. Integrity",
+      "E. Authorisation"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Alice → Bob\nEKUB[M] = C, H[M] = D, EKRA[D] = X\nC|X ⇒\n\nWhich of the following does this achieve?",
+    answers: [
+      "A. Ensures integrity and authentication but not confidentiality",
+      "B. Ensures authentication and confidentiality but not integrity",
+      "C. Ensures confidentiality and integrity but not authentication",
+      "D. Ensures authentication, confidentiality and integrity",
+      "E. Does not ensure any authentication, integrity or confidentiality"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following is NOT TRUE about single key encryption?",
+    answers: [
+      "A. A single key encryption algorithm uses operations on prime numbers to encrypt data",
+      "B. A single key encryption scheme uses one key for encryption and decryption",
+      "C. DES is an example of single key encryption",
+      "D. AES is a single key encryption scheme that uses block cipher",
+      "E. Stream cipher is used in single key encryption to encrypt data bit by bit"
+    ],
+    correct: [0]
+  },
+  {
+    question: "In relation to IPSec, which of the following IS NOT a security function?",
+    answers: [
+      "A. Confidentiality using ESP",
+      "B. Origin Authentication using IKE",
+      "C. Integrity and non-repudiation",
+      "D. Diffie-Hellman to generate a secure symmetric key for communications",
+      "E. Confidentiality using AH"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is NOT correct in IKE phase 1 of creating an encrypted IPSec tunnel?",
+    answers: [
+      "A. Hash function to use for Integrity – MD5 or SHA version",
+      "B. Choosing whether to use ESP or AH",
+      "C. Choose which Diffie-Hellman method to use to exchange the symmetric encryption key",
+      "D. Choosing what Hash algorithm to use for Integrity – MD5, SHA etc",
+      "E. Choosing which Authentication method to use – RSA or PSK"
+    ],
+    correct: [1]
+  },
+  {
+    question: "Which of the following is NOT TRUE in relation to IPSec IKE phase 2?",
+    answers: [
+      "A. Whether to use ESP or AH",
+      "B. Peer IP address or subnet address for the IPsec tunnel",
+      "C. An ID for the SA called a Security Parameter Index",
+      "D. Length of time the encryption key should be valid",
+      "E. None of the above"
+    ],
+    correct: [4]
+  },
+  {
+    question: "When configuring an IPSec Policy for phase 2, which of the following are NOT steps in the process?",
+    answers: [
+      "A. Create ACL to trap interesting traffic",
+      "B. Create an IPsec Transform Set which defines the Hashing and Encryption algorithms to be used",
+      "C. Create a Crypto map that links the ACL, the Transform Set, the IP address of the peer, the Diffie-Hellman Group key for generating the session key and the lifetime of the key.",
+      "D. Associate the Crypto map with an interface",
+      "E. Choose a Hash Algorithm"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is TRUE about VPNs?",
+    answers: [
+      "A. IPSec provides encrypted VPNs when using the AH",
+      "B. In VPN tunnel mode, only the data inside the original packet is encrypted",
+      "C. In VPN Transport mode the original packet and data is encrypted and inserted into a new unencrypted packet",
+      "D. IPSec ensures integrity and confidentiality using ESP",
+      "E. In tunnel mode, the original packet and the packet it is encapsulated in is all encrypted"
+    ],
+    correct: [4]
+  },
+  {
+    question: "Which of the following is TRUE about digital certificates?",
+    answers: [
+      "A. They are always self-signed",
+      "B. They use the recipient's private key to sign",
+      "C. They guarantee absolute security",
+      "D. They are digitally signed by a certificate authority using its private key",
+      "E. They can be created without any verification process"
+    ],
+    correct: [3]
+  },
+  {
+    question: "In VPN tunnel mode, which of the following is TRUE?",
+    answers: [
+      "A. Only the data inside the original packet is encrypted",
+      "B. Only the new IP header is encrypted",
+      "C. Both the original packet and the new IP header are encrypted",
+      "D. The original packet and its data are encrypted and encapsulated within a new packet",
+      "E. Only the original packet is encrypted, not the encapsulated packet"
+    ],
+    correct: [3]
+  },
+  {
+    question: "Which of the following is NOT TRUE about hashing?",
+    answers: [
+      "A. Hashing ensures integrity of data",
+      "B. Hashing is a one-way function",
+      "C. Hashing is reversible",
+      "D. Hashing algorithms include SHA-2 and SHA-3",
+      "E. MD5 is an older hashing algorithm"
+    ],
+    correct: [2]
+  },
+  {
+    question: "Which of the following is a symmetric encryption algorithm?",
+    answers: [
+      "A. RSA",
+      "B. ECC",
+      "C. AES",
+      "D. DH",
+      "E. DSA"
+    ],
+    correct: [2]
+  },
+  {
+    question: "What does a digital signature provide?",
+    answers: [
+      "A. Integrity and confidentiality",
+      "B. Confidentiality and availability",
+      "C. Authentication and non-repudiation",
+      "D. Encryption and hashing",
+      "E. Key exchange and certificate validation"
+    ],
+    correct: [2]
+  }
+    ];
+
+    let questions = [...fullQuestionBank];
+    let currentIndex = 0;
+    let userAnswers = Array(questions.length).fill().map(() => []);
+    let flagged = new Set();
+    let timerId;
+    const totalTime = questions.length * 60;
+
+    function loadQuestion() {
+  const q = questions[currentIndex];
+  document.getElementById('question-title').textContent = `Question ${currentIndex + 1}: ${q.question}`;
+  const answersDiv = document.getElementById('answers');
+  answersDiv.innerHTML = '';
+
+  const isMultiAnswer = q.correct.length > 1;
+  q.answers.forEach((ans, i) => {
+    const input = document.createElement('input');
+    input.type = isMultiAnswer ? 'checkbox' : 'radio';
+    input.name = 'answer';
+    input.value = i;
+    input.checked = userAnswers[currentIndex].includes(i);
+    input.addEventListener('change', () => {
+      const checked = Array.from(document.querySelectorAll('#answers input:checked')).map(cb => +cb.value);
+      userAnswers[currentIndex] = checked;
+    });
+
+    const label = document.createElement('label');
+    label.appendChild(input);
+    label.append(" " + ans);
+    answersDiv.appendChild(label);
+  });
+}
+
+    function updateGrid() {
+      const grid = document.getElementById('question-grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < questions.length; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i + 1;
+        btn.onclick = () => {
+          currentIndex = i;
+          loadQuestion();
+        };
+        grid.appendChild(btn);
+      }
+    }
+
+    function flagQuestion() {
+      if (flagged.has(currentIndex)) {
+        flagged.delete(currentIndex);
+      } else {
+        flagged.add(currentIndex);
+      }
+      alert(`Question ${currentIndex + 1} ${flagged.has(currentIndex) ? 'flagged' : 'unflagged'}`);
+    }
+
+    function showFlagged() {
+      if (!flagged.size) return alert("No flagged questions.");
+      alert("Flagged questions: " + Array.from(flagged).map(i => i + 1).join(', '));
+    }
+
+    function nextQuestion() {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        loadQuestion();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        loadQuestion();
+      }
+    }
+
+    function submitExam() {
+      clearInterval(timerId);
+      let correct = [], wrong = [];
+      questions.forEach((q, i) => {
+        const sortedUser = [...(userAnswers[i] || [])].sort().join(',');
+        const sortedCorrect = q.correct.slice().sort().join(',');
+        if (sortedUser === sortedCorrect) correct.push(i);
+        else wrong.push(i);
+      });
+
+      document.getElementById('exam-section').classList.add('hidden');
+      document.getElementById('review-section').classList.remove('hidden');
+      document.getElementById('correct-count').textContent = correct.length;
+      document.getElementById('wrong-count').textContent = wrong.length;
+      document.getElementById('percentage').textContent = ((correct.length / questions.length) * 100).toFixed(2);
+
+      sessionStorage.setItem('wrongIndexes', JSON.stringify(wrong));
+    }
+
+    function retakeWrongOnly() {
+      const wrong = JSON.parse(sessionStorage.getItem('wrongIndexes') || '[]');
+      if (!wrong.length) return alert("No wrong answers to retake!");
+      questions = wrong.map(i => fullQuestionBank[i]);
+      resetExam();
+    }
+
+    function resetExam() {
+      userAnswers = Array(questions.length).fill().map(() => []);
+      currentIndex = 0;
+      flagged = new Set();
+      document.getElementById('review-section').classList.add('hidden');
+      document.getElementById('exam-section').classList.remove('hidden');
+      updateGrid();
+      loadQuestion();
+      startTimer(questions.length * 60);
+    }
+
+    function startTimer(duration) {
+      let timer = duration;
+      const countdown = document.getElementById('countdown');
+      const update = () => {
+        const m = String(Math.floor(timer / 60)).padStart(2, '0');
+        const s = String(timer % 60).padStart(2, '0');
+        countdown.textContent = `${m}:${s}`;
+        if (--timer < 0) {
+          clearInterval(timerId);
+          submitExam();
+        }
+      };
+      update();
+      timerId = setInterval(update, 1000);
+    }
+
+    window.onload = () => {
+      updateGrid();
+      loadQuestion();
+      startTimer(totalTime);
+    };
+  </script>
+</body>
+</html>

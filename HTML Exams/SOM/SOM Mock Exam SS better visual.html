@@ -1,0 +1,2113 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SOM Mock Exam</title>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, #3b2f2f, #cccccc);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #e0e0e0;
+    }
+    .container {
+      width: 800px;
+      max-width: 90%;
+      background: #3a3a3a;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .question-container {
+      display: none;
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .question-container.active {
+      display: block;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .correct {
+      color: green;
+    }
+    .wrong {
+      color: red;
+      text-decoration: line-through;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px 0 0;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+    }
+    .btn-next, .btn-prev {
+      background-color: #007bff;
+      color: white;
+    }
+    .btn-submit, .btn-reset {
+      background-color: #28a745;
+      color: white;
+    }
+    .btn-next:hover, .btn-prev:hover, .btn-submit:hover, .btn-reset:hover {
+      opacity: 0.9;
+    }
+    .btn-prev::before {
+      content: '⬅️';
+      margin-right: 8px;
+    }
+    .btn-next::after {
+      content: '➡️';
+      margin-left: 8px;
+    }
+    .btn-submit::after {
+      content: ' ✅';
+      opacity: 0.7;
+      transition: transform 0.2s ease;
+    }
+    .btn-submit:hover::after {
+      transform: rotate(8deg);
+      opacity: 1;
+    }
+    .timer {
+      text-align: right;
+      font-size: 18px;
+      color: red;
+      margin-bottom: 20px;
+    }
+    .results {
+      text-align: center;
+      display: none;
+    }
+    .progress-container {
+      width: 800px;
+      max-width: 90%;
+      height: 20px;
+      background-color: #ccc;
+      border-radius: 10px;
+      margin: 20px auto;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 20px;
+      width: 0%;
+      background-color: #28a745;
+      transition: width 1s ease;
+    }
+    .quote-container {
+      width: 800px;
+      max-width: 90%;
+      margin: 20px auto;
+      text-align: center;
+      font-family: 'Lucida Handwriting', 'Brush Script MT', cursive;
+      font-size: 1.2em;
+      color: #2e2e2e;
+    }
+    .quote-container p {
+      margin: 0;
+      line-height: 1.4;
+    }
+  
+  /* Review page styling */
+  .review-container { margin: 20px 0; }
+  .review-header { font-size: 1.5em; margin-bottom: 15px; }
+  .review-card { background: #1a202c; color: #edf2f7; border-radius: 8px; padding: 20px; margin-bottom: 15px; }
+  .review-question { font-weight: bold; margin-bottom: 10px; }
+  .question-container h3,
+.review-question {
+  white-space: pre-line;
+}
+.question-container h3 {
+  font-family: "Courier New", monospace;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+  .review-options { list-style: none; padding: 0; margin: 0; }
+  .review-options li { margin-bottom: 5px; }
+  .correct { color: #48bb78; }
+  .wrong { color: #f56565; text-decoration: line-through; }
+  .unanswered { color: #63b3ed; }
+
+.skipped-correct {
+  color: green !important;
+}
+.skipped-wrong {
+  color: lightgray !important;
+}
+  .nav-box {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    background-color: #444;
+    border: 2px solid transparent;
+    color: #fff;
+    text-align: center;
+    line-height: 20px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+}
+  .nav-box.active {
+    border: 2px solid white;
+  }
+  .nav-box.correct {
+    background-color: green;
+  }
+  .nav-box.wrong {
+    background-color: red;
+  }
+  .nav-box.skipped {
+    background-color: #007bff;
+  }
+  #questionNavigator {
+    position: fixed;
+    right: 106px; /* moved 1 inch (96px) from the original 10px */
+    top: 100px;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-gap: 4px;
+    width: 240px;
+    background-color: #222;
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 1000;
+  }
+}
+  .nav-box {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    background-color: #444;
+    border: 2px solid transparent;
+    color: #fff;
+    text-align: center;
+    line-height: 20px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+}
+  .nav-box.active {
+    border: 2px solid white;
+  }
+  .nav-box.correct {
+    background-color: green;
+  }
+  .nav-box.wrong {
+    background-color: red;
+  }
+  .nav-box.skipped {
+    background-color: #007bff;
+  }
+}}}
+  .nav-box.flagged {
+  border: 2px dashed lightcoral !important;
+  background-color: #333 !important;
+  color: lightcoral !important;
+}
+
+#examDisclaimerBox {
+  position: fixed;
+  top: 100px;
+  left: 106px;
+  width: 260px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 16px;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  line-height: 1.5;
+  z-index: 1000;
+}
+#examDisclaimerBox h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+#examDisclaimerBox p {
+  margin: 8px 0;
+}
+#examDisclaimerBox p strong {
+  display: block;
+  margin-bottom: 5px;
+}
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  .container {
+    width: 100% !important;
+    padding: 15px;
+    border-radius: 8px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .timer {
+    text-align: center;
+    font-size: 16px;
+  }
+
+  .question-container h3 {
+    font-size: 1.1rem;
+  }
+
+  label {
+    font-size: 1rem;
+    padding: 8px 0;
+  }
+
+  .btn-next,
+  .btn-prev,
+  .btn-submit,
+  .btn-reset {
+    width: 100%;
+    margin: 8px 0;
+    font-size: 16px;
+  }
+
+  .progress-container {
+    width: 100% !important;
+  }
+
+  .quote-container {
+    font-size: 0.95em;
+    padding: 10px;
+  }
+
+  #questionNavigator,
+  #examDisclaimerBox {
+    display: none !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="examDisclaimerBox">
+  <h2>Diploma In Cybersecurity<br/>NFQ Level 7</h2>
+  <p><strong>Disclaimer:</strong></p>
+  <p>
+    This is an unofficial mock<br/>
+    examination.<br/>
+    It was created solely for personal<br/>
+    learning purposes.<br/>
+    It is based on the knowledge<br/>
+    acquired during the second<br/>
+    semester.<br/>
+    It is not endorsed by any academic<br/>
+    institution.<br/>
+    It is not formal exam preparation<br/>
+    material.<br/>
+    It is neither an official exam.
+  </p>
+</div>
+
+<div class="container">
+<h1>SOM Mock Exam</h1>
+<div class="timer" id="timer">Time Remaining: 96:00</div>
+<form id="examForm"><div id="flagControlWrapper">
+<button class="btn-next" id="flagButton" onclick="toggleCurrentFlag()" style="display: block; margin: 0 auto; position: relative; top: -1cm;" type="button">🚩 Flag This Question</button>
+</div>
+<div id="questions"></div>
+<div class="results" id="results">
+<h2>Exam Results</h2>
+<p>Total Questions: <span id="totalQuestions"></span></p>
+<p>Correct Answers: <span id="correctAnswers"></span></p>
+<p>Wrong Answers: <span id="wrongAnswers"></span></p>
+<p>Unanswered: <span id="unansweredQuestions"></span></p>
+<p>Percentage: <span id="percentage"></span>%</p>
+<button class="btn-reset" onclick="resetExam()" type="button">Restart Exam</button>
+<button class="btn-reset" onclick="showWrongQuestions()" type="button">Display Wrong Questions</button></div>
+<!-- Navigation row -->
+<div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px;"><div id="examNavButtons" style="display: block;">
+</div></div>
+<div style="display: flex; justify-content: center; gap: 10px; margin-top: 10px;"><button class="btn-next" onclick="showQuestion(currentQuestionIndex + 1)" type="button">Next</button><button class="btn-submit" id="submitButton" style="display: none;" type="submit">Submit Exam</button><button class="btn-prev" onclick="showQuestion(currentQuestionIndex - 1)" type="button">Previous</button></div></form>
+</div>
+<div class="progress-container">
+<div class="progress-bar" id="progressBar"></div>
+</div>
+<div class="quote-container">
+<p>
+      “Life should not be a journey to the grave with the intention of arriving safely in a pretty and well preserved body, 
+      but rather to skid in broadside in a cloud of smoke, thoroughly used up, totally worn out, and loudly proclaiming 
+      'Wow! What a Ride!' – Hunter S. Thompson”
+    </p>
+</div>
+<script>
+        const questionPool = [
+  {
+    id: "q1",
+    question: "What is the basic aim of Security Operations Management?",
+    options: [
+      "A. Define business requirements and mission alignment.",
+      "B. Manage vendor relationships.",
+      "C. Deliver security services in all relevant security domains.",
+      "D. Implement marketing strategies.",
+      "E. Coordinate financial audits."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q2",
+    question: "Which three components are the core principles of Security Operations Management?",
+    options: [
+      "A. Risk management.",
+      "B. Technology.",
+      "C. Compliance.",
+      "D. Processes.",
+      "E. People."
+    ],
+    correctAnswer: ["B", "D", "E"]
+  },
+  {
+    id: "q3",
+    question: "In the context of Security Operations, what does “3LD” refer to?",
+    options: [
+      "A. Third-level detection.",
+      "B. Three-tier logical design.",
+      "C. Tier 3 logging.",
+      "D. Third-level defence.",
+      "E. Three-line defence model."
+    ],
+    correctAnswer: "E"
+  },
+  {
+    id: "q4",
+    question: "Which of the following is a capability category described in a Security Architecture?",
+    options: [
+      "A. Threat & Vulnerability Management.",
+      "B. Financial Reporting.",
+      "C. Human Resources Management.",
+      "D. Customer Relationship Management.",
+      "E. Marketing Strategy."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q5",
+    question: "At which stage of the SDLC should security controls be integrated to ensure early detection of vulnerabilities?",
+    options: [
+      "A. Testing.",
+      "B. Design.",
+      "C. Implementation.",
+      "D. Analysis.",
+      "E. Planning."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q6",
+    question: "Which ISO standard series provides best practices for Information Security Management?",
+    options: [
+      "A. ISO 22301.",
+      "B. ISO 9001.",
+      "C. ISO 14001.",
+      "D. ISO/IEC 31000 series.",
+      "E. ISO/IEC 27000 series."
+    ],
+    correctAnswer: "E"
+  },
+  {
+    id: "q7",
+    question: "Which two of the following are fundamental functions performed in Security Operations Management?",
+    options: [
+      "A. Continuous Improvement.",
+      "B. People.",
+      "C. Technology.",
+      "D. Risk Management.",
+      "E. Processes."
+    ],
+    correctAnswer: ["B", "E"]
+  },
+  {
+    id: "q8",
+    question: "Which activity ensures that processes in Security Operations Management are carried out effectively and efficiently?",
+    options: [
+      "A. Ensuring people are qualified.",
+      "B. Deploying technologies.",
+      "C. Defining processes.",
+      "D. Developing marketing strategies.",
+      "E. Conducting financial audits."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q9",
+    question: "Who are the security capabilities and control measures applied to?",
+    options: [
+      "A. Third-party vendors.",
+      "B. Cloud service providers.",
+      "C. External auditors.",
+      "D. The organisation’s people, processes and technologies.",
+      "E. Government regulatory bodies."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q10",
+    question: "What function deals with ensuring configuration baselines are applied appropriately?",
+    options: [
+      "A. Identity and Access Management.",
+      "B. Security Monitoring.",
+      "C. Security Incident Response.",
+      "D. Infrastructure and Application Security.",
+      "E. Threat & Vulnerability Management."
+    ],
+    correctAnswer: "E"
+  },
+  {
+    id: "q11",
+    question: "What are RACIs used for and why?",
+    options: [
+      "A. Defining Roles, Accountabilities, Consulted and Informed to clarify responsibilities.",
+      "B. Tracking vulnerability scan results for audit purposes.",
+      "C. Managing incident response playbooks.",
+      "D. Prioritising mitigation actions by risk level.",
+      "E. Categorising assets by criticality."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q12",
+    question: "Which tool is typically used to collect and analyse logs for potential security events?",
+    options: [
+      "A. Vulnerability scanner.",
+      "B. Configuration management database (CMDB).",
+      "C. Data Loss Prevention (DLP).",
+      "D. Endpoint Detection and Response (EDR).",
+      "E. Security Information and Event Management (SIEM)."
+    ],
+    correctAnswer: "E"
+  },
+  {
+    id: "q13",
+    question: "Which two processes are core to the Security Monitoring function?",
+    options: [
+      "A. Onboarding of log feeds.",
+      "B. Creating data classification schemas.",
+      "C. Developing and mobilising use cases.",
+      "D. Conducting risk assessments.",
+      "E. Deploying incident analysis tooling."
+    ],
+    correctAnswer: ["A", "C"]
+  },
+  {
+    id: "q14",
+    question: "Which activity is part of the Security Incident Response function?",
+    options: [
+      "A. Scanning for container vulnerabilities.",
+      "B. Establishing and mobilising a communication plan.",
+      "C. Defining access permissions.",
+      "D. Developing SIEM use cases.",
+      "E. Onboarding of log feeds."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q15",
+    question: "Which three sub-processes are part of the Security Incident Response lifecycle?",
+    options: [
+      "A. Qualify incidents.",
+      "B. Analyse alerts and triage.",
+      "C. Collect and preserve incident evidence.",
+      "D. Integrate threat and vulnerability information.",
+      "E. Identify recovery measures and support implementation."
+    ],
+    correctAnswer: ["A", "C", "E"]
+  },
+  {
+    id: "q16",
+    question: "Who in an organisation has a keen interest in data security?",
+    options: [
+      "A. Human Resources only.",
+      "B. Finance department only.",
+      "C. Data owners and protection teams.",
+      "D. Marketing department only.",
+      "E. Internal audit only."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q17",
+    question: "What typical activities does the Security Architecture function pursue?",
+    options: [
+      "A. Designing and configuring federation services.",
+      "B. Advising on firewall and proxy rule sets.",
+      "C. Deploying incident analysis tooling.",
+      "D. Creating and reviewing OS security baselines.",
+      "E. Managing privileged access."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q18",
+    question: "Why does the Security Strategy & Implementation function need to work with an organisation’s Project Office?",
+    options: [
+      "A. To test detection processes.",
+      "B. To align security initiatives with project timelines and deliverables.",
+      "C. To conduct vulnerability scans.",
+      "D. To define incident response playbooks.",
+      "E. To manage IAM provisioning."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q19",
+    question: "What interactions does a Security Engineering team have with the Incident Response team?",
+    options: [
+      "A. Integrating threat intelligence feeds into SIEM.",
+      "B. Assisting with forensic evidence collection.",
+      "C. Providing hardened configurations post-incident.",
+      "D. Advising on playbook development.",
+      "E. All of the above."
+    ],
+    correctAnswer: "E"
+  },
+  {
+    id: "q20",
+    question: "Which areas does Security Engineering activities cover in the NIST CSF?",
+    options: [
+      "A. Protect (hardening, PAM, PKI) and Detect (IDS/EDR).",
+      "B. Respond (incident containment) only.",
+      "C. Identify (asset inventory) only.",
+      "D. Recover (restoration & reconfiguration) only.",
+      "E. All functions equally."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q21",
+    question: "Which of the following are core outputs of the Infrastructure Security activity “Applying or validating hardened configurations”?",
+    options: [
+      "A. Hardened infra components/services.",
+      "B. Documented secure rules.",
+      "C. Audit reports.",
+      "D. Deployed certificates.",
+      "E. Updated SIEM use cases."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q22",
+    question: "Which two of the following activities belong to the Network Security function?",
+    options: [
+      "A. Researching suspected malicious sites and updating proxy configurations.",
+      "B. Creating or reviewing IDS/IPS configurations.",
+      "C. Designing secure groups for directory services.",
+      "D. Collecting and preserving incident evidence.",
+      "E. Advising on DLP rules."
+    ],
+    correctAnswer: ["A", "B"]
+  },
+  {
+    id: "q23",
+    question: "Which three outputs are produced by the Data Security processes?",
+    options: [
+      "A. Documented and applied removable-media configurations.",
+      "B. Deployed PKI certificates.",
+      "C. CMDB entries for asset inventory.",
+      "D. Documented DLP rules.",
+      "E. Hardened infra components."
+    ],
+    correctAnswer: ["A", "B", "D"]
+  },
+  {
+    id: "q24",
+    question: "Which activity is part of the Application Security processes?",
+    options: [
+      "A. Inventory of applications and vulnerabilities.",
+      "B. Defining backup and restore procedures.",
+      "C. Monitoring user behaviour analytics.",
+      "D. Conducting crisis management.",
+      "E. Approving firewall rule changes."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q25",
+    question: "What are the three main core areas of Security Monitoring function concerns?",
+    options: [
+      "A. Use case management",
+      "B. Threat intelligence integration",
+      "C. SIEM management",
+      "D. Capturing KPIs and reporting",
+      "E. Log ingestion"
+    ],
+    correctAnswer: ["A","C","E"]
+  },
+  {
+    id: "q26",
+    question: "What components do SIEM systems monitor?",
+    options: [
+      "A. User access and privileges",
+      "B. Network traffic, system events, and application logs",
+      "C. Physical security controls",
+      "D. Vulnerability scan outputs",
+      "E. Incident response playbooks"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q27",
+    question: "How many levels of investigation usually exist in Security Monitoring?",
+    options: [
+      "A. Two",
+      "B. Four",
+      "C. One",
+      "D. Three",
+      "E. Five"
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q28",
+    question: "What are the use case development & lifecycle phases?",
+    options: [
+      "A. Identification & Selection; Creation, Testing & Deployment; Mobilisation, Operation & Improvement; Integration & Reporting",
+      "B. Planning; Design; Implementation; Testing",
+      "C. Discovery; Scanning; Analysis; Remediation",
+      "D. Define; Develop; Deploy; Decommission",
+      "E. Framework Mapping; Metrics; Tuning; Governance"
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q29",
+    question: "What is the output of tuning SIEM use cases?",
+    options: [
+      "A. Updated use cases",
+      "B. Dashboards and reports",
+      "C. Qualified incidents",
+      "D. Incident tickets",
+      "E. Deployed system configurations"
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q30",
+    question: "What is produced when capturing KPIs and reporting?",
+    options: [
+      "A. SIEM improvement recommendations",
+      "B. Dashboards and reports",
+      "C. Threat intelligence feeds",
+      "D. Updated incident playbooks",
+      "E. Hardened configurations"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q31",
+    question: "What is produced when liaising with vendors and evaluating SIEM platform updates?",
+    options: [
+      "A. SIEM improvement recommendations",
+      "B. Qualified alerts",
+      "C. New use case requirements",
+      "D. Incident response plans",
+      "E. Compliance metrics"
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q32",
+    question: "Which two activities are core to Use Case Management in Security Monitoring?",
+    options: [
+      "A. Defining event/alert triggers and required correlations",
+      "B. Performing lessons learned exercises",
+      "C. Identifying noise (FPs/FNs)",
+      "D. Qualifying incidents",
+      "E. Onboarding new log feeds"
+    ],
+    correctAnswer: ["A","C"]
+  },
+  {
+    id: "q33",
+    question: "What are the three basic vulnerability process steps?",
+    options: [
+      "A. Assessment",
+      "B. Identification",
+      "C. Reporting",
+      "D. Remediation",
+      "E. Monitoring"
+    ],
+    correctAnswer: ["A", "B", "D"]
+  },
+  {
+    id: "q34",
+    question: "Which information is used for qualifying identified vulnerabilities?",
+    options: [
+      "A. Remediation timeframe",
+      "B. Asset criticality",
+      "C. CVSS score",
+      "D. Regulatory requirements",
+      "E. Exploit deliverability"
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q35",
+    question: "How does the TVM team collaborate with Threat Intelligence?",
+    options: [
+      "A. Conducting joint penetration tests",
+      "B. Ingesting threat advisories into prioritisation",
+      "C. Sharing vulnerability scanning tools",
+      "D. Developing threat actor profiles",
+      "E. Writing incident reports"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q36",
+    question: "Which two elements are essential in a TVM standard?",
+    options: [
+      "A. Scan frequency and scope",
+      "B. Roles and responsibilities",
+      "C. Incident containment measures",
+      "D. Threat hunting procedures",
+      "E. SIEM use cases"
+    ],
+    correctAnswer: ["A", "B"]
+  },
+  {
+    id: "q37",
+    question: "Which system is commonly used for aggregating vulnerability scanning outputs?",
+    options: [
+      "A. Ticketing system",
+      "B. SIEM",
+      "C. GRC platform",
+      "D. CMDB",
+      "E. Antivirus console"
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q38",
+    question: "What output is produced when analysing and qualifying vulnerabilities?",
+    options: [
+      "A. Patch deployment plans",
+      "B. Qualified vulnerability reports",
+      "C. Threat intelligence feeds",
+      "D. Incident tickets",
+      "E. Remediation guidelines"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q39",
+    question: "Which ISO 27001 control objective aligns with the TVM process?",
+    options: [
+      "A. A12 – Operations Security",
+      "B. A9 – Access Control",
+      "C. A5 – Information Security Policies",
+      "D. A14 – System Acquisition",
+      "E. A7 – Human Resource Security"
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q40",
+    question: "In the TVM process, what is the first step?",
+    options: [
+      "A. Scanning the environment",
+      "B. Triage of scan results",
+      "C. Remediation of vulnerabilities",
+      "D. Reporting to stakeholders",
+      "E. Feeding back into governance"
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q41",
+    question: "What accounts should be managed by IAM?",
+    options: [
+      "A. Service accounts, privileged accounts, and general user accounts.",
+      "B. Vendor and partner service accounts only.",
+      "C. Only privileged administrative accounts.",
+      "D. Guest and contractor accounts only.",
+      "E. External customer portal accounts only."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q42",
+    question: "Name the Provisioning steps and the key pre-requisite?",
+    options: [
+      "A. Provisioning request → Identity creation → Credentials issuance → Pre-req: approved business authorisation.",
+      "B. Identity creation → Access configuration → Authorisation configuration → Pre-req: valid credentials.",
+      "C. Access configuration → Provisioning request → Credentials issuance → Pre-req: directory sync enabled.",
+      "D. Credentials issuance → Provisioning request → Identity activation → Pre-req: MFA enforced.",
+      "E. Provisioning request → Authorisation configuration → Access configuration → Pre-req: service onboarding complete."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q43",
+    question: "What measure would you take to enhance security of privileged accounts?",
+    options: [
+      "A. Require periodic recertification and implement just-in-time credential issuance.",
+      "B. Disable MFA for privileged sessions.",
+      "C. Assign permanent excessive privileges to avoid delays.",
+      "D. Store credentials in plaintext for quick access.",
+      "E. Skip audit logging to improve performance."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q44",
+    question: "What characteristics would an organisation exhibit at an advanced IAM maturity level?",
+    options: [
+      "A. Centralised IAM/PAM with SSO, well-established governance, and on-prem/cloud integration.",
+      "B. Manual onboarding, disparate directories, and high operational effort.",
+      "C. No federation, no MFA, and no governance processes.",
+      "D. Only on-prem systems managed with ad-hoc processes.",
+      "E. Outsourced IAM services with no internal oversight."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q45",
+    question: "Which single capability does Privileged Access Management (PAM) primarily provide?",
+    options: [
+      "A. Temporary credential issuance and session recording.",
+      "B. Centralised single sign-on for all employees.",
+      "C. Automated software patch deployment.",
+      "D. Network traffic inspection.",
+      "E. Vulnerability scanning."
+    ],
+    correctAnswer: "A"
+  },
+  {
+  id: "q46",
+  question: "Which two IAM system types handle different user populations?",
+  options: [
+    "A. Enterprise IAM (EIAM)",
+    "B. Customer IAM (CIAM)",
+    "C. Privileged Access Management (PAM)",
+    "D. Security Information and Event Management (SIEM)",
+    "E. Threat & Vulnerability Management (TVM)"
+  ],
+  correctAnswer: ["A","B"]
+},
+  {
+    id: "q47",
+    question: "Which three framework mappings involve IAM/PAM?",
+    options: [
+      "A. NIST Protect – IAM, PAM, access rights, resource connection",
+      "B. NIST Detect – vulnerability scanning only",
+      "C. NIST Respond – IR support",
+      "D. NIST Recover – service scope expansion",
+      "E. NIST Identify – asset discovery"
+    ],
+    correctAnswer: ["A", "C", "D"]
+  },
+  {
+    id: "q48",
+    question: "Which activity is part of the IAM “Joiners–Movers–Leavers” lifecycle?",
+    options: [
+      "A. Deprovision digital identities and remove access upon termination.",
+      "B. Conduct vulnerability scans on joiners’ devices.",
+      "C. Develop SIEM use cases for movers.",
+      "D. Perform pen tests on leavers’ accounts.",
+      "E. Integrate threat intelligence feeds for joiners."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q49",
+    question: "What are the three components that make up Threat Management?",
+    options: [
+      "A. Threat Intelligence, Threat Hunting, Advanced Threat Management",
+      "B. Threat Modelling, Incident Response, Continuous Improvement",
+      "C. Vulnerability Scanning, Asset Management, Risk Assessment",
+      "D. Security Architecture, Security Monitoring, Security Strategy",
+      "E. Governance, Risk, Compliance"
+    ],
+    correctAnswer: ["A", "E", "B"]
+  },
+  {
+    id: "q50",
+    question: "What do you need or needs to be in place for starting threat hunting?",
+    options: [
+      "A. A mature security awareness program",
+      "B. Defined threat intelligence sources and tooling",
+      "C. A fully staffed red team",
+      "D. A crisis management playbook",
+      "E. An incident recovery plan"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q51",
+    question: "What is the difference between a red and blue team?",
+    options: [
+      "A. Red teams focus on defence; blue teams focus on attack",
+      "B. Red teams simulate attackers; blue teams defend and detect",
+      "C. Red teams manage vulnerabilities; blue teams perform forensics",
+      "D. Red teams handle alerts; blue teams develop mitigation strategies",
+      "E. Red teams streamline incident response; blue teams run compliance audits"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q52",
+    question: "Which two threat intelligence types would you seek initially to understand your organisation’s risk landscape?",
+    options: [
+      "A. Operational and Tactical",
+      "B. Strategic and Tactical",
+      "C. Technical and Physical",
+      "D. Compliance and Strategic",
+      "E. Operational and Compliance"
+    ],
+    correctAnswer: ["B", "A"]
+  },
+  {
+    id: "q53",
+    question: "Which threat-modelling technique uses a structured list of attack categories like Spoofing, Tampering, and Denial of Service?",
+    options: [
+      "A. Kill Chain",
+      "B. STRIDE",
+      "C. PASTA",
+      "D. OCTAVE",
+      "E. LINDDUN"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q54",
+    question: "What is the primary output when you deploy and monitor honeypots or honeynets?",
+    options: [
+      "A. Adversary TTPs (Tactics, Techniques & Procedures)",
+      "B. SIEM dashboards",
+      "C. Compliance reports",
+      "D. Vulnerability scan results",
+      "E. Incident recovery plans"
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q55",
+    question: "Which alignment describes Threat Hunting’s place in the NIST Cybersecurity Framework?",
+    options: [
+      "A. Identify",
+      "B. Respond",
+      "C. Detect",
+      "D. Recover",
+      "E. Protect"
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q56",
+    question: "Which three activities are core to Advanced Threat Management?",
+    options: [
+      "A. Deep-dive system/application analysis",
+      "B. Performing exploit proof-of-concepts",
+      "C. Developing threat-modelling diagrams",
+      "D. Capturing adversary behaviours and designing countermeasures",
+      "E. Onboarding new threat-intelligence feeds"
+    ],
+    correctAnswer: ["A", "B", "D"]
+  },
+  {
+    id: "q57",
+    question: "What application categories could be defined?",
+    options: [
+      "A. Server-less apps, monolithic mainframe, desktop utilities.",
+      "B. Container-based apps, mobile apps, server-less apps.",
+      "C. Legacy COBOL, COTS, open-source libraries.",
+      "D. Desktop apps, server-side scripts, human-machine interfaces.",
+      "E. Mobile apps, network services, database engines."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q58",
+    question: "What security challenges would you highlight when embedding security in an Agile delivery methodology?",
+    options: [
+      "A. Lack of defined stage gates and documentation.",
+      "B. Delayed threat modelling and ad-hoc code reviews.",
+      "C. Over-reliance on pen testing and manual audits.",
+      "D. Strict sequential phase progression.",
+      "E. Inflexible CI/CD pipelines."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q59",
+    question: "Which application software testing tool would you use to identify runtime weaknesses?",
+    options: [
+      "A. Static Application Security Testing (SAST).",
+      "B. Software Composition Analysis (SCA).",
+      "C. Container Vulnerability Scanner.",
+      "D. Dynamic Application Security Testing (DAST).",
+      "E. Web Application Firewall (WAF)."
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q60",
+    question: "How can you perform Software Composition Analysis (SCA) on SaaS offerings?",
+    options: [
+      "A. Scan underlying host OS for vulnerabilities.",
+      "B. Integrate SCA APIs into the service provider’s pipeline.",
+      "C. Request dependency reports from the vendor.",
+      "D. Deploy an external DAST tool.",
+      "E. Use a Web Application Firewall."
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q61",
+    question: "Which three elements are part of an Optimised AppSec service maturation?",
+    options: [
+      "A. Consistent threat modelling.",
+      "B. Advanced SOC integration.",
+      "C. Manual code reviews.",
+      "D. Extensive automation toolchain.",
+      "E. Centralised code repository."
+    ],
+    correctAnswer: ["A", "B", "D"]
+  },
+  {
+    id: "q62",
+    question: "Which two security elements belong to the Advanced AppSec phase?",
+    options: [
+      "A. Ad-hoc code reviews.",
+      "B. SAST & SCA in CI/CD.",
+      "C. Periodic penetration testing.",
+      "D. Education & training programs.",
+      "E. Manual configuration baselines."
+    ],
+    correctAnswer: ["B", "D"]
+  },
+  {
+    id: "q63",
+    question: "Which single AppSec tool is ‘outside-in’, scanning running applications?",
+    options: [
+      "A. Dynamic Application Security Testing (DAST).",
+      "B. Static Application Security Testing (SAST).",
+      "C. Software Composition Analysis (SCA).",
+      "D. Container Vulnerability Scanner.",
+      "E. Web Application Firewall (WAF)."
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q64",
+    question: "Which activity is part of integrating security into CI/CD?",
+    options: [
+      "A. Triggering SAST on code check-in.",
+      "B. Automating build-time vulnerability scans.",
+      "C. Embedding threat models in user stories.",
+      "D. Reviewing pull requests manually.",
+      "E. Configuring WAF rules post-deployment."
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q65",
+    question: "Which Incident Response phase should playbooks be created?",
+    options: [
+      "A. Containment",
+      "B. Preparation",
+      "C. Identification",
+      "D. Eradication",
+      "E. Restoration"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q66",
+    question: "Which phase should deal comprehensively with the root causes of an incident?",
+    options: [
+      "A. Lessons Learned",
+      "B. Preparation",
+      "C. Identification",
+      "D. Eradication",
+      "E. Restoration"
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q67",
+    question: "Which two incident criticality categories would typically involve a crisis management team?",
+    options: [
+      "A. C4 – Minor incidents",
+      "B. C2 – Significant incidents",
+      "C. C3 – Moderate incidents",
+      "D. C1 – Major incidents",
+      "E. C5 – Catastrophic incidents"
+    ],
+    correctAnswer: ["B", "D"]
+  },
+  {
+    id: "q68",
+    question: "Which of the following is a common mistake made during incident response?",
+    options: [
+      "A. Failure to take clean or working backups",
+      "B. Over-documenting every step in playbooks",
+      "C. Performing too many tabletop exercises",
+      "D. Excessive reliance on automated detection",
+      "E. Immediate public disclosure of incidents"
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q69",
+    question: "Which three activities are core to the Restoration and Lessons Learned stages?",
+    options: [
+      "A. Validating integrity of restored systems",
+      "B. Performing post-mortem review and compiling recommendations",
+      "C. Identifying recovery measures in planning",
+      "D. Collaborating with IT and security to rebuild from clean backups",
+      "E. Developing new threat-hunting use cases"
+    ],
+    correctAnswer: ["A", "B", "D"]
+  },
+  {
+    id: "q70",
+    question: "Which activity is part of the Lessons Learned process?",
+    options: [
+      "A. Issuing of interjections during tabletop exercises",
+      "B. Conducting post-incident scenario simulations",
+      "C. Compiling a report with recommendations for improvement",
+      "D. Deploying new SIEM use cases",
+      "E. Triggering automated vulnerability scans"
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q71",
+    question: "Which ISO/IEC 27001 control objective aligns directly with Incident Management?",
+    options: [
+      "A. A12 – Operations Security",
+      "B. A16 – Information Security Incident Management",
+      "C. A9 – Access Control",
+      "D. A5 – Information Security Policies",
+      "E. A18 – Compliance"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q72",
+    question: "Within the NIST Cybersecurity Framework, which function best maps to Incident Management’s containment and mitigation activities?",
+    options: [
+      "A. Recover",
+      "B. Detect",
+      "C. Identify",
+      "D. Respond",
+      "E. Protect"
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q73",
+    question: "What is the primary goal of a Security Architecture practice?",
+    options: [
+      "A. To define incident response playbooks",
+      "B. To design and document the organisation’s security controls and their interactions",
+      "C. To conduct penetration testing on applications",
+      "D. To manage user access and provisioning",
+      "E. To develop employee security training materials"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q74",
+    question: "Which of the following components would you expect to find in an enterprise reference security architecture?",
+    options: [
+      "A. Business continuity runbooks",
+      "B. Network segmentation and firewall zones",
+      "C. Vulnerability scanning schedules",
+      "D. Incident ticketing workflows",
+      "E. Training curriculums"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q75",
+    question: "Which three principles underpin a robust Security Architecture?",
+    options: [
+      "A. Defence-in-depth",
+      "B. Least privilege",
+      "C. Single sign-on",
+      "D. Segregation of duties",
+      "E. Unified logging"
+    ],
+    correctAnswer: ["A", "B", "D"]
+  },
+  {
+    id: "q76",
+    question: "What activity falls under Security Strategy & Implementation?",
+    options: [
+      "A. Developing a technology roadmap to meet future security requirements",
+      "B. Monitoring network traffic for anomalies",
+      "C. Conducting daily vulnerability scans",
+      "D. Running user awareness phishing campaigns",
+      "E. Configuring endpoint antivirus policies"
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q77",
+    question: "Which two stakeholders should be engaged when defining security strategy for a new enterprise project?",
+    options: [
+      "A. Project management office (PMO)",
+      "B. External legal counsel",
+      "C. Human resources",
+      "D. Executive leadership",
+      "E. Data centre operations"
+    ],
+    correctAnswer: ["A", "D"]
+  },
+  {
+    id: "q78",
+    question: "Which ISO/IEC standard series most directly informs an organisation’s Security Architecture?",
+    options: [
+      "A. ISO/IEC 27000 series",
+      "B. ISO 9001 series",
+      "C. ISO/IEC 20000 series",
+      "D. ISO 31000 series",
+      "E. ISO 14000 series"
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q79",
+    question: "What outcome does effective Security Implementation ensure?",
+    options: [
+      "A. All systems are automatically scanned hourly",
+      "B. Security designs are deployed consistently across environments",
+      "C. Incident response teams are always on standby",
+      "D. Employees complete annual security awareness training",
+      "E. Vendors comply with SLA requirements"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q80",
+    question: "Which activity is part of translating Security Strategy into operational plans?",
+    options: [
+      "A. Defining and scheduling security project milestones",
+      "B. Writing vulnerability remediation reports",
+      "C. Performing root-cause forensic analysis",
+      "D. Onboarding new threat intelligence feeds",
+      "E. Updating antivirus signature databases"
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q81",
+    question: "Which mechanisms and means are available to get visibility and manage information security risks across an organisation?",
+    options: [
+      "A. Incident Response playbooks and crisis drills",
+      "B. Executive Board communication channels",
+      "C. Governance structures and KPIs",
+      "D. Vendor contract SLAs",
+      "E. Asset discovery and risk treatment processes"
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q82",
+    question: "What is the key purpose of risk management?",
+    options: [
+      "A. To enforce password policies",
+      "B. To document network topologies",
+      "C. To identify, articulate, and mitigate risks",
+      "D. To audit compliance controls",
+      "E. To establish remediation runbooks"
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q83",
+    question: "What is a key advantage of defining governance structures?",
+    options: [
+      "A. Reduced costs for security tooling",
+      "B. Clear decision authority and transparency",
+      "C. Automated policy enforcement",
+      "D. Enhanced encryption standards",
+      "E. Faster incident containment"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q84",
+    question: "Mean time to detection is a KPI for which metrics area?",
+    options: [
+      "A. Technical metrics",
+      "B. Managerial metrics",
+      "C. Compliance metrics",
+      "D. Operational metrics",
+      "E. Strategic metrics"
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q85",
+    question: "Which three activities are part of a robust ISMS assurance cycle?",
+    options: [
+      "A. Self assessments",
+      "B. Crisis management exercises",
+      "C. Remediation plan tracking",
+      "D. Evidenced-based evaluations",
+      "E. Annual user training"
+    ],
+    correctAnswer: ["A","C","D"]
+  },
+  {
+    id: "q86",
+    question: "Which two outputs result from the CISO’s management of major incident response?",
+    options: [
+      "A. Post-mortem report",
+      "B. Funded security roadmap",
+      "C. IR management and coordination",
+      "D. Revised governance charter",
+      "E. Crisis communication plan"
+    ],
+    correctAnswer: ["C","A"]
+  },
+  {
+    id: "q87",
+    question: "Which ISO 27001 control objective area covers Information Security Incident Management?",
+    options: [
+      "A. A5 – Information Security Policies",
+      "B. A12 – Operations Security",
+      "C. A16 – Information Security Incident Management",
+      "D. A9 – Access Control",
+      "E. A18 – Compliance"
+    ],
+    correctAnswer: "C"
+  },
+  {
+    id: "q88",
+    question: "Which single NIST CSF Protect subcategory relates to ensuring staff understand cybersecurity roles and responsibilities?",
+    options: [
+      "A. PR.AT – Awareness and Training",
+      "B. PR.PT – Protective Technology",
+      "C. PR.AC – Access Control",
+      "D. PR.DS – Data Security",
+      "E. PR.IP – Information Protection Processes"
+    ],
+    correctAnswer: "A"
+  },
+  {
+    id: "q89",
+    question: "Which responsibility falls under the Data Protection Office?",
+    options: [
+      "A. Conducting vulnerability scans",
+      "B. Configuring network segmentation rules",
+      "C. Managing endpoint antivirus deployments",
+      "D. Defining and applying data classification schemes",
+      "E. Performing digital forensics on compromised systems"
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q90",
+    question: "Which two activities are core to Physical Security within an organisation?",
+    options: [
+      "A. Designing and maintaining secure entry controls",
+      "B. Developing software change-management processes",
+      "C. Conducting facility risk assessments",
+      "D. Configuring SIEM use cases",
+      "E. Background checks on personnel"
+    ],
+    correctAnswer: ["A","E"]
+  },
+  {
+    id: "q91",
+    question: "What is a key component of Business Continuity planning?",
+    options: [
+      "A. Tuning SIEM detection rules",
+      "B. Simulating cybersecurity compromise scenarios",
+      "C. Establishing federated identity services",
+      "D. Encrypting data at rest",
+      "E. Implementing just-in-time privileged access"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q92",
+    question: "Which measure supports Failure Tolerance in business resilience?",
+    options: [
+      "A. Continuous threat hunting",
+      "B. Automated code scanning",
+      "C. Mandatory quarterly security audits",
+      "D. Redundancies in power and network",
+      "E. Centralised IAM/PAM solutions"
+    ],
+    correctAnswer: "D"
+  },
+  {
+    id: "q93",
+    question: "Which three principles underlie a Zero Trust approach?",
+    options: [
+      "A. Never trust, always verify",
+      "B. Least-privilege access",
+      "C. Perimeter-based security",
+      "D. Continuous monitoring of transactions",
+      "E. Implicit trust of internal network traffic"
+    ],
+    correctAnswer: ["A","B","D"]
+  },
+  {
+    id: "q94",
+    question: "Which of the following is an example of a GenAI “Data Poisoning” risk?",
+    options: [
+      "A. Exfiltrating user chat history",
+      "B. Corrupting the training dataset to bias model outputs",
+      "C. Overloading compute resources with large file uploads",
+      "D. Injecting malicious prompts at runtime",
+      "E. Causing the model to hallucinate through adversarial inputs"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q95",
+    question: "Which control helps mitigate GenAI “Prompt Injection” attacks?",
+    options: [
+      "A. Disabling all user file uploads",
+      "B. Implementing prompt sanitization and validation",
+      "C. Purging or encrypting chat history",
+      "D. Deploying secure isolation environments",
+      "E. Enforcing access policies and guardrails"
+    ],
+    correctAnswer: "B"
+  },
+  {
+    id: "q96",
+    question: "Which activity belongs to the overall governance approach for GenAI?",
+    options: [
+      "A. Scheduling daily SIEM report reviews",
+      "B. Registering AI use cases before deployment",
+      "C. Performing container vulnerability scans",
+      "D. Managing PKI certificate lifecycles",
+      "E. Designing application-level DAST tests"
+    ],
+    correctAnswer: "B"
+  },
+];
+
+        let selectedQuestions = [];
+    const totalQuestions = 96;
+    let currentQuestionIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let unansweredCount = 0;
+    let userResponses = new Array(totalQuestions).fill(null);
+    let timerInterval;
+    let timeRemaining = totalQuestions * 60;
+
+    const timerElement = document.getElementById('timer');
+    const questionsElement = document.getElementById('questions');
+    const resultsElement = document.getElementById('results');
+    const submitButton = document.getElementById('submitButton');
+    const progressBar = document.getElementById('progressBar');
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function startExam() {
+      selectedQuestions = shuffle(questionPool).slice(0, totalQuestions);
+      displayQuestions();
+      startTimer();
+      updateProgress(0);
+    }
+
+    function displayQuestions() {
+      questionsElement.innerHTML = '';
+      selectedQuestions.forEach((q, index) => {
+        const inputType = (Array.isArray(q.correctAnswer) && q.correctAnswer.length > 1) ? 'checkbox' : 'radio';
+        const correctAnswers = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
+
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-container';
+        // Attach correct answers for delayed feedback
+        questionDiv.setAttribute('data-correct', JSON.stringify(correctAnswers));
+        if (index === 0) questionDiv.classList.add('active');
+
+        questionDiv.innerHTML = `
+          <h3>Question ${index + 1}: ${q.question}</h3>
+          ${q.options.map((opt, i) => {
+            const optVal = String.fromCharCode(65 + i);
+            return `
+              <label data-index="${index}" data-value="${optVal}">
+                <input type="${inputType}" name="q${index}${inputType === 'checkbox' ? '[]' : ''}" value="${optVal}">
+                ${opt}
+              </label>
+            `;
+          }).join('')}
+        `;
+
+        questionsElement.appendChild(questionDiv);
+
+        setTimeout(() => {
+          const inputs = questionDiv.querySelectorAll('input');
+          const labels = questionDiv.querySelectorAll('label');
+
+          inputs.forEach(input => {
+            input.addEventListener('change', (e) => {
+              const selectedVal = e.target.value;
+              const label = e.target.parentElement;
+
+              if (inputType === 'radio') {
+                inputs.forEach(inp => (inp.disabled = true));
+                userResponses[index] = [selectedVal];
+
+                if (correctAnswers.includes(selectedVal)) {
+                  label.classList.add('correct');
+                  label.innerHTML += ' <span style="color: green;">✔</span>';
+                } else {
+                  label.classList.add('wrong');
+                  labels.forEach(lbl => {
+                    const val = lbl.getAttribute('data-value');
+                    if (correctAnswers.includes(val)) {
+                      lbl.classList.add('correct');
+                      if (!lbl.innerHTML.includes('✔')) {
+                        lbl.innerHTML += ' <span style="color: green;">✔ (Correct)</span>';
+                      }
+                    }
+                  });
+                  if (monster) {
+                    monster.classList.add('show');
+                    setTimeout(() => monster.classList.remove('show'), 6000);
+                  }
+                }
+
+              } else if (inputType === 'checkbox') {
+                e.target.disabled = true;
+                if (!userResponses[index]) userResponses[index] = [];
+                userResponses[index].push(selectedVal);
+
+                const selectedCount = Array.from(inputs).filter(inp => inp.checked).length;
+                if (selectedCount === correctAnswers.length) {
+                  inputs.forEach(inp => (inp.disabled = true));
+                  labels.forEach(lbl => {
+                    const val = lbl.getAttribute('data-value');
+                    const chk = lbl.querySelector('input');
+                    if (chk.checked) {
+                      if (correctAnswers.includes(val)) {
+                        lbl.classList.add('correct');
+                        lbl.innerHTML += ' <span style="color: green;">✔</span>';
+                      } else {
+                        lbl.classList.add('wrong');
+                        if (monster) {
+                          monster.classList.add('show');
+                          setTimeout(() => monster.classList.remove('show'), 6000);
+                        }
+                      }
+                    } else {
+                      if (correctAnswers.includes(val)) {
+                        lbl.classList.add('correct');
+                        if (!lbl.innerHTML.includes('(Correct)')) {
+                          lbl.innerHTML += ' <span style="color: green;">(Correct)</span>';
+                        }
+                      }
+                    }
+                  });
+                }
+              }
+            });
+          });
+        }, 100);
+      });
+
+      submitButton.style.display = 'block';
+    }
+
+    function showQuestion(index) {
+      const active = document.querySelector('.question-container.active');
+      if (active) active.classList.remove('active');
+      const newActive = document.querySelectorAll('.question-container')[index];
+      if (newActive) newActive.classList.add('active');
+      currentQuestionIndex = index;
+      updateProgress(index);
+    }
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          submitExam();
+        } else {
+          timeRemaining--;
+          const minutes = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+          const seconds = (timeRemaining % 60).toString().padStart(2, '0');
+          timerElement.textContent = `Time Remaining: ${minutes}:${seconds}`;
+        }
+      }, 1000);
+    }
+
+    function updateProgress(index) {
+      const fraction = ((index + 1) / totalQuestions) * 100;
+      progressBar.style.width = fraction.toFixed(1) + '%';
+    }
+
+    function submitExam() {
+      clearInterval(timerInterval);
+      correctCount = 0;
+      wrongCount = 0;
+      unansweredCount = 0;
+
+      selectedQuestions.forEach((q, index) => {
+        const userAnswer = userResponses[index] || [];
+        const correctAnswers = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
+
+        if (userAnswer.length === 0) {
+          unansweredCount++;
+      const questionLabels = document.querySelectorAll(`.question-container:nth-of-type(${index + 1}) label`);
+      questionLabels.forEach(label => {
+        const val = label.getAttribute('data-value');
+        if (correctAnswers.includes(val)) {
+          label.classList.add('skipped-correct');
+        } else {
+          label.classList.add('skipped-wrong');
+        }
+      });
+    
+        } else if (JSON.stringify(userAnswer.sort()) === JSON.stringify(correctAnswers.sort())) {
+          correctCount++;
+        } else {
+          wrongCount++;
+        }
+      });
+
+      displayResults();
+      buildReview();
+    }
+
+    function displayResults() {
+  const flagWrapper = document.getElementById('flagControlWrapper');
+  const flagBtn = document.getElementById('flagButton');
+  if (flagWrapper) flagWrapper.style.display = 'none';
+  if (flagBtn) flagBtn.style.display = 'none';
+      // hide Next/Previous buttons on results page
+      document.querySelectorAll('button.btn-next, button.btn-prev').forEach(btn => btn.style.display = 'none');
+      questionsElement.style.display = 'none';
+      submitButton.style.display = 'none';
+      resultsElement.style.display = 'block';
+
+      document.getElementById('totalQuestions').textContent = totalQuestions;
+      document.getElementById('correctAnswers').textContent = correctCount;
+      document.getElementById('wrongAnswers').textContent = wrongCount;
+      document.getElementById('unansweredQuestions').textContent = unansweredCount;
+      document.getElementById('percentage').textContent = ((correctCount / totalQuestions) * 100).toFixed(2);
+    }
+
+    function resetExam() {
+      location.reload();
+    }
+
+    document.getElementById('examForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitExam();
+    });
+
+    startExam();
+  
+    function buildReview() {
+      const reviewContainer = document.createElement('div');
+      reviewContainer.className = 'review-container';
+      const header = document.createElement('div');
+      header.className = 'review-header';
+      header.textContent = 'Review Your Answers';
+      reviewContainer.appendChild(header);
+
+      selectedQuestions.forEach((q, idx) => {
+        const userAns = userResponses[idx] || [];
+        const correctAns = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
+
+        const card = document.createElement('div');
+        card.className = 'review-card';
+
+        const qDiv = document.createElement('div');
+        qDiv.className = 'review-question';
+        qDiv.textContent = `Q${idx+1}: ${q.question}`;
+        card.appendChild(qDiv);
+
+        const ul = document.createElement('ul');
+        ul.className = 'review-options';
+        q.options.forEach(opt => {
+          const letter = opt.charAt(0);
+          const li = document.createElement('li');
+          li.textContent = opt;
+          if (userAns.length === 0) {
+            if (correctAns.includes(letter)) li.className = 'unanswered';
+          } else if (correctAns.includes(letter)) {
+            li.className = 'correct';
+          } else if (userAns.includes(letter)) {
+            li.className = 'wrong';
+          }
+          ul.appendChild(li);
+        });
+        card.appendChild(ul);
+
+        reviewContainer.appendChild(card);
+      });
+
+      resultsElement.after(reviewContainer);
+    }
+
+function createNavigator() {
+  const navigator = document.getElementById("questionNavigator");
+  navigator.innerHTML = "";
+  for (let i = 0; i < totalQuestions; i++) {
+    const box = document.createElement("div");
+    box.className = "nav-box";
+    box.textContent = i + 1;
+    box.addEventListener("click", () => showQuestion(i));
+    navigator.appendChild(box);
+  }
+}
+
+function updateNavigator() {
+  const boxes = document.querySelectorAll(".nav-box");
+  boxes.forEach((box, index) => {
+    box.classList.remove("active", "correct", "wrong", "skipped");
+
+    if (index === currentQuestionIndex) {
+      box.classList.add("active");
+    }
+
+    const answer = userResponses[index];
+    if (!answer || answer.length === 0) {
+      box.classList.add("skipped");
+    } else {
+      const correctAnswers = Array.isArray(selectedQuestions[index].correctAnswer) ?
+                              selectedQuestions[index].correctAnswer : [selectedQuestions[index].correctAnswer];
+      const isCorrect = answer.length === correctAnswers.length &&
+                        answer.every(val => correctAnswers.includes(val));
+      box.classList.add(isCorrect ? "correct" : "wrong");
+    }
+  });
+}
+
+const originalShowQuestion = showQuestion;
+showQuestion = function(index) {
+  originalShowQuestion(index);
+  updateNavigator();
+};
+
+window.addEventListener("load", () => {
+  createNavigator();
+  updateNavigator();
+});
+
+function showWrongQuestions() {
+  const reviewCards = document.querySelectorAll('.review-card');
+  reviewCards.forEach(card => {
+    const wrong = card.querySelector('.wrong');
+    if (wrong) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+function hideNavigationButtons() {
+  const nav = document.getElementById('examNavButtons');
+  if (nav) nav.style.display = 'none';
+}
+function showNavigationButtons() {
+  const nav = document.getElementById('examNavButtons');
+  if (nav) nav.style.display = 'block';
+}
+
+
+let flaggedQuestions = new Set();
+
+function toggleFlag(index) {
+  if (flaggedQuestions.has(index)) {
+    flaggedQuestions.delete(index);
+  } else {
+    flaggedQuestions.add(index);
+  }
+  updateNavigator();
+}
+
+function createNavigator() {
+  const navigator = document.getElementById("questionNavigator");
+  navigator.innerHTML = "";
+  for (let i = 0; i < totalQuestions; i++) {
+    const box = document.createElement("div");
+    box.className = "nav-box";
+    box.textContent = i + 1;
+    
+    box.addEventListener("click", () => {
+      showQuestion(i);
+    });
+
+    box.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      toggleFlag(i);
+    });
+
+    navigator.appendChild(box);
+  }
+}
+
+function updateNavigator() {
+  const boxes = document.querySelectorAll(".nav-box");
+  boxes.forEach((box, index) => {
+    box.classList.remove("active", "correct", "wrong", "skipped", "flagged");
+
+    if (index === currentQuestionIndex) {
+      box.classList.add("active");
+    }
+
+    const answer = userResponses[index];
+    if (flaggedQuestions.has(index)) {
+      box.classList.add("flagged");
+      box.textContent = "?";
+    } else if (!answer || answer.length === 0) {
+      box.classList.add("skipped");
+      box.textContent = index + 1;
+    } else {
+      const correctAnswers = Array.isArray(selectedQuestions[index].correctAnswer) ?
+                              selectedQuestions[index].correctAnswer : [selectedQuestions[index].correctAnswer];
+      const isCorrect = answer.length === correctAnswers.length &&
+                        answer.every(val => correctAnswers.includes(val));
+      box.classList.add(isCorrect ? "correct" : "wrong");
+      box.textContent = index + 1;
+    }
+  });
+}
+
+function toggleCurrentFlag() {
+  toggleFlag(currentQuestionIndex);
+}
+
+let flaggedOnlyMode = false;
+let flaggedQuestionIndices = [];
+let flaggedPosition = 0;
+
+function showFlaggedQuestions() {
+  flaggedOnlyMode = true;
+  flaggedQuestionIndices = [];
+
+  const navBoxes = document.querySelectorAll('.nav-box');
+  navBoxes.forEach((box, index) => {
+    if (box.classList.contains('flagged')) {
+      flaggedQuestionIndices.push(index);
+    }
+  });
+
+  if (flaggedQuestionIndices.length > 0) {
+    flaggedPosition = 0;
+    currentQuestionIndex = flaggedQuestionIndices[flaggedPosition];
+    showQuestion(currentQuestionIndex);
+    document.getElementById('flaggedControls').style.display = 'inline-block';
+    document.getElementById('flaggedModeBanner').style.display = 'block';
+  } else {
+    alert("No questions have been flagged.");
+    document.getElementById('flaggedControls').style.display = 'none';
+    document.getElementById('flaggedModeBanner').style.display = 'none';
+  }
+}
+
+function showNextFlagged() {
+  if (flaggedPosition < flaggedQuestionIndices.length - 1) {
+    flaggedPosition++;
+    showQuestion(flaggedQuestionIndices[flaggedPosition]);
+  } else {
+    alert("This is the last flagged question.");
+  }
+}
+
+function showPrevFlagged() {
+  if (flaggedPosition > 0) {
+    flaggedPosition--;
+    showQuestion(flaggedQuestionIndices[flaggedPosition]);
+  } else {
+    alert("This is the first flagged question.");
+  }
+}
+
+function exitFlaggedMode() {
+  flaggedOnlyMode = false;
+  flaggedQuestionIndices = [];
+  flaggedPosition = 0;
+  showQuestion(currentQuestionIndex);
+  document.getElementById('flaggedControls').style.display = 'none';
+  document.getElementById('flaggedModeBanner').style.display = 'none';
+}
+</script>
+<div id="questionNavigator"></div>
+<!-- Flagged question controls -->
+<div id="flaggedNavContainer" style="margin-top: 96px; text-align: center;">
+<button class="btn-next" onclick="showFlaggedQuestions()">
+    🏴 Show Flagged Questions
+  </button>
+<div id="flaggedControls" style="display: none; margin-top: 10px;">
+<button onclick="showPrevFlagged()" style="background-color: #007bff; color: white; padding: 8px 16px; border-radius: 6px; margin-right: 10px;">⬅️ Previous Flagged</button>
+<button onclick="showNextFlagged()" style="background-color: #007bff; color: white; padding: 8px 16px; border-radius: 6px; margin-right: 10px;">Next Flagged ➡️</button>
+<button onclick="exitFlaggedMode()" style="background-color: gray; color: white; padding: 8px 16px; border-radius: 6px;">🔙 Return to Full Exam</button>
+</div>
+<div id="flaggedModeBanner" style="display: none; margin-top: 20px; background-color: #3a3a3a; color: orange; padding: 12px 20px; border: 2px dashed orange; border-radius: 6px; font-size: 16px; font-weight: bold;">
+    🚩 You are now reviewing <span style="text-decoration: underline;">flagged questions only</span>.
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.question-container').forEach(questionEl => {
+    const correctAnswers = JSON.parse(questionEl.getAttribute('data-correct'));
+    const inputs = questionEl.querySelectorAll('input');
+    const labels = questionEl.querySelectorAll('label');
+    inputs.forEach(input => input.addEventListener('change', handleAnswerClick));
+    
+    function handleAnswerClick(e) {
+      const sel = e.target;
+      const type = sel.type;
+      if (type === 'radio') {
+        // Immediate grading for single-select
+        const val = sel.value;
+        labels.forEach(l => { l.classList.remove('correct','wrong'); l.querySelectorAll('.feedback').forEach(s=>s.remove()); });
+        inputs.forEach(i => i.disabled = true);
+        if (correctAnswers.includes(val)) {
+          const lbl = sel.closest('label');
+          lbl.classList.add('correct');
+          lbl.insertAdjacentHTML('beforeend',' <span class="feedback correct">✔</span>');
+        } else {
+          const lbl = sel.closest('label');
+          lbl.classList.add('wrong');
+          lbl.insertAdjacentHTML('beforeend',' <span class="feedback wrong">✖</span>');
+          labels.forEach(l => {
+            const inp = l.querySelector('input');
+            if (inp && correctAnswers.includes(inp.value)) {
+              l.classList.add('correct');
+              l.insertAdjacentHTML('beforeend',' <span class="feedback correct">✔</span>');
+            }
+          });
+        }
+      } else if (type === 'checkbox') {
+        // Delayed grading: wait until user selects N options
+        const checkedInputs = Array.from(questionEl.querySelectorAll('input[type="checkbox"]')).filter(i => i.checked);
+        if (checkedInputs.length < correctAnswers.length) {
+          return; // don't grade yet
+        }
+        // Once N selected, disable all and grade
+        questionEl.querySelectorAll('input[type="checkbox"]').forEach(i => i.disabled = true);
+        labels.forEach(l => {
+          const inp = l.querySelector('input');
+          const val = inp.value;
+          const hasFeedback = l.querySelector('.feedback');
+          if (inp.checked) {
+            if (correctAnswers.includes(val)) {
+              l.classList.add('correct');
+              if (!hasFeedback) l.insertAdjacentHTML('beforeend',' <span class="feedback correct">✔</span>');
+            } else {
+              l.classList.add('wrong');
+              if (!hasFeedback) l.insertAdjacentHTML('beforeend',' <span class="feedback wrong">✖</span>');
+            }
+          } else {
+            if (correctAnswers.includes(val)) {
+              l.classList.add('correct');
+              if (!hasFeedback) l.insertAdjacentHTML('beforeend',' <span class="feedback correct">✔</span>');
+            }
+          }
+        });
+      }
+    }
+  });
+});
+</script>
+<script>
+// Unified feedback handler for radio and checkboxes
+document.querySelectorAll('.question-container').forEach(questionEl => {
+  const correctAnswers = JSON.parse(questionEl.getAttribute('data-correct'));
+  const inputs  = questionEl.querySelectorAll('input');
+  const labels  = questionEl.querySelectorAll('label');
+
+  inputs.forEach(input => input.addEventListener('change', handleAnswer));
+
+  function handleAnswer(e) {
+    const sel  = e.target;
+    const type = sel.type;
+
+    // Immediate grading for single-select
+    if (type === 'radio') {
+      labels.forEach(l => {
+        l.classList.remove('correct','wrong');
+        l.querySelectorAll('.feedback').forEach(f => f.remove());
+      });
+      inputs.forEach(i => i.disabled = true);
+      if (correctAnswers.includes(sel.value)) {
+        const lbl = sel.closest('label');
+        lbl.classList.add('correct');
+        lbl.insertAdjacentHTML('beforeend',' <span class="feedback correct">✔</span>');
+      } else {
+        const lbl = sel.closest('label');
+        lbl.classList.add('wrong');
+        lbl.insertAdjacentHTML('beforeend',' <span class="feedback wrong">✖</span>');
+        labels.forEach(l => {
+          const inp = l.querySelector('input');
+          if (inp && correctAnswers.includes(inp.value)) {
+            l.classList.add('correct');
+            l.insertAdjacentHTML('beforeend',' <span class="feedback correct">✔</span>');
+          }
+        });
+      }
+    }
+    // Delayed grading for multi-select
+    else if (type === 'checkbox') {
+      const checked = Array.from(questionEl.querySelectorAll('input[type="checkbox"]')).filter(i => i.checked);
+      if (checked.length < correctAnswers.length) return;
+      questionEl.querySelectorAll('input[type="checkbox"]').forEach(i => i.disabled = true);
+      labels.forEach(l => {
+        const inp = l.querySelector('input');
+        const val = inp.value;
+        if (l.querySelector('.feedback')) return;
+        if (inp.checked) {
+          if (correctAnswers.includes(val)) {
+            l.classList.add('correct');
+            l.insertAdjacentHTML('beforeend',' <span class="feedback correct">✔</span>');
+          } else {
+            l.classList.add('wrong');
+            l.insertAdjacentHTML('beforeend',' <span class="feedback wrong">✖</span>');
+          }
+        } else {
+          if (correctAnswers.includes(val)) {
+            l.classList.add('correct');
+            l.insertAdjacentHTML('beforeend',' <span class="feedback correct">✔</span>');
+          }
+        }
+      });
+    }
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Fundamentals Exam</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #0056b3, #87CEEB);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .question-container {
+            display: none;
+        }
+        .question-container.active {
+            display: block;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px 0 0;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        .btn-next, .btn-prev {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-submit, .btn-reset {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-next:hover, .btn-prev:hover, .btn-submit:hover, .btn-reset:hover {
+            opacity: 0.9;
+        }
+        .timer {
+            text-align: right;
+            font-size: 18px;
+            color: red;
+            margin-bottom: 20px;
+        }
+        .results {
+            text-align: center;
+            display: none;
+        }
+        .motivational {
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Security Fundamentals Exam</h1>
+        <div class="timer" id="timer">Time Remaining: 54:00</div>
+        <form id="examForm">
+            <div id="questions"></div>
+            <div class="results" id="results">
+                <h2>Exam Results</h2>
+                <p>Total Questions: <span id="totalQuestions"></span></p>
+                <p>Correct Answers: <span id="correctAnswers"></span></p>
+                <p>Wrong Answers: <span id="wrongAnswers"></span></p>
+                <p>Unanswered: <span id="unansweredQuestions"></span></p>
+                <p>Percentage: <span id="percentage"></span>%</p>
+                <p>Your Name: <span id="userNameOutput"></span></p>
+                <button type="button" class="btn-reset" onclick="resetExam()">Restart Exam</button>
+            </div>
+            <button type="submit" class="btn-submit" id="submitButton" style="display: none;">Submit Exam</button>
+        </form>
+    </div>
+
+    <script>
+        const questionPool = [
+            {
+    id: 'q1',
+    question: 'You are called by a person identifying as IT support who wants to follow up on an account compromise. You are asked to verify your user ID and password to validate the compromise. What specific type of attack is attempted?',
+    options: [
+        'A. Spear phishing',
+        'B. Vishing',
+        'C. Phishing',
+        'D. Replication'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q2',
+    question: 'Which of the following are specifically used to spread influence, alter perceptions, and sway people toward a position favoured by those spreading it?',
+    options: [
+        'A. Identity fraud, invoice scams, credential harvesting',
+        'B. Hoaxes, eliciting information, urgency',
+        'C. Influence campaigns, social media, hybrid warfare',
+        'D. Authority, intimidation, consensus'
+    ],
+    correctAnswer: ['C']
+},
+{
+    id: 'q3',
+    question: 'Several computers in your organization are displaying a red screen with the message "Your files have been encrypted. You have to pay 100 bitcoin to recover them." These desktops have most likely been affected by what type of malware?',
+    options: [
+        'A. Spyware',
+        'B. Spraying',
+        'C. Ransomware',
+        'D. Crypto-malware'
+    ],
+    correctAnswer: ['C']
+},
+{
+    id: 'q4',
+    question: 'When an attacker captures network traffic and retransmits it at a later time, what type of attack are they attempting?',
+    options: [
+        'A. Denial-of-service attack',
+        'B. Replay attack',
+        'C. Bluejacking attack',
+        'D. Man in the middle attack'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q5',
+    question: 'You’re testing a web application and type a number in a text field. The application returns an error message containing filenames and the path of the application. This is an example of which of the following?',
+    options: [
+        'A. Resource exhaustion',
+        'B. Improper error handling',
+        'C. Generic error message',
+        'D. Common misconfiguration'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q6',
+    question: 'While examining a laptop infected with malware, you notice the malware loads on startup and also loads a file called apputilities.dll each time Microsoft Word is opened. This is an example of which of the following?',
+    options: [
+        'A. Race condition',
+        'B. DLL injection',
+        'C. System infection',
+        'D. Memory overflow'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q7',
+    question: 'A user reports "odd" certificate warnings on her web browser this morning whenever she visits Google. Looking at her browser, you see these certificate warnings. Looking at the network traffic, you notice that all HTTP and HTTPS requests from that system are being routed to the same IP regardless of destination. Which of the following attack types are you seeing in this case?',
+    options: [
+        'A. Evil twin',
+        'B. Man in the middle',
+        'C. Disassociation',
+        'D. MAC cloning'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q8',
+    question: 'All of the wireless users on the third floor of your building are reporting issues with the network. Every 15 minutes, their devices disconnect from the network. Within a minute or so they are able to reconnect. What type of attack is most likely underway in this situation?',
+    options: [
+        'A. Evil twin',
+        'B. Jamming',
+        'C. Domain hijacking',
+        'D. Disassociation'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q9',
+    question: 'Proper use of separation of duties with respect to privileged users on your systems is a defense against which type of hacker?',
+    options: [
+        'A. Nation-state actor',
+        'B. Insider',
+        'C. Criminal syndicate',
+        'D. All of the above'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q10',
+    question: 'You use a "golden disk" to provision new machines from your vendors. As part of the incident response, you have discovered that the source of the malware you are seeing comes from this golden disk. This is an example of what vector?',
+    options: [
+        'A. Insider',
+        'B. Direct access',
+        'C. Removable media',
+        'D. Supply chain'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q11',
+    question: 'Understanding how an attacker operates so that you can develop a defensive posture is done through the use of which of the following?',
+    options: [
+        'A. Predictive analysis',
+        'B. TTPs',
+        'C. Threat maps',
+        'D. Automated Indicator Sharing'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q12',
+    question: 'Common sources of vulnerability issues for systems include which of the following? (Choose all that apply.)',
+    options: [
+        'A. Weak patch management',
+        'B. Data loss',
+        'C. Identity theft',
+        'D. Weak configurations'
+    ],
+    correctAnswer: ['A', 'D']
+},
+{
+    id: 'q13',
+    question: 'What type of threat exploits system and application vulnerabilities that are unknown to software developers and even anti-malware manufacturers?',
+    options: [
+        'A. An on-premises attack',
+        'B. A zero-day attack',
+        'C. A cloud-based attack',
+        'D. A legacy platform attack'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q14',
+    question: 'Who assumes the risk associated with a system or product after it has entered EOL status?',
+    options: [
+        'A. The original manufacturer',
+        'B. The vendor',
+        'C. The organization',
+        'D. The supply chain manager'
+    ],
+    correctAnswer: ['C']
+},
+{
+    id: 'q15',
+    question: 'Anti-malware software fails to detect a ransomware attack that is supposed to be within its capabilities of detecting. What is this an example of?',
+    options: [
+        'A. False negative',
+        'B. False positive',
+        'C. Measurement error',
+        'D. Analysis failure'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q16',
+    question: 'Which of the following is NOT associated typically with SIEM processes?',
+    options: [
+        'A. Applications',
+        'B. Syslog',
+        'C. Log capture',
+        'D. Log aggregation'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q17',
+    question: 'Which of the following are NOT typically scanned during a vulnerability scan?',
+    options: [
+        'A. End users',
+        'B. Network',
+        'C. Applications',
+        'D. Web applications'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q18',
+    question: 'What is the most important first step in a penetration test?',
+    options: [
+        'A. OSINT',
+        'B. Rules of engagement',
+        'C. Reconnaissance',
+        'D. Privilege escalation'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q19',
+    question: 'Which of the following is not a state of data in the enterprise?',
+    options: [
+        'A. At rest',
+        'B. In storage',
+        'C. In processing',
+        'D. In transit/motion'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q20',
+    question: 'Which of the following can provide complete traceability to an original transaction without revealing any personal information if disclosed to an outside party?',
+    options: [
+        'A. Tokenization',
+        'B. Data sovereignty',
+        'C. Rights management',
+        'D. Baseline configuration'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q21',
+    question: 'A system that is ready for immediate use in the event of an outage is called what?',
+    options: [
+        'A. Standby system',
+        'B. Disaster recovery site',
+        'C. Backup site',
+        'D. Hot site'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q22',
+    question: 'Which of the following is important to consider when specifically examining configuration management?',
+    options: [
+        'A. Data loss prevention',
+        'B. Standard naming conventions',
+        'C. Rights management',
+        'D. Hashing'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q23',
+    question: 'What is masking?',
+    options: [
+        'A. The use of stand-in data to replace real-time data',
+        'B. The marking of regions where data is not allowed by policy',
+        'C. The use of backups to preserve data during disruptive events',
+        'D. Redacting portions of data using a covering symbol such as * or x'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q24',
+    question: 'How does a hypervisor enable multiple guest operating systems to run concurrently on a host computer?',
+    options: [
+        'A. Via a specialized driver package',
+        'B. By abstracting the hardware from the guest operating system',
+        'C. By providing specific virtual hardware to each guest OS',
+        'D. By hiding the underlying Linux operating system'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q25',
+    question: 'Your new application has multiple small processes that provide services to the network. You want to make this application run more efficiently by virtualizing it. What is the best approach for virtualization of this application?',
+    options: [
+        'A. Type II hypervisor',
+        'B. Linux KVM',
+        'C. Containerisation',
+        'D. Type I hypervisor'
+    ],
+    correctAnswer: ['C']
+},
+{
+    id: 'q26',
+    question: 'Problems in which phase will specifically stop continuous deployment but not necessarily continuous delivery?',
+    options: [
+        'A. Continuous integration',
+        'B. Continuous monitoring',
+        'C. Continuous validation',
+        'D. Continuous development'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q27',
+    question: 'Which of the following algorithms uses a secret key with a current timestamp to generate a one-time password?',
+    options: [
+        'A. Hash-based Message Authentication Code',
+        'B. Date-Hashed Message Authorization Password',
+        'C. Time-based One-Time Password',
+        'D. Single sign-on'
+    ],
+    correctAnswer: ['C']
+},
+{
+    id: 'q28',
+    question: 'To ensure customers entering credentials in your website are valid and not someone with stolen credentials, your team is tasked with designing multifactor authentication. Which of the following would NOT be a good choice?',
+    options: [
+        'A. Static code',
+        'B. Phone call',
+        'C. Authentication application',
+        'D. Short Message Service'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q29',
+    question: 'Which backup strategy includes only the files and software that have changed since the last full backup?',
+    options: [
+        'A. Incremental',
+        'B. Full',
+        'C. Snapshot',
+        'D. Differential'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q30',
+    question: 'When discussing location for storage of backups, which of the following statements are true? (Choose all that apply.)',
+    options: [
+        'A. The most recent copy should be stored offsite, as it is the one that is most current and is thus the most valuable.',
+        'B. Offsite storage is generally not necessary, except in cases where the possibility of a break-in at the main facility is high.',
+        'C. Offsite storage is a good idea so that you don’t lose your backup to the same event that caused you to lose your operational data and thus need the backup.',
+        'D. The most recent copy can be stored locally, as it is the most likely to be needed, while other copies can be kept at other locations.'
+    ],
+    correctAnswer: ['A', 'C', 'D']
+},
+{
+    id: 'q31',
+    question: 'Based on what you’ve seen, you suspect the animated screensaver is really what type of malware?',
+    options: [
+        'A. A worm',
+        'B. A trojan',
+        'C. Ransomware',
+        'D. Spyware'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q32',
+    question: 'A user is experiencing frequent pop-up ads regardless of the websites visited. What type of attack does this sound like?',
+    options: [
+        'A. A potentially unwanted program (PUP)',
+        'B. Ransomware',
+        'C. Worm',
+        'D. Virus'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q33',
+    question: 'An online retail site is crashing due to extremely high traffic from multiple IPs worldwide. What type of attack is this?',
+    options: [
+        'A. Memory leak',
+        'B. DDoS',
+        'C. URL redirection',
+        'D. Domain hijacking'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q34',
+    question: 'Which solution is most comprehensive for managing a variety of endpoints in an enterprise?',
+    options: [
+        'A. COPE-based solutions',
+        'B. MAM solutions',
+        'C. MDM solutions',
+        'D. UEM solutions'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q35',
+    question: 'What is the single most effective method to counter potential social engineering attacks?',
+    options: [
+        'A. An active security awareness program',
+        'B. Separate physical access controls for each department',
+        'C. Frequent testing of physical security procedures and telephone practices',
+        'D. Implementing access control cards and security badges'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q36',
+    question: 'Password policies are needed for all of the following except?',
+    options: [
+        'A. Password complexity',
+        'B. Password history',
+        'C. Password reuse',
+        'D. Password origin'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q37',
+    question: 'Proper use of separation of duties with privileged users defends against which type of hacker?',
+    options: [
+        'A. Criminal',
+        'B. Insider',
+        'C. Nation state actor',
+        'D. All of the above'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q38',
+    question: 'What is the best solution to prevent graffiti tagging and loitering despite chain-link fencing?',
+    options: [
+        'A. “Beware guard dogs” signage',
+        'B. More guard stations',
+        'C. Additional external lighting',
+        'D. Changing the chain-link fencing to anti-scale fencing'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q39',
+    question: 'Testing systems using the top 100 commonly used passwords is an example of what?',
+    options: [
+        'A. Dictionary attack',
+        'B. Password spraying',
+        'C. Rainbow tables',
+        'D. Online attack'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q40',
+    question: 'Understanding how an attacker operates to develop a defensive posture involves which of the following?',
+    options: [
+        'A. Machine learning',
+        'B. TTPs',
+        'C. Threat modelling',
+        'D. Automated indicator sharing'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q41',
+    question: 'Users connecting to an unrecognized access point are victims of what type of attack?',
+    options: [
+        'A. Rogue AP',
+        'B. Bluejacking',
+        'C. Disassociation',
+        'D. Default configuration'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q42',
+    question: 'High CPU utilization due to a process communicating with external IPs on UDP port 43232 indicates what type of malware?',
+    options: [
+        'A. Rainbow tables',
+        'B. Crypto-malware',
+        'C. Language fuzzing',
+        'D. Multi-pronged'
+    ],
+    correctAnswer: ['B']
+},
+{
+    id: 'q43',
+    question: 'What is the best way to get plaintext from a hash value?',
+    options: [
+        'A. Use linear crypto analysis',
+        'B. Use crypto cracker software with reverse hash function',
+        'C. You can’t',
+        'D. Use homomorphic decryption'
+    ],
+    correctAnswer: ['C']
+},
+{
+    id: 'q44',
+    question: 'What is the purpose of HTTPS?',
+    options: [
+        'A. To transfer large files securely',
+        'B. To allow enumeration and monitoring of network resources',
+        'C. To use SSL or TLS to encrypt HTTP traffic',
+        'D. To implement Single Sign-On'
+    ],
+    correctAnswer: ['C']
+},
+{
+    id: 'q45',
+    question: 'What differentiates a digitally signed message from an encrypted message?',
+    options: [
+        'A. Digital signatures ensure integrity and non-repudiation',
+        'B. Digitally signed messages use stronger encryption',
+        'C. Encrypted messages only use symmetric encryption',
+        'D. Encrypted messages only use asymmetric encryption'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q46',
+    question: 'When a pen tester uses OSINT, the environment changes from ______ to ______.',
+    options: [
+        'A. Closed to open',
+        'B. Unknown to known',
+        'C. Secure to vulnerable',
+        'D. Unknown to partially known'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q47',
+    question: 'What is it called when an attacker moves to a new machine and rescans the network?',
+    options: [
+        'A. Lateral movement',
+        'B. Privilege escalation',
+        'C. Persistence',
+        'D. Pivoting'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q48',
+    question: 'Which of the following are characteristics of remote-access trojans?',
+    options: [
+        'A. Can be deployed through worms',
+        'B. Allow attackers to connect remotely',
+        'C. Enable modification of files and settings',
+        'D. All of the above'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q49',
+    question: 'What are specifically used to spread influence and sway public perception?',
+    options: [
+        'A. Identity fraud, invoice scams, credential harvesting',
+        'B. Hoaxes, eliciting information, urgency',
+        'C. Influence campaigns, social media, hybrid warfare',
+        'D. Authority, intimidation, consensus'
+    ],
+    correctAnswer: ['C']
+},
+{
+    id: 'q50',
+    question: 'Which of the following statements concerning elasticity and scalability are true?',
+    options: [
+        'A. Scalability requires elasticity',
+        'B. Elasticity involves enabling software to use more processors to do more work',
+        'C. Scalability can be vertically as well as horizontally',
+        'D. All of the above'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q51',
+    question: 'Which phase of the incident response process occurs before an actual incident?',
+    options: [
+        'A. Discovery',
+        'B. Containment',
+        'C. Recovery',
+        'D. Preparation'
+    ],
+    correctAnswer: ['D']
+},
+{
+    id: 'q52',
+    question: 'Which process allows log files to be enriched with additional data to provide context?',
+    options: [
+        'A. Log aggregation',
+        'B. Log collectors',
+        'C. Log reviews',
+        'D. Syslog'
+    ],
+    correctAnswer: ['A']
+},
+{
+    id: 'q53',
+    question: 'Who is responsible for determining what data is needed by the enterprise?',
+    options: [
+        'A. Data steward',
+        'B. Data handler',
+        'C. Data owner',
+        'D. Data custodian'
+    ],
+    correctAnswer: ['C']
+},
+{
+    id: 'q54',
+    question: 'You’re reviewing a web application and accidentally type a number in a text field. The application returns an error message containing variable names, filenames, and the full path of the application. This is an example of which of the following?',
+    options: [
+        'A. Directory traversal',
+        'B. Common misconfiguration',
+        'C. Improper error handling',
+        'D. Resource exhaustion'
+    ],
+    correctAnswer: ['C']
+}
+        
+        ];
+
+        let selectedQuestions = [];
+        const totalQuestions = 54; // Adjust as necessary
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let unansweredCount = 0;
+        let attempts = JSON.parse(localStorage.getItem('examAttempts')) || [];
+
+        let timerInterval;
+        let timeRemaining = totalQuestions * 60; // 54 minutes in seconds
+
+        const timerElement = document.getElementById('timer');
+        const questionsElement = document.getElementById('questions');
+        const resultsElement = document.getElementById('results');
+        const submitButton = document.getElementById('submitButton');
+        const userNameOutput = document.getElementById('userNameOutput');
+
+        const userName = prompt("Please enter your name:");
+        userNameOutput.textContent = userName + ", GO ON MY SON, YOU CAN DO IT :)";
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startExam() {
+            selectedQuestions = shuffle(questionPool).slice(0, totalQuestions);
+            displayQuestions();
+            startTimer();
+        }
+
+        function displayQuestions() {
+    questionsElement.innerHTML = '';
+    selectedQuestions.forEach((q, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-container';
+        if (index === 0) questionDiv.classList.add('active');
+
+        // Determine input type (radio for single answer, checkbox for multiple answers)
+        const inputType = Array.isArray(q.correctAnswer) ? 'checkbox' : 'radio';
+
+        questionDiv.innerHTML = `
+            <h3>Question ${index + 1}: ${q.question}</h3>
+            ${q.options.map((opt, i) => `
+                <label>
+                    <input type="${inputType}" name="q${index}${inputType === 'checkbox' ? '[]' : ''}" value="${String.fromCharCode(65 + i)}">
+                    ${opt}
+                </label><br>
+            `).join('')}
+            <div>
+                ${index > 0 ? '<button type="button" class="btn-prev" onclick="showQuestion(' + (index - 1) + ')">Previous</button>' : ''}
+                ${index < totalQuestions - 1 ? '<button type="button" class="btn-next" onclick="showQuestion(' + (index + 1) + ')">Next</button>' : ''}
+            </div>
+        `;
+
+        questionsElement.appendChild(questionDiv);
+    });
+
+    submitButton.style.display = 'block';
+}
+
+        function showQuestion(index) {
+            const activeQuestion = document.querySelector('.question-container.active');
+            if (activeQuestion) activeQuestion.classList.remove('active');
+            document.querySelectorAll('.question-container')[index].classList.add('active');
+            currentQuestionIndex = index;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    submitExam();
+                } else {
+                    timeRemaining--;
+                    const minutes = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+                    const seconds = (timeRemaining % 60).toString().padStart(2, '0');
+                    timerElement.textContent = `Time Remaining: ${minutes}:${seconds}`;
+                }
+            }, 1000);
+        }
+
+        function submitExam() {
+    clearInterval(timerInterval);
+    const formData = new FormData(document.getElementById('examForm'));
+    selectedQuestions.forEach((q, index) => {
+        const userAnswers = formData.getAll(`q${index}[]`); // Use getAll() for checkboxes
+        const correctAnswers = Array.isArray(q.correctAnswer) ? q.correctAnswer : [q.correctAnswer];
+
+        if (userAnswers.length === 0) {
+            unansweredCount++;
+        } else if (JSON.stringify(userAnswers.sort()) === JSON.stringify(correctAnswers.sort())) {
+            correctCount++;
+        } else {
+            wrongCount++;
+        }
+    });
+
+    saveAttempt();
+    displayResults();
+}
+
+        function saveAttempt() {
+            const attempt = {
+                name: userName,
+                date: new Date().toLocaleString(),
+                percentage: ((correctCount / totalQuestions) * 100).toFixed(2)
+            };
+            attempts.push(attempt);
+            if (attempts.length > 20) attempts.shift(); // Keep only the last 20 attempts
+            localStorage.setItem('examAttempts', JSON.stringify(attempts));
+        }
+
+        function displayResults() {
+            questionsElement.style.display = 'none';
+            submitButton.style.display = 'none';
+            resultsElement.style.display = 'block';
+
+            document.getElementById('totalQuestions').textContent = totalQuestions;
+            document.getElementById('correctAnswers').textContent = correctCount;
+            document.getElementById('wrongAnswers').textContent = wrongCount;
+            document.getElementById('unansweredQuestions').textContent = unansweredCount;
+            document.getElementById('percentage').textContent = ((correctCount / totalQuestions) * 100).toFixed(2);
+
+            // Display last attempts
+            const attemptsList = document.createElement('ul');
+            attempts.forEach(attempt => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${attempt.name}: ${attempt.percentage}% on ${attempt.date}`;
+                attemptsList.appendChild(listItem);
+            });
+            resultsElement.appendChild(attemptsList);
+        }
+
+        function resetExam() {
+            location.reload();
+        }
+
+        document.getElementById('examForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitExam();
+        });
+
+        startExam();
+    </script>
+</body>
+</html>

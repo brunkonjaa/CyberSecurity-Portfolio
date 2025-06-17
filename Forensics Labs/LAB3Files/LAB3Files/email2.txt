@@ -1,0 +1,59 @@
+Return-Path: <prvs=196709c11=m022088@hops.cs.jhu.edu>
+Received: from razorgate600.usna.edu (razorgate600.usna.edu [131.122.220.33])
+	by mp6.usna.edu (MOS 4.2.3-GA)
+	with ESMTP id ABJ40352;
+	Wed, 10 Aug 2011 15:00:59 -0400
+Received: from lincoln.usna.edu (lin3.usna.edu [131.122.220.63])
+	by razorgate600.usna.edu (MOS 4.2.3-GA)
+	with ESMTP id ASD36811;
+	Wed, 10 Aug 2011 15:00:58 -0400
+Received: from usna.edu (mplus3.dmz.usna.edu [192.190.229.16])
+	by lincoln.usna.edu (8.14.4/8.14.4) with ESMTP id p7AJ0wbC026458
+	for <forensics@usna.edu>; Wed, 10 Aug 2011 15:00:58 -0400
+Received: from ipex4.johnshopkins.edu ([128.220.161.141]) by usna.edu ([192.190.229.16]) with ESMTP via TCP; Wed, 10 Aug 2011 15:00:57 -0400
+X-MailFrom: prvs=196709c11=m022088@hops.cs.jhu.edu
+X-IronPort-Anti-Spam-Filtered: true
+X-IronPort-Anti-Spam-Result: AgEIABvUQk6A3OBk/2dsb2JhbABBDpgmjwJ3ggGBNKgFn3uFZ18EkwmQNVQ
+X-IronPort-AV: E=Sophos;i="4.67,351,1309752000";
+   d="scan'208";a="90580226"
+Received: from ugradx.cs.jhu.edu ([128.220.224.100
+  by ipex4.johnshopkins.edu with ESMTP/TLS/DHE-RSA-AES256-SHA; 10 Aug 2011 15:00:41 -0400
+Received: from ugradx.cs.jhu.edu
+	by ugradx.cs.jhu.edu (8.14.3/8.13.1) with ESMTP id p7AJ0f2T007129
+	for <forensics@usna.edu>; Wed, 10 Aug 2011 15:00:41 -0400
+Received: (from m022088@localhost)
+	by ugradx.cs.jhu.edu (8.14.3/8.13.8/Submit) id p7AJ0fnk007128
+	for forensics@usna.edu; Wed, 10 Aug 2011 15:00:41 -0400
+Date: Wed, 10 Aug 2011 15:00:40 -0400
+From: James Tiberius Kirk <tkirk@ussenterprise.space>
+To: forensics@usna.edu
+Subject: Extra time allocated
+Message-ID: <20110810190040.GA6825@ugradx.cs.jhu.edu>
+MIME-Version: 1.0
+User-Agent: Mutt/1.5.20 (2009-08-17)
+X-Mplus-Spam-Scanned: mplusversion: 2010.1.release; timestamp: Wed, 10 Aug 2011 15:00:58 -0400
+	engine: XCFSPAM3 Engine; version: 7.03.0049; level: 1
+		ref: str=0001.0A02020A.4E42D56A.002C,ss=1,re=0.000,fgs=0
+		status: success;error: none
+	engine: XCFSPAM4 Engine; version: 5.2.4/2011.08.10.08.25.51/2005.02.11.04.44.13/2009.04.13.23.00.00/2010.03.15.20.58.02/2010.07.11.02.35.32/2011.08.09.21.01.01/2011.08.10.01.40.01/2011.08.10.18.36.01/2011.07.19.21.15.40/; level: 1
+		ref: 23 1
+		status: success;error: none
+	engine: XCFSPAM1 Engine; version: Not Available; level: 0
+		ref: 0-0-0-2049-c/
+		status: success;error: none
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+X-Scanned-By: MIMEDefang 2.67 on 131.122.220.80
+
+Professor,
+
+After considering your request in detail, I find that a longer school
+day would be beneficial to the students of 2016. I do not believe it
+would be an honest test to include the other classes at this time. You
+have my blessing to extend the school day by one hour, to 1620.  Good
+luck in your endeavors.  Fair winds and following seas and all that
+jazz.
+
+       R/
+       CAPT T. Kirk
+

@@ -9,4 +9,5 @@ My public collection of cybersecurity labs, HTML/JS exams, and theory writeups.
 - [SOM Open Exam Q&A from PDFs](https://brunkonjaa.github.io/CyberSecurity-Portfolio/HTML%20Exams/SOM/SOM%20Open%20Exam%20Q&A%20from%20PDFs%20Q&A.html)
 - [SOM Open Exam Q&A](https://brunkonjaa.github.io/CyberSecurity-Portfolio/HTML%20Exams/SOM/SOM%20Open%20Exam%20Q&A.html)
 - [SOM same format as 10 uploaded](https://brunkonjaa.github.io/CyberSecurity-Portfolio/HTML%20Exams/SOM/SOM%20same%20format%20as%2010%20uploaded.html)
-- [SecOps Exam End of PDFs](https://brunkonjaa.github.io/CyberSecurity-Portfolio/HTML%20Exams/SOM/SecOps%20Exam%20End%20of%20PDFs.html)
+- [SecOps Exam End Of PDFs](https://brunkonjaa.github.io/CyberSecurity-Portfolio/HTML%20Exams/SOM/SecOps%20Exam%20End%20Of%20PDFs.html)
+
